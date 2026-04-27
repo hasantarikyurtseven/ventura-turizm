@@ -1,0 +1,217 @@
+<div class="page">
+  <mat-card class="card">
+    <mat-card-title>AirSearch Test</mat-card-title>
+    <mat-card-subtitle>client-api <code>POST /biletbank/airsearch</code> çağrısı</mat-card-subtitle>
+
+    <mat-card-content>
+      <div class="info-banner">
+        <mat-icon>info</mat-icon>
+        <div>
+          <strong>Test için:</strong> client-api çalışıyor olmalı (<code>cd apps/client-api && npm run start</code>).
+          Varsayılan API URL: <code>http://localhost:3002</code>.
+        </div>
+      </div>
+      <form [formGroup]="form" class="form">
+        <div class="row">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label>API Base URL</mat-label>
+            <input matInput formControlName="apiBaseUrl" placeholder="http://localhost:3002" />
+            <mat-hint>Tarayıcıdan erişilen URL olmalı (örn: http://localhost:3002)</mat-hint>
+          </mat-form-field>
+        </div>
+
+        <div class="row cols">
+          <mat-form-field appearance="outline">
+            <mat-label>TripType</mat-label>
+            <mat-select formControlName="tripType">
+              <mat-option value="OW">OW (One-way)</mat-option>
+              <mat-option value="RT">RT (Round-trip)</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>SearchReason</mat-label>
+            <mat-select formControlName="searchReason">
+              <mat-option value="SearchOnly">SearchOnly</mat-option>
+              <mat-option value="SearchAndBook">SearchAndBook</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+
+        <div class="row cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Origin Code</mat-label>
+            <input matInput formControlName="originCode" placeholder="ESB" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Origin Country</mat-label>
+            <input matInput formControlName="originCountryCode" placeholder="TR" />
+          </mat-form-field>
+          <mat-checkbox formControlName="originIsCity">Origin IsCity</mat-checkbox>
+        </div>
+
+        <div class="row cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Destination Code</mat-label>
+            <input matInput formControlName="destinationCode" placeholder="IST" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Destination Country</mat-label>
+            <input matInput formControlName="destinationCountryCode" placeholder="TR" />
+          </mat-form-field>
+          <mat-checkbox formControlName="destinationIsCity">Destination IsCity</mat-checkbox>
+        </div>
+
+        <div class="row cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Departure Date</mat-label>
+            <input matInput formControlName="departureDate" placeholder="YYYY-MM-DD" />
+          </mat-form-field>
+          <mat-form-field appearance="outline" *ngIf="form.value.tripType === 'RT'">
+            <mat-label>Return Date</mat-label>
+            <input matInput formControlName="returnDate" placeholder="YYYY-MM-DD" />
+          </mat-form-field>
+        </div>
+
+        <div class="row cols">
+          <mat-form-field appearance="outline">
+            <mat-label>Adults</mat-label>
+            <input matInput type="number" formControlName="adults" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Children</mat-label>
+            <input matInput type="number" formControlName="children" />
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Infants</mat-label>
+            <input matInput type="number" formControlName="infants" />
+          </mat-form-field>
+        </div>
+
+        <div class="actions">
+          <button mat-raised-button color="primary" type="button" (click)="submit()" [disabled]="loading">
+            {{ loading ? 'Aranıyor...' : 'AirSearch Çalıştır' }}
+          </button>
+          <a mat-stroked-button [href]="debugUrl" target="_blank" rel="noopener" class="debug-link">
+            <mat-icon>bug_report</mat-icon>
+            Debug (Request/Response XML)
+          </a>
+        </div>
+      </form>
+
+      <div class="result" *ngIf="error">
+        <mat-card class="error">
+          <mat-card-title>Hata</mat-card-title>
+          <mat-card-content><pre>{{ error }}</pre></mat-card-content>
+        </mat-card>
+      </div>
+
+      <div class="result" *ngIf="response">
+        <mat-card class="response">
+          <mat-card-title>Response</mat-card-title>
+          <mat-card-content>
+            <div class="summary" *ngIf="response?.hasError !== undefined">
+              <strong>HasError:</strong> {{ response?.hasError }}
+              <span *ngIf="response?.searchId"> | <strong>SearchId:</strong> {{ response?.searchId }}</span>
+              <span *ngIf="response?.shoppingFileId"> | <strong>ShoppingFileId:</strong> {{ response?.shoppingFileId }}</span>
+              <span> | <strong>Flights:</strong> {{ response?.flights?.length ?? 0 }}</span>
+            </div>
+
+            <div class="empty-hint" *ngIf="response?.success && !response?.flights?.length">
+              <mat-icon>info</mat-icon>
+              <span>Sonuç boş. <a [href]="debugUrl" target="_blank" rel="noopener">Debug sayfası</a>ndan ham Request/Response XML'ini inceleyin.</span>
+            </div>
+
+            <div class="flight-list" *ngIf="response?.flights?.length">
+              <mat-card *ngFor="let flight of response.flights" class="flight-card">
+                <mat-card-content>
+                  <div class="flight-header">
+                    <div class="airline-info">
+                      <div class="airline-logo">{{ flight.airlineLogo }}</div>
+                      <div class="airline-details">
+                        <div class="airline-name">{{ flight.airline }}</div>
+                        <div class="flight-number">{{ flight.flightNumber }}</div>
+                      </div>
+                    </div>
+                    <div class="flight-price">
+                      <div class="price-amount">{{ flight.price }} {{ flight.currency }}</div>
+                    </div>
+                  </div>
+
+                  <div class="flight-route">
+                    <div class="route-segment departure">
+                      <div class="time">{{ flight.departure?.time }}</div>
+                      <div class="airport-code">{{ flight.departure?.airportCode }}</div>
+                    </div>
+
+                    <div class="route-connector">
+                      <div class="duration">
+                        <mat-icon>schedule</mat-icon>
+                        <span>{{ flight.duration || '-' }}</span>
+                      </div>
+                      <div class="stops-info" *ngIf="flight.stops > 0">
+                        <span>{{ flight.stops }} aktarma</span>
+                        <span *ngIf="flight.stopDetails">({{ flight.stopDetails }})</span>
+                      </div>
+                      <div class="stops-info direct" *ngIf="flight.stops === 0">
+                        <span>Direkt</span>
+                      </div>
+                    </div>
+
+                    <div class="route-segment arrival">
+                      <div class="time">{{ flight.arrival?.time }}</div>
+                      <div class="airport-code">{{ flight.arrival?.airportCode }}</div>
+                    </div>
+                  </div>
+
+                  <div class="meta">
+                    <span class="chip">ProductId: {{ flight.id }}</span>
+                    <span class="chip" *ngIf="flight.cabinClass">Cabin: {{ flight.cabinClass }}</span>
+                  </div>
+
+              <div class="brand-options" *ngIf="flight.brandOptions?.length">
+                <mat-accordion>
+                  <mat-expansion-panel>
+                    <mat-expansion-panel-header>
+                      <mat-panel-title>
+                        Branded Fares ({{ flight.brandOptions.length }})
+                      </mat-panel-title>
+                    </mat-expansion-panel-header>
+
+                    <div
+                      class="brand-row"
+                      *ngFor="let brand of flight.brandOptions">
+                      <span class="chip">
+                        Paket:
+                        {{ brand.brandName || brand.brandCode || 'Paket' }}
+                      </span>
+                      <span class="chip">
+                        Fiyat:
+                        {{ brand.totalFare }} {{ brand.currency }}
+                      </span>
+                      <span class="chip" *ngIf="brand.totalTaxes">
+                        Vergi:
+                        {{ brand.totalTaxes }} {{ brand.currency }}
+                      </span>
+                      <span class="chip" *ngIf="brand.baggageAllowanceId">
+                        Bagaj ID: {{ brand.baggageAllowanceId }}
+                      </span>
+                    </div>
+                  </mat-expansion-panel>
+                </mat-accordion>
+              </div>
+                </mat-card-content>
+              </mat-card>
+            </div>
+
+            <details class="debug">
+              <summary>Debug JSON (ham)</summary>
+              <pre>{{ response | json }}</pre>
+            </details>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>
+

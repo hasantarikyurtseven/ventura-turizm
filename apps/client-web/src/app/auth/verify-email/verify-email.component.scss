@@ -1,0 +1,249 @@
+// ===== Verify Email Page =====
+// Maildeki tasarımla uyumlu – aynı renkler, kutu stili, gradient header
+
+.verify-email-container {
+  min-height: calc(100vh - 64px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  background-color: #f4f7fa; // mail background
+}
+
+// ─── Header Banner (mail header ile aynı gradient) ───
+.verify-header-banner {
+  text-align: center;
+  margin-bottom: -1px; // card'a yapışsın
+  width: 100%;
+  max-width: 520px;
+  background: linear-gradient(135deg, #183641 0%, #4088b3 100%);
+  padding: 28px 32px;
+  border-radius: 16px 16px 0 0;
+
+  .brand-title {
+    color: #ffffff;
+    margin: 0;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+  }
+
+  .brand-subtitle {
+    color: rgba(255, 255, 255, 0.7);
+    margin: 4px 0 0;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+}
+
+// ─── Card ───
+.verify-card {
+  max-width: 520px;
+  width: 100%;
+  border-radius: 0 0 16px 16px !important;
+  box-shadow: 0 4px 24px rgba(24, 54, 65, 0.08) !important;
+  overflow: hidden;
+}
+
+// ─── State (loading / success / error) ───
+.verify-state {
+  text-align: center;
+  padding: 2.5rem 2rem;
+
+  mat-spinner {
+    margin: 0 auto 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #183641;
+    margin: 0 0 0.5rem;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: #475569;
+    line-height: 1.6;
+    margin: 0 0 1.5rem;
+  }
+}
+
+// ─── Icon Circles ───
+.icon-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.25rem;
+
+  .state-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+    color: #ffffff;
+  }
+}
+
+.success-circle {
+  background: linear-gradient(135deg, #16a34a, #22c55e);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+}
+
+.error-circle {
+  background: linear-gradient(135deg, #dc2626, #ef4444);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+// ─── Info Box (maildeki info/warning kutuları ile uyumlu) ───
+.info-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px 20px;
+  border-radius: 10px;
+  text-align: left;
+  margin: 0 0 1.5rem;
+
+  .info-box-icon {
+    flex-shrink: 0;
+    font-size: 22px;
+    width: 22px;
+    height: 22px;
+    margin-top: 2px;
+  }
+
+  div {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    strong {
+      font-size: 0.875rem;
+      color: #183641;
+    }
+
+    span {
+      font-size: 0.813rem;
+      color: #64748b;
+      line-height: 1.5;
+    }
+  }
+}
+
+.success-info {
+  background-color: #f0f9ff;
+  border: 1px solid #bae6fd;
+
+  .info-box-icon {
+    color: #4088b3;
+  }
+}
+
+.warning-info {
+  background-color: #fefce8;
+  border: 1px solid #fde68a;
+
+  .info-box-icon {
+    color: #d97706;
+  }
+}
+
+// ─── Benefits List (maildeki ✓ listesi ile uyumlu) ───
+.benefits-list {
+  text-align: left;
+  margin: 0 0 1.5rem;
+  padding: 0 0.5rem;
+
+  .benefit-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+
+    .benefit-check {
+      color: #22c55e;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    span {
+      font-size: 0.813rem;
+      color: #475569;
+      line-height: 1.5;
+    }
+  }
+}
+
+// ─── Action Button (maildeki CTA ile aynı gradient) ───
+.action-button {
+  background: linear-gradient(135deg, #183641 0%, #2d6a8a 50%, #4088b3 100%) !important;
+  color: #ffffff !important;
+  border-radius: 10px !important;
+  font-weight: 700;
+  padding: 10px 36px;
+  text-decoration: none;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 12px rgba(24, 54, 65, 0.25) !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+// ─── Footer (maildeki footer ile uyumlu) ───
+.verify-footer {
+  text-align: center;
+  margin-top: 24px;
+  max-width: 520px;
+  width: 100%;
+
+  p {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0 0 6px;
+
+    a {
+      color: #4088b3;
+      text-decoration: underline;
+    }
+  }
+
+  .copyright {
+    color: #94a3b8;
+    font-size: 0.69rem;
+  }
+}
+
+// ─── Responsive ───
+@media (max-width: 580px) {
+  .verify-header-banner {
+    padding: 20px 16px;
+    border-radius: 12px 12px 0 0;
+
+    .brand-title {
+      font-size: 18px;
+    }
+  }
+
+  .verify-card {
+    border-radius: 0 0 12px 12px !important;
+  }
+
+  .verify-state {
+    padding: 2rem 1.25rem;
+  }
+}

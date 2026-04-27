@@ -1,0 +1,61 @@
+.contract-modal {
+  display: flex;
+  flex-direction: column;
+  min-width: 320px;
+  max-width: 92vw;
+  width: 720px;
+  max-height: 85vh;
+}
+
+.contract-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-right: 8px;
+
+  h2 {
+    margin: 0;
+    flex: 1;
+    font-size: 1.25rem;
+  }
+}
+
+mat-dialog-content {
+  overflow-y: auto;
+  min-height: 120px;
+  padding: 0 24px 16px;
+}
+
+.modal-spinner {
+  margin: 24px auto;
+  display: block;
+}
+
+.modal-error {
+  color: var(--mat-form-field-error-text-color, #f44336);
+  margin: 16px 0;
+}
+
+.contract-content {
+  line-height: 1.6;
+
+  :deep(h1),
+  :deep(h2),
+  :deep(h3) {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+  }
+  :deep(p) {
+    margin: 0.5em 0;
+  }
+  :deep(ul),
+  :deep(ol) {
+    margin: 0.5em 0;
+    padding-left: 1.5em;
+  }
+}
+
+mat-dialog-actions {
+  padding: 8px 16px 16px;
+}

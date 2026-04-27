@@ -1,0 +1,899 @@
+.payment-page {
+  min-height: calc(100vh - 80px);
+  padding: 1rem 0.75rem;
+  background: var(--ventura-surface-100);
+}
+
+// ──────────────────────────────────────────
+// Başlık + Sayaç
+// ──────────────────────────────────────────
+.payment-header-section {
+  max-width: 1400px;
+  margin: 0 auto 1rem auto;
+}
+
+.payment-header-content {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.back-btn {
+  color: var(--ventura-text-secondary);
+  &:hover { color: var(--ventura-primary); }
+}
+
+.header-text-block {
+  flex: 1;
+  min-width: 0;
+}
+
+.payment-title {
+  margin: 0;
+  font-size: 1.375rem;
+  font-weight: 700;
+  color: var(--ventura-text-primary);
+}
+
+.payment-subtitle {
+  margin: 0.125rem 0 0;
+  font-size: 0.875rem;
+  color: var(--ventura-text-secondary);
+}
+
+.payment-countdown {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.5rem 1rem;
+  background: var(--ventura-surface-0);
+  border: 1px solid var(--ventura-border);
+  border-radius: 12px;
+  box-shadow: var(--ventura-shadow-sm);
+  flex-shrink: 0;
+
+  .countdown-icon {
+    color: var(--ventura-primary);
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+
+  .countdown-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+
+  .countdown-label {
+    font-size: 0.6875rem;
+    color: var(--ventura-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .countdown-value {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ventura-primary);
+    &.warning { color: #d32f2f; }
+  }
+}
+
+// ──────────────────────────────────────────
+// Layout
+// ──────────────────────────────────────────
+.payment-layout {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.payment-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+// ══════════════════════════════════════════
+// 3D Kredi Kartı Görseli
+// ══════════════════════════════════════════
+.credit-card-wrapper {
+  perspective: 1000px;
+  display: flex;
+  justify-content: center;
+}
+
+.credit-card {
+  width: 100%;
+  max-width: 380px;
+  height: 215px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+
+  &.is-flipped {
+    transform: rotateY(180deg);
+  }
+}
+
+.card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 16px;
+  backface-visibility: hidden;
+  overflow: hidden;
+}
+
+// ── Ön Yüz ──
+.card-front {
+  background: linear-gradient(135deg, var(--ventura-primary-900) 0%, var(--ventura-primary-600) 50%, var(--ventura-primary) 100%);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+  box-shadow:
+    0 20px 60px -15px rgba(64, 136, 179, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+}
+
+.card-shine {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    125deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 40%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 60%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+}
+
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.card-chip-icon {
+  svg { display: block; filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3)); }
+}
+
+.card-number-display {
+  display: flex;
+  gap: 1rem;
+  position: relative;
+  z-index: 1;
+  margin: 0.25rem 0;
+
+  .card-group {
+    font-family: 'Roboto Mono', 'Courier New', monospace;
+    font-size: 1.35rem;
+    font-weight: 500;
+    letter-spacing: 0.15rem;
+    opacity: 0.5;
+    transition: opacity 0.2s ease;
+
+    &.filled { opacity: 1; }
+  }
+}
+
+.card-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  position: relative;
+  z-index: 1;
+}
+
+.card-info-block {
+  &.right { text-align: right; }
+
+  .card-label-text {
+    display: block;
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.5;
+    margin-bottom: 0.15rem;
+  }
+
+  .card-value-text {
+    display: block;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+}
+
+.card-brand-logo {
+  position: relative;
+  z-index: 2;
+  text-align: right;
+
+  .brand-text {
+    font-size: 1.3rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    opacity: 0.85;
+    font-style: italic;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+
+    &.mc {
+      font-style: normal;
+      letter-spacing: 0;
+    }
+  }
+}
+
+// ── Arka Yüz ──
+.card-back {
+  background: linear-gradient(135deg, var(--ventura-primary-900) 0%, var(--ventura-primary-600) 50%, var(--ventura-primary) 100%);
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  box-shadow:
+    0 20px 60px -15px rgba(64, 136, 179, 0.45),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+}
+
+.card-magnetic-strip {
+  height: 48px;
+  background: rgba(0, 0, 0, 0.2);
+  margin-top: 28px;
+}
+
+.card-cvv-strip {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin: 20px 24px;
+  padding: 8px 16px;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 4px;
+
+  .cvv-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: #666;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .cvv-value {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    letter-spacing: 0.2rem;
+  }
+}
+
+// ══════════════════════════════════════════
+// Form Kartı
+// ══════════════════════════════════════════
+.form-card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  border-radius: 16px;
+  border: 1px solid var(--ventura-border);
+  background: var(--ventura-surface-0);
+  overflow: hidden;
+
+  ::ng-deep .mat-mdc-card-header {
+    padding: 0 !important;
+    display: block !important;
+    min-height: auto !important;
+  }
+  ::ng-deep .mat-mdc-card-header-text { width: 100% !important; margin: 0 !important; }
+  ::ng-deep .mat-mdc-card-content { padding: 0 !important; }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid var(--ventura-border);
+  background: var(--ventura-surface-0);
+
+  .header-icon {
+    color: var(--ventura-primary);
+    font-size: 1.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .header-title {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--ventura-text-primary);
+    flex: 1;
+  }
+
+  .secure-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.75rem;
+    color: #2e7d32;
+    font-weight: 600;
+    background: #e8f5e9;
+    padding: 0.2rem 0.6rem;
+    border-radius: 20px;
+
+    mat-icon {
+      font-size: 0.875rem;
+      width: 0.875rem;
+      height: 0.875rem;
+    }
+  }
+}
+
+.card-form {
+  padding: 1.25rem;
+}
+
+.form-group {
+  margin-bottom: 0.25rem;
+}
+
+.form-field-full { width: 100%; }
+
+.form-row-3col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+::ng-deep {
+  .card-form .mat-mdc-form-field {
+    .mat-mdc-text-field-wrapper {
+      .mdc-text-field__input {
+        font-size: 0.9375rem !important;
+        padding: 0.5rem 0.5rem !important;
+      }
+      .mat-mdc-floating-label {
+        font-size: 0.875rem;
+        color: var(--ventura-text-secondary);
+      }
+    }
+    &.mat-focused .mat-mdc-floating-label {
+      color: var(--ventura-primary);
+    }
+  }
+}
+
+// ── Koşullar ──
+.terms-section {
+  margin: 1rem 0;
+}
+
+.terms-check {
+  display: block;
+  .terms-text {
+    font-size: 0.8125rem;
+    color: var(--ventura-text-secondary);
+    a {
+      color: var(--ventura-primary);
+      text-decoration: none;
+      font-weight: 500;
+      &:hover { text-decoration: underline; }
+    }
+  }
+}
+
+.terms-error {
+  font-size: 0.75rem;
+  color: #d32f2f;
+  margin-top: 0.25rem;
+  display: block;
+}
+
+// ── 3D Secure Badge ──
+.threed-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+  border: 1px solid #c8e6c9;
+  border-radius: 12px;
+  margin-bottom: 1.25rem;
+
+  .threed-icon-wrap {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #2e7d32;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    mat-icon {
+      color: #fff;
+      font-size: 1.125rem;
+      width: 1.125rem;
+      height: 1.125rem;
+    }
+  }
+
+  .threed-text {
+    strong {
+      display: block;
+      font-size: 0.8125rem;
+      color: #1b5e20;
+      margin-bottom: 0.1rem;
+    }
+    span {
+      font-size: 0.75rem;
+      color: #388e3c;
+    }
+  }
+}
+
+// ── Ödeme Butonu ──
+.pay-button {
+  width: 100%;
+  height: 52px;
+  border-radius: 14px !important;
+  background: linear-gradient(135deg, var(--ventura-primary) 0%, #1565c0 100%) !important;
+  color: #fff !important;
+  font-size: 1rem;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px rgba(25, 118, 210, 0.35);
+  margin-bottom: 0.75rem;
+
+  &:hover:not(:disabled) {
+    box-shadow: 0 6px 24px rgba(25, 118, 210, 0.5);
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .pay-btn-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+  }
+
+  .btn-spinner { display: inline-block; }
+
+  mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
+
+  .pay-btn-text {
+    font-size: 0.9375rem;
+    font-weight: 600;
+  }
+
+  .pay-btn-amount {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-left: 0.25rem;
+    padding-left: 0.5rem;
+    border-left: 1px solid rgba(255, 255, 255, 0.3);
+  }
+}
+
+.back-link {
+  width: 100%;
+  color: var(--ventura-text-secondary);
+  font-size: 0.8125rem;
+  font-weight: 500;
+
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; margin-right: 0.25rem; }
+  &:hover { color: var(--ventura-primary); }
+}
+
+// ══════════════════════════════════════════
+// Sağ Sütun: Özet
+// ══════════════════════════════════════════
+.payment-summary-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  position: sticky;
+  top: 1rem;
+}
+
+.summary-card {
+  box-shadow: var(--ventura-shadow-sm);
+  border-radius: 12px;
+  border: 1px solid var(--ventura-border);
+  background: var(--ventura-surface-0);
+  overflow: hidden;
+
+  ::ng-deep .mat-mdc-card-header { padding: 0 !important; display: block !important; min-height: auto !important; }
+  ::ng-deep .mat-mdc-card-header-text { width: 100% !important; margin: 0 !important; }
+  ::ng-deep .mat-mdc-card-content { padding: 0 !important; }
+}
+
+.summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--ventura-border);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--ventura-text-primary);
+
+  mat-icon {
+    color: var(--ventura-primary);
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+}
+
+.flight-summary { padding: 0.75rem; }
+
+.flight-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.75rem;
+  background: var(--ventura-surface-50);
+  border-radius: var(--ventura-radius-sm);
+  margin-bottom: 0.75rem;
+}
+
+.route-seg {
+  text-align: center;
+  flex: 1;
+
+  .airport-code { font-size: 1.375rem; font-weight: 700; color: var(--ventura-primary); margin-bottom: 0.125rem; }
+  .flight-time { font-size: 1rem; font-weight: 600; color: var(--ventura-text-primary); }
+  .flight-date { font-size: 0.8125rem; color: var(--ventura-text-secondary); margin-top: 0.125rem; }
+}
+
+.route-arrow,
+.route-arrow-sm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 0.75rem;
+  color: var(--ventura-primary);
+
+  mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; }
+  .duration { font-size: 0.75rem; color: var(--ventura-text-secondary); margin-top: 0.25rem; }
+}
+
+.flight-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.8125rem;
+    color: var(--ventura-text-secondary);
+
+    mat-icon { font-size: 0.9375rem; width: 0.9375rem; height: 0.9375rem; color: var(--ventura-primary); }
+  }
+}
+
+.passengers-list { padding: 0.625rem 0.75rem; }
+
+.passenger-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.375rem 0;
+  font-size: 0.875rem;
+
+  &:not(:last-child) { border-bottom: 1px solid var(--ventura-border); }
+
+  .pax-icon { color: var(--ventura-primary); font-size: 1.125rem; width: 1.125rem; height: 1.125rem; }
+  .pax-name { flex: 1; font-weight: 500; color: var(--ventura-text-primary); }
+  .pax-type {
+    font-size: 0.75rem;
+    color: var(--ventura-primary);
+    background: var(--ventura-primary-50);
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 500;
+  }
+}
+
+.price-card ::ng-deep .mat-mdc-card-content { padding: 0 !important; }
+.price-breakdown { padding: 0.625rem 0.75rem; }
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0;
+  font-size: 0.875rem;
+  color: var(--ventura-text-secondary);
+
+  &.total {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ventura-text-primary);
+    margin-top: 0.375rem;
+
+    .total-price {
+      font-size: 1.25rem;
+      color: var(--ventura-primary);
+    }
+  }
+}
+
+.security-info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.375rem;
+  font-size: 0.8125rem;
+  color: #2e7d32;
+  padding: 0.5rem;
+
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+}
+
+// ──────────────────────────────────────────
+// Rezervasyon Kodu Badge
+// ──────────────────────────────────────────
+.booking-code-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  background: var(--ventura-primary-light, #e8f0fe);
+  border: 1px solid var(--ventura-primary);
+  border-radius: var(--ventura-radius-sm);
+
+  mat-icon { color: var(--ventura-primary); font-size: 1.5rem; width: 1.5rem; height: 1.5rem; }
+
+  .booking-code-label {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--ventura-text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .booking-code-value {
+    display: block;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: var(--ventura-primary);
+    letter-spacing: 0.1em;
+    font-family: 'Roboto Mono', monospace;
+  }
+}
+
+// ──────────────────────────────────────────
+// Başarı Ekranı
+// ──────────────────────────────────────────
+.payment-success {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 120px);
+  padding: 2rem 1rem;
+}
+
+.success-container {
+  text-align: center;
+  max-width: 600px;
+  padding: 2.5rem;
+  background: var(--ventura-surface-0);
+  border-radius: 16px;
+  box-shadow: var(--ventura-shadow-lg);
+  border: 1px solid var(--ventura-border);
+}
+
+.success-icon-wrap {
+  margin-bottom: 1.25rem;
+  .success-icon { font-size: 4rem; width: 4rem; height: 4rem; color: #4caf50; }
+}
+
+.success-title { margin: 0 0 0.75rem; font-size: 1.75rem; font-weight: 700; color: var(--ventura-text-primary); }
+.success-subtitle { margin: 0 0 1.5rem; font-size: 1rem; color: var(--ventura-text-secondary); line-height: 1.6; }
+
+.success-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.625rem;
+  margin-bottom: 1.5rem;
+  text-align: left;
+}
+
+.success-info-item {
+  background: var(--ventura-surface-100, #f8f9fa);
+  border: 1px solid var(--ventura-border);
+  border-radius: var(--ventura-radius-sm);
+  padding: 0.625rem 0.75rem;
+
+  .info-label {
+    display: block; font-size: 0.6875rem; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--ventura-text-secondary); margin-bottom: 0.25rem;
+  }
+  .info-value {
+    display: block; font-size: 0.9375rem; font-weight: 600; color: var(--ventura-text-primary);
+    &.mono { font-family: 'Roboto Mono', monospace; font-size: 0.8125rem; }
+    &.strong { color: var(--ventura-primary); font-size: 1.125rem; letter-spacing: 0.06em; }
+    &.status-chip { display: inline-block; background: #e8f5e9; color: #2e7d32; border-radius: 12px; padding: 0.125rem 0.625rem; font-size: 0.8125rem; }
+    &.refundable { color: #2e7d32; }
+    &.non-refundable { color: #d32f2f; }
+  }
+}
+
+.success-flight-summary {
+  background: var(--ventura-primary-50, #e8f0fe);
+  border-radius: var(--ventura-radius-sm);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.success-route { display: flex; align-items: center; justify-content: center; gap: 1rem; margin-bottom: 0.5rem; }
+
+.success-seg {
+  text-align: center;
+  .route-code { display: block; font-size: 1.5rem; font-weight: 700; color: var(--ventura-primary); }
+  .route-time { display: block; font-size: 0.875rem; font-weight: 600; color: var(--ventura-text-primary); }
+  .route-date { display: block; font-size: 0.75rem; color: var(--ventura-text-secondary); }
+}
+
+.route-arrow {
+  text-align: center;
+  mat-icon { display: block; color: var(--ventura-primary); font-size: 1.25rem; width: 1.25rem; height: 1.25rem; margin: 0 auto 0.125rem; }
+  .route-duration { font-size: 0.75rem; color: var(--ventura-text-secondary); white-space: nowrap; }
+}
+
+.success-flight-no { margin: 0; font-size: 0.875rem; color: var(--ventura-text-secondary); text-align: center; }
+
+.success-actions .home-btn {
+  height: 44px; font-size: 0.9375rem; font-weight: 600;
+  display: flex; align-items: center; gap: 0.5rem; margin: 0 auto;
+}
+
+// ──────────────────────────────────────────
+// Değişiklik Bannerları
+// ──────────────────────────────────────────
+.change-banner {
+  max-width: 1400px;
+  margin: 0 auto 0.75rem auto;
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
+  border-radius: var(--ventura-radius-sm); font-size: 0.875rem; font-weight: 500;
+
+  mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; flex-shrink: 0; }
+
+  &.warning-banner { background: #fff8e1; border: 1px solid #ffe082; color: #6d4c00; mat-icon { color: #f57c00; } }
+  &.info-banner { background: #e3f2fd; border: 1px solid #90caf9; color: #0d3a66; mat-icon { color: #1976d2; } }
+}
+
+// ──────────────────────────────────────────
+// Responsive
+// ──────────────────────────────────────────
+@media (max-width: 1024px) {
+  .payment-layout { grid-template-columns: 1fr; }
+  .payment-summary-section { position: static; order: -1; }
+}
+
+@media (max-width: 768px) {
+  .payment-page { padding: 0.75rem 0.5rem; }
+
+  .payment-header-content {
+    flex-wrap: wrap;
+  }
+
+  .payment-countdown {
+    width: 100%;
+    justify-content: center;
+    margin-top: 0.5rem;
+  }
+
+  .credit-card { height: 195px; }
+  .card-front { padding: 1.25rem; }
+  .card-number-display .card-group { font-size: 1.1rem; }
+
+  .form-row-3col { grid-template-columns: 1fr 1fr 1fr; gap: 0.5rem; }
+
+  .pay-button { height: 48px; }
+}
+
+@media (max-width: 420px) {
+  .credit-card { height: 180px; }
+  .card-number-display { gap: 0.5rem; }
+  .card-number-display .card-group { font-size: 0.95rem; letter-spacing: 0.08rem; }
+  .card-front { padding: 1rem; }
+  .form-row-3col { grid-template-columns: 1fr; }
+}
+
+// ──────────────────────────────────────────
+// Hata Debug Paneli
+// ──────────────────────────────────────────
+.debug-panel {
+  max-width: 1400px;
+  margin: 1.5rem auto 0;
+}
+
+.debug-card {
+  border: 2px solid #ef5350;
+  border-radius: 16px;
+  background: #fff8f8;
+
+  ::ng-deep .mat-mdc-card-header { padding: 0 !important; display: block !important; min-height: auto !important; }
+  ::ng-deep .mat-mdc-card-header-text { width: 100% !important; margin: 0 !important; }
+  ::ng-deep .mat-mdc-card-content { padding: 0 !important; }
+}
+
+.debug-header {
+  display: flex; align-items: center; gap: 0.5rem; width: 100%; padding: 0.875rem 1.25rem;
+  border-bottom: 1px solid #ef9a9a;
+}
+
+.debug-icon { font-size: 1.5rem; width: 1.5rem; height: 1.5rem; }
+.debug-title { flex: 1; margin: 0; font-size: 1.1rem; font-weight: 600; color: #c62828; }
+
+.debug-hint {
+  font-size: 0.85rem; color: #666; margin: 1rem 1.25rem; padding: 0.5rem 0.75rem;
+  background: #fff3e0; border-radius: 6px; border-left: 3px solid #ff9800;
+}
+
+.debug-field {
+  margin: 0 1.25rem 1rem;
+
+  label {
+    display: block; font-weight: 600; font-size: 0.8rem; text-transform: uppercase;
+    letter-spacing: 0.03em; color: #555; margin-bottom: 0.25rem;
+  }
+}
+
+.debug-label-row {
+  display: flex; align-items: center; gap: 0.25rem; margin-bottom: 0.25rem;
+
+  label { margin-bottom: 0; }
+}
+
+.copy-btn {
+  width: 24px; height: 24px; line-height: 24px;
+  ::ng-deep .mat-icon { font-size: 16px; width: 16px; height: 16px; line-height: 16px; }
+}
+
+.copy-all-btn {
+  font-size: 0.8rem; height: 32px; line-height: 32px; padding: 0 10px;
+  ::ng-deep .mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 4px; }
+}
+
+.debug-value {
+  padding: 0.4rem 0.6rem; background: #f5f5f5; border-radius: 4px; font-size: 0.9rem;
+  &.mono { font-family: 'Fira Code', 'Consolas', monospace; font-size: 0.8rem; }
+  &.error-msg { color: #c62828; font-weight: 500; }
+}
+
+.debug-xml {
+  background: #1e1e2e; color: #cdd6f4; padding: 1rem; border-radius: 8px;
+  font-family: 'Fira Code', 'Consolas', 'Courier New', monospace; font-size: 0.75rem;
+  line-height: 1.5; overflow-x: auto; white-space: pre-wrap; word-break: break-all;
+  max-height: 400px; overflow-y: auto; margin: 0;
+}

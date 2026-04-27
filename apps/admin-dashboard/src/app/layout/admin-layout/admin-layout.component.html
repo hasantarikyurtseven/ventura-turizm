@@ -1,0 +1,144 @@
+<div class="admin-container">
+    <mat-toolbar class="admin-header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="logo-section" routerLink="/" style="cursor: pointer;">
+                    <img src="/img/logo/yonetim-logo.svg" alt="Ventura Logo" class="logo-image">
+                </div>
+
+                <button mat-button routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="control-panel-button">
+                    <mat-icon>dashboard</mat-icon>
+                    <span>Kontrol Paneli</span>
+                </button>
+
+                <span class="menu-separator">|</span>
+
+                <button mat-button routerLink="/members" routerLinkActive="active" class="control-panel-button">
+                    <mat-icon>groups</mat-icon>
+                    <span>Müşteriler</span>
+                </button>
+
+                <span class="menu-separator">|</span>
+
+                <button mat-button [matMenuTriggerFor]="reservationsMenu" [class.active]="isReservationPageActive()" class="settings-button">
+                    <mat-icon>confirmation_number</mat-icon>
+                    <span>Rezervasyonlar</span>
+                </button>
+                <mat-menu #reservationsMenu="matMenu" class="user-dropdown-menu">
+                    <button mat-menu-item *ngFor="let item of reservationMenuItems" (click)="item.command && item.command()">
+                        <mat-icon>{{item.icon}}</mat-icon>
+                        <span>{{item.label}}</span>
+                    </button>
+                </mat-menu>
+
+                <span class="menu-separator">|</span>
+
+                <button mat-button [matMenuTriggerFor]="settingsMenu" [class.active]="isSettingsPageActive()" class="settings-button">
+                    <mat-icon>settings</mat-icon>
+                    <span>Ayarlar</span>
+                </button>
+                <mat-menu #settingsMenu="matMenu" class="user-dropdown-menu">
+                    <button mat-menu-item *ngFor="let item of settingsMenuItems" (click)="item.command && item.command()">
+                        <mat-icon>{{item.icon}}</mat-icon>
+                        <span>{{item.label}}</span>
+                    </button>
+                </mat-menu>
+            </div>
+
+            <div class="header-right">
+                <button mat-icon-button [matMenuTriggerFor]="notificationsMenu" class="notification-button">
+                    <mat-icon>notifications</mat-icon>
+                    <span class="notification-badge" *ngIf="getUnreadNotificationCount() > 0">{{getUnreadNotificationCount()}}</span>
+                </button>
+                <mat-menu #notificationsMenu="matMenu" class="notification-dropdown-menu">
+                    <div class="notification-header">
+                        <span class="notification-title">Bildirimler</span>
+                        <button mat-icon-button class="mark-all-read" (click)="markAllNotificationsRead()">
+                            <mat-icon>done_all</mat-icon>
+                        </button>
+                    </div>
+                    <div class="notification-list">
+                        <button mat-menu-item *ngFor="let notification of notifications" class="notification-item">
+                            <div class="notification-content">
+                                <mat-icon class="notification-icon">{{notification.icon}}</mat-icon>
+                                <div class="notification-text">
+                                    <span class="notification-message">{{notification.message}}</span>
+                                    <span class="notification-time">{{notification.time}}</span>
+                                </div>
+                            </div>
+                        </button>
+                        <div class="notification-empty" *ngIf="notifications.length === 0">
+                            <mat-icon>notifications_none</mat-icon>
+                            <span>Yeni bildirim yok</span>
+                        </div>
+                    </div>
+                    <div class="notification-footer">
+                        <button mat-button class="view-all-btn" (click)="viewAllNotifications()">Tümünü Gör</button>
+                    </div>
+                </mat-menu>
+                
+                <button mat-icon-button [matMenuTriggerFor]="messagesMenu" class="message-button">
+                    <mat-icon>mail</mat-icon>
+                    <span class="message-badge" *ngIf="getUnreadMessageCount() > 0">{{getUnreadMessageCount()}}</span>
+                </button>
+                <mat-menu #messagesMenu="matMenu" class="message-dropdown-menu">
+                    <div class="message-header">
+                        <span class="message-title">Mesajlar</span>
+                        <button mat-icon-button class="mark-all-read" (click)="markAllMessagesRead()">
+                            <mat-icon>done_all</mat-icon>
+                        </button>
+                    </div>
+                    <div class="message-list">
+                        <button mat-menu-item *ngFor="let message of messages" class="message-item">
+                            <div class="message-content">
+                                <div class="message-avatar">
+                                    {{ getInitials(message.senderName, message.senderSurname) }}
+                                </div>
+                                <div class="message-text">
+                                    <span class="message-sender">{{message.senderName}} {{message.senderSurname}}</span>
+                                    <span class="message-preview">{{message.preview}}</span>
+                                    <span class="message-time">{{message.time}}</span>
+                                </div>
+                            </div>
+                        </button>
+                        <div class="message-empty" *ngIf="messages.length === 0">
+                            <mat-icon>mail_outline</mat-icon>
+                            <span>Yeni mesaj yok</span>
+                        </div>
+                    </div>
+                    <div class="message-footer">
+                        <button mat-button class="view-all-btn" (click)="viewAllMessages()">Tümünü Gör</button>
+                    </div>
+                </mat-menu>
+
+                <button mat-button [matMenuTriggerFor]="profileMenu" class="profile-trigger">
+                    <div class="user-initials-avatar">
+                        {{ getInitials((authService.currentUser$ | async)?.name, (authService.currentUser$ | async)?.surName) }}
+                    </div>
+                    <span class="user-name-text">
+                        {{ (authService.currentUser$ | async)?.name }} {{ (authService.currentUser$ | async)?.surName }}
+                    </span>
+                </button>
+                <mat-menu #profileMenu="matMenu" class="user-dropdown-menu">
+                    <button mat-menu-item *ngFor="let item of profileMenuItems" (click)="item.command && item.command()">
+                        <mat-icon>{{item.icon}}</mat-icon>
+                        <span>{{item.label}}</span>
+                    </button>
+                </mat-menu>
+            </div>
+        </div>
+    </mat-toolbar>
+
+    <div class="page-content">
+        <router-outlet></router-outlet>
+    </div>
+
+    <footer class="admin-footer">
+        <div class="footer-content">
+            <span class="footer-text">Crafted by With Look Production.</span>
+            <a href="https://withlookproduction.com/" target="_blank" rel="noopener noreferrer" class="footer-logo-link">
+                <img src="/assets/images/wlp-logo.svg" alt="With Look Production" class="footer-logo">
+            </a>
+        </div>
+    </footer>
+</div>

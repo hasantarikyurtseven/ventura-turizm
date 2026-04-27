@@ -1,0 +1,510 @@
+<div class="flight-results-page">
+  <div class="results-container">
+    <!-- Header -->
+    <div class="results-header">
+      <div class="header-content">
+        <h1>Uçuş Sonuçları</h1>
+        <p class="results-count" *ngIf="searchTripType === 'RT' && searchOriginCode && searchDestinationCode">
+          <span class="count-outbound">{{ filteredOutboundFlights.length }} gidiş</span>
+          <span class="count-sep">·</span>
+          <span class="count-return">{{ filteredReturnFlights.length }} dönüş</span>
+          <span> uçuş</span>
+        </p>
+        <p class="results-count" *ngIf="searchTripType !== 'RT' || !searchOriginCode || !searchDestinationCode">
+          {{ filteredFlights.length }} uçuş bulundu
+        </p>
+      </div>
+      <button mat-button class="toggle-filters-btn" (click)="toggleFilters()">
+        <mat-icon>{{ showFilters ? 'filter_list' : 'tune' }}</mat-icon>
+        <span>Filtreler</span>
+      </button>
+    </div>
+
+    <div class="results-layout">
+      <!-- Filters Sidebar -->
+      <aside class="filters-sidebar" [class.active]="showFilters">
+        <div class="filters-content">
+          <div class="filters-title-row">
+            <h3>Filtrele</h3>
+            <button mat-button class="reset-filters-btn" (click)="resetFilters()">
+              <mat-icon>refresh</mat-icon>
+              Sıfırla
+            </button>
+          </div>
+
+          <!-- Price Range -->
+          <div class="filter-section">
+            <h4>Fiyat Aralığı</h4>
+            <div class="price-range">
+              <div class="price-slider-wrapper">
+                <label>Fiyat Aralığı: {{ filterBy.priceRange.min }} ₺ - {{ filterBy.priceRange.max }} ₺</label>
+                <mat-slider
+                  [min]="priceSliderMin"
+                  [max]="priceSliderMax"
+                  [step]="50"
+                  [disabled]="false"
+                  class="price-slider">
+                  <input
+                    matSliderStartThumb
+                    [(ngModel)]="filterBy.priceRange.min"
+                    (ngModelChange)="onFilterChange()" />
+                  <input
+                    matSliderEndThumb
+                    [(ngModel)]="filterBy.priceRange.max"
+                    (ngModelChange)="onFilterChange()" />
+                </mat-slider>
+              </div>
+              <div class="price-inputs">
+                <input
+                  type="number"
+                  [(ngModel)]="filterBy.priceRange.min"
+                  (ngModelChange)="onFilterChange()"
+                  [min]="priceSliderMin"
+                  [max]="priceSliderMax"
+                  placeholder="Min"
+                  class="price-input" />
+                <span>-</span>
+                <input
+                  type="number"
+                  [(ngModel)]="filterBy.priceRange.max"
+                  (ngModelChange)="onFilterChange()"
+                  [min]="priceSliderMin"
+                  [max]="priceSliderMax"
+                  placeholder="Max"
+                  class="price-input" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Stops -->
+          <div class="filter-section">
+            <h4>Aktarma</h4>
+            <div class="filter-options">
+              <button
+                mat-button
+                [class.active]="filterBy.stops === null"
+                (click)="filterBy.stops = null; onFilterChange()"
+                class="filter-option">
+                Tümü
+              </button>
+              <button
+                mat-button
+                [class.active]="filterBy.stops === 0"
+                (click)="filterBy.stops = 0; onFilterChange()"
+                class="filter-option">
+                Direkt
+              </button>
+              <button
+                mat-button
+                [class.active]="filterBy.stops === 1"
+                (click)="filterBy.stops = 1; onFilterChange()"
+                class="filter-option">
+                1 Aktarma
+              </button>
+            </div>
+          </div>
+
+          <!-- Airlines -->
+          <div class="filter-section">
+            <h4>Havayolu</h4>
+            <div class="filter-checkboxes">
+              <mat-checkbox
+                *ngFor="let airline of getUniqueAirlinesWithLogo()"
+                [checked]="filterBy.airlines.includes(airline.name)"
+                (change)="
+                  $event.checked
+                    ? filterBy.airlines.push(airline.name)
+                    : filterBy.airlines.splice(filterBy.airlines.indexOf(airline.name), 1);
+                  onFilterChange()
+                "
+                class="airline-checkbox">
+                <span class="airline-filter-item">
+                  <img *ngIf="airline.logoUrl" [src]="airline.logoUrl" [alt]="airline.name" class="airline-filter-logo" />
+                  <span *ngIf="!airline.logoUrl" class="airline-filter-logo-placeholder">{{ airline.name.substring(0, 2) }}</span>
+                  <span class="airline-filter-name">{{ airline.name }}</span>
+                </span>
+              </mat-checkbox>
+            </div>
+          </div>
+
+        </div>
+      </aside>
+
+      <!-- Main Content -->
+      <main class="results-main">
+        <!-- Sort Options -->
+        <div class="sort-bar">
+          <div class="sort-header">
+            <mat-icon class="sort-icon">sort</mat-icon>
+            <span class="sort-label">Sırala:</span>
+          </div>
+          <mat-form-field appearance="outline" class="sort-select-field">
+            <mat-label>Sıralama</mat-label>
+            <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange(sortBy)">
+              <mat-option *ngFor="let option of sortOptions" [value]="option.value">
+                {{ option.label }}
+              </mat-option>
+            </mat-select>
+            <mat-icon matPrefix class="sort-prefix-icon">{{ getCurrentSortIcon() }}</mat-icon>
+          </mat-form-field>
+        </div>
+
+        <!-- Flight List -->
+        <div class="flight-list">
+          <!-- Skeleton Loader -->
+          <ng-container *ngIf="isLoading; else resultsOrEmpty">
+            <mat-card
+              *ngFor="let s of skeletonItems"
+              class="flight-card flight-card-skeleton">
+              <mat-card-content>
+                <div class="flight-header">
+                  <div class="airline-info">
+                    <div class="airline-logo skeleton-box"></div>
+                    <div class="airline-details">
+                      <div class="skeleton-line w-60"></div>
+                      <div class="skeleton-line w-40"></div>
+                    </div>
+                  </div>
+                  <div class="flight-price">
+                    <div class="skeleton-line w-40"></div>
+                    <div class="skeleton-line w-30"></div>
+                  </div>
+                </div>
+                <div class="flight-route">
+                  <div class="route-segment departure">
+                    <div class="skeleton-line w-40"></div>
+                    <div class="skeleton-line w-30"></div>
+                    <div class="skeleton-line w-50"></div>
+                  </div>
+                  <div class="route-connector">
+                    <div class="duration"><div class="skeleton-line w-30"></div></div>
+                    <div class="route-line"><div class="line"></div></div>
+                    <div class="stops-info direct"><div class="skeleton-line w-40"></div></div>
+                  </div>
+                  <div class="route-segment arrival">
+                    <div class="skeleton-line w-40"></div>
+                    <div class="skeleton-line w-30"></div>
+                    <div class="skeleton-line w-50"></div>
+                  </div>
+                </div>
+                <div class="flight-details">
+                  <div class="detail-item"><div class="skeleton-icon"></div><div class="skeleton-line w-30"></div></div>
+                  <div class="detail-item"><div class="skeleton-icon"></div><div class="skeleton-line w-40"></div></div>
+                </div>
+                <div class="flight-actions">
+                  <div class="skeleton-button primary"></div>
+                  <div class="skeleton-button secondary"></div>
+                </div>
+              </mat-card-content>
+            </mat-card>
+          </ng-container>
+
+          <!-- Gerçek sonuçlar / boş durum -->
+          <ng-template #resultsOrEmpty>
+            <!-- Tek yönlü uçuşlar (OW) -->
+            <section class="flight-section single" *ngIf="searchTripType !== 'RT' && filteredFlights.length > 0">
+              <div class="section-header">
+                <mat-icon class="section-icon">flight</mat-icon>
+                <div class="section-title-block">
+                  <h2 class="section-title">Uçuş Sonuçları</h2>
+                  <p class="section-route" *ngIf="searchOriginCode && searchDestinationCode">
+                    {{ searchOriginCode }} → {{ searchDestinationCode }}
+                    <span class="section-date" *ngIf="searchDepartureDate">{{ searchDepartureDate }}</span>
+                  </p>
+                </div>
+                <span class="section-badge">{{ filteredFlights.length }} uçuş</span>
+              </div>
+              <div class="section-cards">
+                <ng-container *ngFor="let flight of filteredFlights">
+                  <ng-container *ngTemplateOutlet="flightCardTpl; context: { $implicit: flight }"></ng-container>
+                </ng-container>
+              </div>
+            </section>
+
+            <!-- Gidiş biletleri (RT) -->
+            <section class="flight-section outbound" *ngIf="searchTripType === 'RT' && filteredOutboundFlights.length > 0">
+              <div class="section-header">
+                <mat-icon class="section-icon">flight_takeoff</mat-icon>
+                <div class="section-title-block">
+                  <h2 class="section-title">Gidiş biletleri</h2>
+                  <p class="section-route" *ngIf="searchOriginCode && searchDestinationCode">
+                    {{ searchOriginCode }} → {{ searchDestinationCode }}
+                    <span class="section-date" *ngIf="searchDepartureDate">{{ searchDepartureDate }}</span>
+                  </p>
+                </div>
+                <span class="section-badge">{{ filteredOutboundFlights.length }} uçuş</span>
+              </div>
+              <div class="section-cards">
+                <ng-container *ngFor="let flight of filteredOutboundFlights">
+                  <ng-container *ngTemplateOutlet="flightCardTpl; context: { $implicit: flight }"></ng-container>
+                </ng-container>
+              </div>
+            </section>
+
+            <!-- Dönüş biletleri (sadece gidiş-dönüş aramada) -->
+            <section class="flight-section return" *ngIf="searchTripType === 'RT' && searchOriginCode && searchDestinationCode && filteredReturnFlights.length > 0">
+              <div class="section-header">
+                <mat-icon class="section-icon">flight_land</mat-icon>
+                <div class="section-title-block">
+                  <h2 class="section-title">Dönüş biletleri</h2>
+                  <p class="section-route">
+                    {{ searchDestinationCode }} → {{ searchOriginCode }}
+                    <span class="section-date" *ngIf="searchReturnDate">{{ searchReturnDate }}</span>
+                  </p>
+                </div>
+                <span class="section-badge">{{ filteredReturnFlights.length }} uçuş</span>
+              </div>
+              <div class="section-cards">
+                <ng-container *ngFor="let flight of filteredReturnFlights">
+                  <ng-container *ngTemplateOutlet="flightCardTpl; context: { $implicit: flight }"></ng-container>
+                </ng-container>
+              </div>
+            </section>
+
+            <!-- No Results -->
+            <div class="no-results" *ngIf="!isLoading && hasSearchResult && filteredFlights.length === 0">
+              <mat-icon>search_off</mat-icon>
+              <h3>Uçuş bulunamadı</h3>
+              <p>Filtrelerinizi değiştirerek tekrar deneyin.</p>
+            </div>
+          </ng-template>
+        </div>
+      </main>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     Reusable Flight Card Template
+     ═══════════════════════════════════════════ -->
+<ng-template #flightCardTpl let-flight>
+  <mat-card
+    class="flight-card"
+    [class.selected]="selectedFlight?.id === flight.id"
+    (click)="selectFlight(flight)">
+    <mat-card-content>
+      <!-- Airline & Price -->
+      <div class="flight-header">
+        <div class="airline-info" *ngIf="getAirlineForFlight(flight) as airlineInfo">
+          <div class="airline-logo" [class.has-logo]="!!airlineInfo.logoUrl">
+            <img *ngIf="airlineInfo.logoUrl" [src]="airlineInfo.logoUrl" [alt]="airlineInfo.name" class="airline-logo-img" />
+            <span *ngIf="!airlineInfo.logoUrl">{{ flight.airlineLogo || flight.airline }}</span>
+          </div>
+          <div class="airline-details">
+            <span class="airline-name">{{ airlineInfo.name }}</span>
+            <span class="flight-number">{{ flight.flightNumber }}</span>
+          </div>
+        </div>
+        <div class="flight-price">
+          <span class="price-amount">{{ flight.price }} {{ flight.currency }}</span>
+          <span class="price-label">Kişi başı</span>
+        </div>
+      </div>
+
+      <!-- Route -->
+      <div class="flight-route">
+        <div class="route-segment departure">
+          <div class="time">{{ flight.departure.time }}</div>
+          <div class="airport-code">{{ flight.departure.airportCode }}</div>
+          <div class="airport-name">{{ flight.departure.airport }}</div>
+          <div class="city">{{ flight.departure.city }}</div>
+        </div>
+        <div class="route-connector">
+          <div class="duration">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ flight.duration }}</span>
+          </div>
+          <div class="route-line">
+            <div class="line-dot start"></div>
+            <div class="line" [class.has-stops]="flight.stops > 0"></div>
+            <div class="line-dot end"></div>
+          </div>
+          <div class="stops-info" *ngIf="flight.stops > 0">
+            <mat-icon>flight_land</mat-icon>
+            <span>{{ flight.stops }} aktarma</span>
+            <span class="stop-detail" *ngIf="flight.stopDetails">({{ flight.stopDetails }})</span>
+          </div>
+          <div class="stops-info direct" *ngIf="flight.stops === 0">
+            <span>Direkt uçuş</span>
+          </div>
+        </div>
+        <div class="route-segment arrival">
+          <div class="time">{{ flight.arrival.time }}</div>
+          <div class="airport-code">{{ flight.arrival.airportCode }}</div>
+          <div class="airport-name">{{ flight.arrival.airport }}</div>
+          <div class="city">{{ flight.arrival.city }}</div>
+        </div>
+      </div>
+
+      <!-- Details chips -->
+      <div class="flight-details">
+        <div class="detail-item" *ngIf="flight.baggage && flight.baggage !== '-'">
+          <mat-icon>luggage</mat-icon>
+          <span>{{ flight.baggage }} bagaj</span>
+        </div>
+        <div class="detail-item">
+          <mat-icon>airline_seat_recline_normal</mat-icon>
+          <span>{{ getCabinClassLabel(flight.cabinClass) }}</span>
+        </div>
+        <div class="detail-item" *ngIf="flight.aircraft">
+          <mat-icon>flight</mat-icon>
+          <span>{{ flight.aircraft }}</span>
+        </div>
+        <div class="detail-item brand-count-chip" *ngIf="flight.brandOptions && flight.brandOptions.length > 1">
+          <mat-icon>style</mat-icon>
+          <span>{{ flight.brandOptions.length }} paket</span>
+        </div>
+      </div>
+
+      <!-- ═══ Brand / Paket Seçenekleri ═══ -->
+      <div class="flight-brand-options" *ngIf="flight.brandOptions && flight.brandOptions.length && isBrandOptionsExpanded(flight.id)">
+        <div class="brand-options-header">
+          <h4>Paket Seçenekleri ({{ flight.brandOptions.length }})</h4>
+          <p class="brand-options-subtitle">Size en uygun paketi seçin</p>
+        </div>
+
+        <div class="brand-cards-container grid-mode">
+          <div class="brand-cards-wrapper">
+            <div
+              *ngFor="let brand of flight.brandOptions; trackBy: trackBrandById"
+              class="brand-card"
+              [class.selected]="isBrandSelected(flight.id, brand.id)"
+              (click)="selectBrand(flight, brand, $event)">
+
+              <!-- Card Header: ad + fiyat -->
+              <div class="brand-card-header">
+                <div class="brand-title-section">
+                  <h3 class="brand-name">{{ getBrandDisplayName(brand) }}</h3>
+                  <div class="brand-price">
+                    <span class="price-amount">{{ brand.totalFare }} {{ brand.currency }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Card Body: bagaj + kurallar -->
+              <div class="brand-card-body">
+                <!-- Bagaj bilgisi -->
+                <div class="brand-feature" *ngIf="brand.baggageDescription">
+                  <mat-icon class="feature-icon">luggage</mat-icon>
+                  <div class="feature-content">
+                    <span class="feature-label">Bagaj Hakkı</span>
+                    <span class="feature-value">{{ brand.baggageDescription }}</span>
+                  </div>
+                </div>
+
+                <!-- Kurallar listesi -->
+                <div class="brand-rules" *ngIf="brand.rules && brand.rules.length">
+                  <div class="brand-rule-item" *ngFor="let rule of brand.rules">
+                    <mat-icon class="rule-icon" [title]="getServiceGroupLabel(rule.serviceGroup)">
+                      {{ getServiceGroupIcon(rule.serviceGroup) }}
+                    </mat-icon>
+                    <span class="rule-description">{{ getRuleDescriptionLabel(rule) }}</span>
+                  </div>
+                </div>
+
+                <!-- Hiçbir detay yoksa minimal bilgi -->
+                <div class="brand-feature" *ngIf="!brand.baggageDescription && (!brand.rules || !brand.rules.length)">
+                  <mat-icon class="feature-icon">info</mat-icon>
+                  <div class="feature-content">
+                    <span class="feature-label">Paket Tipi</span>
+                    <span class="feature-value">{{ brand.brandName || brand.brandCode || 'Standart' }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flight-actions">
+        <button mat-button class="details-btn" (click)="toggleFlightDetails(flight.id, $event)">
+          {{ isDetailsExpanded(flight.id) ? 'Detayları Gizle' : 'Detaylar' }}
+        </button>
+        <button 
+          *ngIf="canProceedToBooking(flight)"
+          mat-raised-button 
+          color="primary" 
+          class="select-btn"
+          [disabled]="isLoading"
+          (click)="proceedToBooking(flight, $event)">
+          <mat-icon *ngIf="!isLoading">check</mat-icon>
+          <mat-spinner *ngIf="isLoading" diameter="20"></mat-spinner>
+          <span *ngIf="!isLoading">Seç</span>
+          <span *ngIf="isLoading">İşleniyor...</span>
+        </button>
+        <div *ngIf="isLoggedIn && !canProceedToBooking(flight) && flight.brandOptions && flight.brandOptions.length > 0" class="select-hint">
+          <mat-icon>info</mat-icon>
+          <span>Lütfen bir paket seçin</span>
+        </div>
+      </div>
+
+      <!-- Uçuş detayları paneli (segment listesi vb.) -->
+      <div class="flight-details-panel" *ngIf="isDetailsExpanded(flight.id)" (click)="$event.stopPropagation()">
+        <h4 class="details-panel-title">
+          <mat-icon>flight</mat-icon>
+          Uçuş detayları
+        </h4>
+
+        <div class="details-summary" *ngIf="!flight.segments || !flight.segments.length">
+          <div class="details-summary-row">
+            <span class="label">Kalkış</span>
+            <span class="value">{{ getAirportLabel(flight.departure.airportCode) }} — {{ flight.departure.time }}, {{ flight.departure.date }}</span>
+          </div>
+          <div class="details-summary-row">
+            <span class="label">Varış</span>
+            <span class="value">{{ getAirportLabel(flight.arrival.airportCode) }} — {{ flight.arrival.time }}, {{ flight.arrival.date }}</span>
+          </div>
+          <div class="details-summary-row">
+            <span class="label">Süre</span>
+            <span class="value">{{ flight.duration }}</span>
+          </div>
+          <div class="details-summary-row" *ngIf="flight.stops > 0">
+            <span class="label">Aktarma</span>
+            <span class="value">{{ flight.stops }} aktarma <span *ngIf="flight.stopDetails">({{ flight.stopDetails }})</span></span>
+          </div>
+          <div class="details-summary-row" *ngIf="flight.aircraft">
+            <span class="label">Uçak</span>
+            <span class="value">{{ flight.aircraft }}</span>
+          </div>
+        </div>
+
+        <div class="details-segments" *ngIf="flight.segments && flight.segments.length">
+          <div class="segment-block" *ngFor="let seg of flight.segments; let i = index">
+            <!-- Segmentler arası aktarma bilgisi (ilk segmentten sonra) -->
+            <div class="layover-row" *ngIf="i > 0">
+              <mat-icon class="layover-icon">transfer_within_a_station</mat-icon>
+              <span>Aktarma: {{ getAirportLabel(seg.originCode) }} ({{ seg.originCode }})</span>
+            </div>
+
+            <div class="segment-item">
+              <div class="segment-header">
+                <span class="segment-badge">{{ i + 1 }}. uçuş</span>
+                <span class="segment-route-text">
+                  {{ getAirportLabel(seg.originCode) }} ({{ seg.originCode }}) → {{ getAirportLabel(seg.destinationCode) }} ({{ seg.destinationCode }})
+                </span>
+              </div>
+              <div class="segment-body">
+                <div class="segment-row">
+                  <span class="segment-label">Havayolu</span>
+                  <span class="segment-value">{{ getAirlineNameForCode(seg.marketingAirline || flight.airlineLogo) }} {{ seg.flightNumber }}</span>
+                </div>
+                <div class="segment-row">
+                  <span class="segment-label">Kalkış</span>
+                  <span class="segment-value">{{ formatSegmentTime(seg.departureDateTime) }}</span>
+                </div>
+                <div class="segment-row">
+                  <span class="segment-label">Varış</span>
+                  <span class="segment-value">{{ formatSegmentTime(seg.arrivalDateTime) }}</span>
+                </div>
+                <div class="segment-row" *ngIf="seg.duration">
+                  <span class="segment-label">Süre</span>
+                  <span class="segment-value">{{ formatDurationReadable(seg.duration) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</ng-template>

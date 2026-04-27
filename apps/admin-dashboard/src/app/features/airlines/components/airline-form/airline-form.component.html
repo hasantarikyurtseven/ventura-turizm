@@ -1,0 +1,55 @@
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-content">
+            <h1>{{ isEditMode ? 'Havayolu Düzenle' : 'Yeni Havayolu' }}</h1>
+            <p class="subtitle">{{ isEditMode ? 'Havayolu bilgilerini güncelleyin' : 'SOAP’ta kullanılan koda logo ve ad eşleyin' }}</p>
+        </div>
+        <button mat-button (click)="cancel()">
+            <mat-icon>arrow_back</mat-icon>
+            Geri Dön
+        </button>
+    </div>
+
+    <mat-card class="content-card">
+        <form [formGroup]="airlineForm" (ngSubmit)="onSubmit()">
+            <div class="form-section">
+                <h3 class="section-title">Havayolu Bilgileri</h3>
+                <div class="fields-grid">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Kod (IATA) <span class="required">*</span></mat-label>
+                        <input matInput formControlName="code" placeholder="Örn: TK" maxlength="5" />
+                        <mat-hint align="end">SOAP’tan gelen kod (TK, PC vb.)</mat-hint>
+                        <mat-error *ngIf="airlineForm.get('code')?.hasError('required')">Kod zorunludur</mat-error>
+                        <mat-error *ngIf="airlineForm.get('code')?.hasError('maxlength')">En fazla 5 karakter</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Havayolu Adı <span class="required">*</span></mat-label>
+                        <input matInput formControlName="name" placeholder="Örn: Turkish Airlines" />
+                        <mat-error *ngIf="airlineForm.get('name')?.hasError('required')">Ad zorunludur</mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="full-width">
+                        <mat-label>Logo URL</mat-label>
+                        <input matInput formControlName="logoUrl" placeholder="https://..." />
+                        <mat-hint>Bilet kartında gösterilecek logo adresi</mat-hint>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Durum <span class="required">*</span></mat-label>
+                        <mat-select formControlName="status" placeholder="Durum">
+                            <mat-option *ngFor="let s of statuses" [value]="s.value">{{ s.label }}</mat-option>
+                        </mat-select>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button mat-button type="button" (click)="cancel()">İptal</button>
+                <button mat-raised-button color="primary" type="submit" [disabled]="loading">
+                    {{ isEditMode ? 'Güncelle' : 'Kaydet' }}
+                </button>
+            </div>
+        </form>
+    </mat-card>
+</div>

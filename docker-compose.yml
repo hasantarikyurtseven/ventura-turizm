@@ -44,7 +44,6 @@ services:
       - MONGO_URI=${MONGO_URI}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CHOKIDAR_USEPOLLING=true
     volumes:
       - ./apps/admin-api:/app
       - /app/node_modules
@@ -59,11 +58,26 @@ services:
     container_name: ventura-client-api
     ports:
       - "${CLIENT_API_PORT:-3002}:3000"
+    env_file:
+      - .env
     environment:
+      - PORT=3000
       - MONGO_URI=${MONGO_URI}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CHOKIDAR_USEPOLLING=true
+      - CLIENT_WEB_URL=${CLIENT_WEB_URL:-http://localhost:4300}
+      - BILETBANK_API_URL=${BILETBANK_API_URL}
+      - BILETBANK_CLIENT_KEY=${BILETBANK_CLIENT_KEY}
+      - BILETBANK_USERNAME=${BILETBANK_USERNAME}
+      - BILETBANK_PASSWORD=${BILETBANK_PASSWORD}
+      - BILETBANK_WSDL_URL=${BILETBANK_WSDL_URL}
+      - BILETBANK_SOAP_ACTION=${BILETBANK_SOAP_ACTION}
+      - BILETBANK_CHANNEL_CODE=${BILETBANK_CHANNEL_CODE}
+      - BILETBANK_CLIENT_NAME=${BILETBANK_CLIENT_NAME}
+      - BILETBANK_CLIENT_IP=${BILETBANK_CLIENT_IP}
+      - CLIENT_JWT_SECRET=${CLIENT_JWT_SECRET}
+      - CLIENT_JWT_ACCESS_EXPIRES=${CLIENT_JWT_ACCESS_EXPIRES:-15m}
+      - CLIENT_JWT_REFRESH_EXPIRES=${CLIENT_JWT_REFRESH_EXPIRES:-7d}
     volumes:
       - ./apps/client-api:/app
       - /app/node_modules
@@ -80,7 +94,13 @@ services:
       - MONGO_URI=${MONGO_URI}
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - CHOKIDAR_USEPOLLING=true
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - SMTP_SECURE=${SMTP_SECURE}
+      - SMTP_FROM=${SMTP_FROM}
+      - CLIENT_WEB_URL=${CLIENT_WEB_URL:-http://localhost:4300}
     volumes:
       - ./apps/jobs-service:/app
       - /app/node_modules
@@ -113,7 +133,10 @@ services:
       - ./apps/client-web:/app
       - /app/node_modules
     environment:
-      - WATCHPACK_POLLING=true
+      - CLIENT_API_URL=http://client-api:3000
+      - CLIENT_API_BROWSER_URL=${CLIENT_API_BROWSER_URL:-http://localhost:3002}
+    depends_on:
+      - client-api
 
 volumes:
   mongo-data:

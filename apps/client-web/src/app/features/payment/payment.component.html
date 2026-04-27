@@ -1,0 +1,496 @@
+<div class="payment-page">
+
+  <!-- Başarı Ekranı -->
+  <div class="payment-success" *ngIf="paymentSuccess">
+    <div class="success-container">
+      <div class="success-icon-wrap">
+        <mat-icon class="success-icon">check_circle</mat-icon>
+      </div>
+      <h1 class="success-title">Ödeme Tamamlandı!</h1>
+      <p class="success-subtitle">
+        Rezervasyonunuz başarıyla oluşturuldu. Biletiniz e-posta adresinize gönderilecektir.
+      </p>
+
+      <div class="success-info-grid">
+        <div class="success-info-item" *ngIf="paymentResult?.paymentId">
+          <span class="info-label">Ödeme ID</span>
+          <span class="info-value mono">{{ paymentResult?.paymentId }}</span>
+        </div>
+        <div class="success-info-item" *ngIf="paymentResult?.bookingCode || bookingCode">
+          <span class="info-label">Rezervasyon Kodu</span>
+          <span class="info-value mono strong">{{ paymentResult?.bookingCode || bookingCode }}</span>
+        </div>
+        <div class="success-info-item" *ngIf="paymentResult?.status">
+          <span class="info-label">Durum</span>
+          <span class="info-value status-chip">{{ paymentResult?.status }}</span>
+        </div>
+        <div class="success-info-item" *ngIf="paymentResult?.totalFare">
+          <span class="info-label">Ödenen Tutar</span>
+          <span class="info-value">{{ paymentResult?.totalFare | number:'1.2-2' }} {{ paymentResult?.currency }}</span>
+        </div>
+        <div class="success-info-item" *ngIf="paymentResult?.reservationDate">
+          <span class="info-label">Rezervasyon Tarihi</span>
+          <span class="info-value">{{ paymentResult?.reservationDate | date:'dd.MM.yyyy HH:mm' }}</span>
+        </div>
+        <div class="success-info-item" *ngIf="paymentResult?.isRefundable !== undefined">
+          <span class="info-label">İade Durumu</span>
+          <span class="info-value"
+            [class.refundable]="paymentResult?.isRefundable"
+            [class.non-refundable]="!paymentResult?.isRefundable">
+            {{ paymentResult?.isRefundable ? 'İade Edilebilir' : 'İade Edilemez' }}
+          </span>
+        </div>
+      </div>
+
+      <div class="success-flight-summary" *ngIf="bookingData?.flight">
+        <div class="success-route">
+          <div class="success-seg">
+            <span class="route-code">{{ bookingData?.flight?.departure?.airportCode }}</span>
+            <span class="route-time">{{ bookingData?.flight?.departure?.time }}</span>
+            <span class="route-date">{{ bookingData?.flight?.departure?.date }}</span>
+          </div>
+          <div class="route-arrow">
+            <mat-icon>flight</mat-icon>
+            <span class="route-duration">{{ bookingData?.flight?.duration }}</span>
+          </div>
+          <div class="success-seg">
+            <span class="route-code">{{ bookingData?.flight?.arrival?.airportCode }}</span>
+            <span class="route-time">{{ bookingData?.flight?.arrival?.time }}</span>
+            <span class="route-date">{{ bookingData?.flight?.arrival?.date }}</span>
+          </div>
+        </div>
+        <p class="success-flight-no">
+          {{ bookingData?.flight?.airline }} · {{ bookingData?.flight?.flightNumber }}
+        </p>
+      </div>
+
+      <div class="success-actions">
+        <button mat-flat-button color="primary" class="home-btn" (click)="goHome()">
+          <mat-icon>home</mat-icon>
+          Ana Sayfaya Dön
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Ödeme Formu -->
+  <ng-container *ngIf="!paymentSuccess">
+
+    <!-- Fiyat Değişikliği Uyarısı -->
+    <div class="change-banner warning-banner" *ngIf="isPriceChanged">
+      <mat-icon>info</mat-icon>
+      <span>Bilet fiyatı güncellenmiştir. Güncel tutar: <strong>{{ totalFare | number:'1.2-2' }} {{ currency }}</strong></span>
+    </div>
+
+    <!-- Uçuş Bilgisi Değişikliği Uyarısı -->
+    <div class="change-banner info-banner" *ngIf="isFlightInfoChanged">
+      <mat-icon>flight_land</mat-icon>
+      <span>Uçuş bilgileri değişmiştir. Lütfen aşağıdaki bilgileri kontrol edin.</span>
+    </div>
+
+    <!-- Başlık + Sayaç (aynı satır) -->
+    <div class="payment-header-section">
+      <div class="payment-header-content">
+        <button mat-icon-button class="back-btn" (click)="goBack()" matTooltip="Yolcu bilgilerine dön">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
+        <div class="header-text-block">
+          <h1 class="payment-title">Güvenli Ödeme</h1>
+          <p class="payment-subtitle">Kart bilgilerinizi girin — 3D Secure ile onaylayın</p>
+        </div>
+        <div class="payment-countdown">
+          <mat-icon class="countdown-icon">timer</mat-icon>
+          <div class="countdown-text">
+            <span class="countdown-label">Rezervasyon süresi</span>
+            <span class="countdown-value" [class.warning]="isCountdownWarning">{{ countdownDisplay }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="payment-layout">
+
+      <!-- Sol: Kart Formu -->
+      <div class="payment-form-section">
+
+        <mat-card class="form-card">
+          <mat-card-header>
+            <div class="card-header">
+              <mat-icon class="header-icon">credit_card</mat-icon>
+              <h2 class="header-title">Kart Bilgileri</h2>
+              <span class="secure-badge">
+                <mat-icon>verified_user</mat-icon>
+                3D Secure
+              </span>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
+            <form [formGroup]="paymentForm" class="card-form" autocomplete="off">
+
+              <!-- Kart Numarası -->
+              <div class="form-group">
+                <mat-form-field appearance="outline" class="form-field-full">
+                  <mat-label>Kart Numarası</mat-label>
+                  <input
+                    matInput
+                    formControlName="cardNumber"
+                    placeholder="0000 0000 0000 0000"
+                    maxlength="19"
+                    (input)="formatCardNumber($event)"
+                    (focus)="isCardFlipped = false"
+                    inputmode="numeric"
+                    autocomplete="cc-number"
+                  />
+                  <mat-icon matPrefix>credit_card</mat-icon>
+                  <mat-error *ngIf="paymentForm.get('cardNumber')?.hasError('required')">Kart numarası zorunludur</mat-error>
+                  <mat-error *ngIf="paymentForm.get('cardNumber')?.hasError('pattern')">16 haneli geçerli bir kart numarası girin</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Kart Üzerindeki İsim -->
+              <div class="form-group">
+                <mat-form-field appearance="outline" class="form-field-full">
+                  <mat-label>Kart Üzerindeki İsim</mat-label>
+                  <input
+                    matInput
+                    formControlName="cardHolder"
+                    placeholder="AD SOYAD"
+                    style="text-transform:uppercase"
+                    (focus)="isCardFlipped = false"
+                    autocomplete="cc-name"
+                  />
+                  <mat-icon matPrefix>person_outline</mat-icon>
+                  <mat-error *ngIf="paymentForm.get('cardHolder')?.hasError('required')">Kart sahibi adı zorunludur</mat-error>
+                  <mat-error *ngIf="paymentForm.get('cardHolder')?.hasError('minlength')">En az 3 karakter giriniz</mat-error>
+                </mat-form-field>
+              </div>
+
+              <!-- Ay / Yıl / CVV -->
+              <div class="form-row-3col">
+                <mat-form-field appearance="outline">
+                  <mat-label>Ay</mat-label>
+                  <input matInput formControlName="expiryMonth" placeholder="AA" maxlength="2"
+                         (focus)="isCardFlipped = false" inputmode="numeric" autocomplete="cc-exp-month" />
+                  <mat-error *ngIf="paymentForm.get('expiryMonth')?.hasError('required')">Zorunlu</mat-error>
+                  <mat-error *ngIf="paymentForm.get('expiryMonth')?.hasError('pattern')">01–12</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>Yıl</mat-label>
+                  <input matInput formControlName="expiryYear" placeholder="YY / YYYY" maxlength="4"
+                         (focus)="isCardFlipped = false" inputmode="numeric" autocomplete="cc-exp-year" />
+                  <mat-error *ngIf="paymentForm.get('expiryYear')?.hasError('required')">Zorunlu</mat-error>
+                  <mat-error *ngIf="paymentForm.get('expiryYear')?.hasError('pattern')">2 veya 4 hane</mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline">
+                  <mat-label>CVV</mat-label>
+                  <input matInput formControlName="cvv"
+                         [placeholder]="cvvPlaceholder"
+                         [maxlength]="cvvMaxLength"
+                         type="password"
+                         (focus)="isCardFlipped = true" (blur)="isCardFlipped = false"
+                         inputmode="numeric" autocomplete="cc-csc" />
+                  <mat-icon matSuffix [matTooltip]="cvvHint">help_outline</mat-icon>
+                  <mat-hint>{{ cvvMaxLength }} hane</mat-hint>
+                  <mat-error *ngIf="paymentForm.get('cvv')?.hasError('required')">Zorunlu</mat-error>
+                  <mat-error *ngIf="paymentForm.get('cvv')?.hasError('pattern')">
+                    {{ cardBrand === 'amex' ? '4 haneli olmalı' : '3 haneli olmalı' }}
+                  </mat-error>
+                </mat-form-field>
+              </div>
+
+              <mat-divider></mat-divider>
+
+              <!-- Koşullar -->
+              <div class="terms-section">
+                <mat-checkbox formControlName="agreeTerms" class="terms-check" color="primary">
+                  <span class="terms-text">
+                    <a href="#" (click)="$event.preventDefault()">Satış koşullarını</a> ve
+                    <a href="#" (click)="$event.preventDefault()">gizlilik politikasını</a> okudum, kabul ediyorum.
+                  </span>
+                </mat-checkbox>
+                <mat-error
+                  *ngIf="paymentForm.get('agreeTerms')?.touched && paymentForm.get('agreeTerms')?.invalid"
+                  class="terms-error">
+                  Devam etmek için koşulları kabul etmelisiniz
+                </mat-error>
+              </div>
+
+              <!-- 3D Secure Bilgi -->
+              <div class="threed-badge">
+                <div class="threed-icon-wrap">
+                  <mat-icon>shield</mat-icon>
+                </div>
+                <div class="threed-text">
+                  <strong>3D Secure ile Korunuyor</strong>
+                  <span>Ödemeniz bankanızın güvenlik sistemi ile doğrulanacaktır</span>
+                </div>
+              </div>
+
+              <!-- Ödeme Butonu -->
+              <button
+                mat-flat-button
+                class="pay-button"
+                (click)="onSubmit()"
+                [disabled]="isLoading"
+                type="button"
+              >
+                <div class="pay-btn-content">
+                  <mat-spinner *ngIf="isLoading" diameter="20" class="btn-spinner"></mat-spinner>
+                  <mat-icon *ngIf="!isLoading">lock</mat-icon>
+                  <span class="pay-btn-text">
+                    {{ isLoading ? '3D Doğrulama Başlatılıyor...' : 'Güvenli Ödeme Yap' }}
+                  </span>
+                  <span class="pay-btn-amount" *ngIf="!isLoading">
+                    {{ totalFare | number:'1.2-2' }} {{ currency }}
+                  </span>
+                </div>
+              </button>
+
+              <!-- Geri -->
+              <button mat-button type="button" class="back-link" (click)="goBack()">
+                <mat-icon>arrow_back</mat-icon>
+                Yolcu bilgilerine dön
+              </button>
+
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+      </div>
+
+      <!-- Sağ: Özet -->
+      <div class="payment-summary-section">
+
+        <!-- Kart Önizleme (3D) -->
+        <div class="credit-card-wrapper">
+          <div class="credit-card" [class.is-flipped]="isCardFlipped">
+
+            <!-- Ön Yüz -->
+            <div class="card-face card-front">
+              <div class="card-shine"></div>
+              <div class="card-top-row">
+                <div class="card-chip-icon">
+                  <svg viewBox="0 0 50 40" width="46" height="36">
+                    <rect x="0" y="0" rx="5" ry="5" width="50" height="40" fill="#d4af37"/>
+                    <rect x="0" y="12" width="50" height="4" fill="#c5960a"/>
+                    <rect x="0" y="20" width="50" height="4" fill="#c5960a"/>
+                    <rect x="17" y="0" width="4" height="40" fill="#c5960a"/>
+                    <rect x="29" y="0" width="4" height="40" fill="#c5960a"/>
+                  </svg>
+                </div>
+                <div class="card-brand-logo">
+                  <span class="brand-text" *ngIf="cardBrand === 'visa'">VISA</span>
+                  <span class="brand-text mc" *ngIf="cardBrand === 'mastercard'">MasterCard</span>
+                  <span class="brand-text" *ngIf="cardBrand === 'amex'">AMEX</span>
+                  <span class="brand-text" *ngIf="cardBrand === 'troy'">TROY</span>
+                </div>
+              </div>
+              <div class="card-number-display">
+                <span *ngFor="let group of cardNumberGroups; let i = index" class="card-group"
+                      [class.filled]="group !== '••••'">
+                  {{ group }}
+                </span>
+              </div>
+              <div class="card-bottom-row">
+                <div class="card-info-block">
+                  <span class="card-label-text">Kart Sahibi</span>
+                  <span class="card-value-text">{{ cardHolderDisplay }}</span>
+                </div>
+                <div class="card-info-block right">
+                  <span class="card-label-text">SKT</span>
+                  <span class="card-value-text">{{ expiryDisplay }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Arka Yüz -->
+            <div class="card-face card-back">
+              <div class="card-magnetic-strip"></div>
+              <div class="card-cvv-strip">
+                <span class="cvv-label">CVV</span>
+                <span class="cvv-value">{{ cvvDisplay }}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Uçuş Bilgisi -->
+        <mat-card class="summary-card" *ngIf="bookingData?.flight">
+          <mat-card-header>
+            <div class="summary-title">
+              <mat-icon>flight</mat-icon>
+              <span>Uçuş Bilgisi</span>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="flight-summary">
+              <div class="flight-route">
+                <div class="route-seg">
+                  <div class="airport-code">{{ bookingData?.flight?.departure?.airportCode }}</div>
+                  <div class="flight-time">{{ bookingData?.flight?.departure?.time }}</div>
+                  <div class="flight-date">{{ bookingData?.flight?.departure?.date }}</div>
+                </div>
+                <div class="route-arrow-sm">
+                  <mat-icon>flight</mat-icon>
+                  <span class="duration">{{ bookingData?.flight?.duration }}</span>
+                </div>
+                <div class="route-seg">
+                  <div class="airport-code">{{ bookingData?.flight?.arrival?.airportCode }}</div>
+                  <div class="flight-time">{{ bookingData?.flight?.arrival?.time }}</div>
+                  <div class="flight-date">{{ bookingData?.flight?.arrival?.date }}</div>
+                </div>
+              </div>
+              <div class="flight-meta">
+                <span class="meta-item">
+                  <mat-icon>airlines</mat-icon>
+                  {{ bookingData?.flight?.airline }}
+                </span>
+                <span class="meta-item">
+                  <mat-icon>confirmation_number</mat-icon>
+                  {{ bookingData?.flight?.flightNumber }}
+                </span>
+                <span class="meta-item" *ngIf="bookingData?.selectedBrand?.baggageDescription">
+                  <mat-icon>luggage</mat-icon>
+                  {{ bookingData?.selectedBrand?.baggageDescription }}
+                </span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Yolcular -->
+        <mat-card class="summary-card" *ngIf="bookingData?.passengers?.length">
+          <mat-card-header>
+            <div class="summary-title">
+              <mat-icon>people</mat-icon>
+              <span>Yolcular</span>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="passengers-list">
+              <div class="passenger-item" *ngFor="let p of bookingData?.passengers">
+                <mat-icon class="pax-icon">person</mat-icon>
+                <span class="pax-name">{{ p.firstName }} {{ p.lastName }}</span>
+                <span class="pax-type">{{ p.type }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Fiyat -->
+        <mat-card class="summary-card price-card">
+          <mat-card-header>
+            <div class="summary-title">
+              <mat-icon>receipt_long</mat-icon>
+              <span>Fiyat Özeti</span>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="price-breakdown">
+              <div class="price-row" *ngIf="taxAmount > 0">
+                <span>Bilet Ücreti</span>
+                <span>{{ baseFare | number:'1.2-2' }} {{ currency }}</span>
+              </div>
+              <div class="price-row" *ngIf="taxAmount > 0">
+                <span>Vergiler ve Ücretler</span>
+                <span>{{ taxAmount | number:'1.2-2' }} {{ currency }}</span>
+              </div>
+              <div class="price-row" *ngIf="serviceFee > 0">
+                <span>Hizmet Bedeli</span>
+                <span>{{ serviceFee | number:'1.2-2' }} {{ currency }}</span>
+              </div>
+              <mat-divider></mat-divider>
+              <div class="price-row total">
+                <span>Toplam</span>
+                <span class="total-price">{{ totalFare | number:'1.2-2' }} {{ currency }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Rezervasyon Kodu -->
+        <div class="booking-code-badge" *ngIf="bookingCode">
+          <mat-icon>confirmation_number</mat-icon>
+          <div>
+            <span class="booking-code-label">Ön Rezervasyon Kodu</span>
+            <span class="booking-code-value">{{ bookingCode }}</span>
+          </div>
+        </div>
+
+        <!-- Güvenlik -->
+        <div class="security-info">
+          <mat-icon>verified_user</mat-icon>
+          <span>Ödemeleriniz 256-bit SSL &amp; 3D Secure ile korunmaktadır</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Hata Debug Paneli -->
+    <div class="debug-panel" *ngIf="paymentError">
+      <mat-card class="debug-card">
+        <mat-card-header>
+          <div class="debug-header">
+            <mat-icon class="debug-icon" color="warn">bug_report</mat-icon>
+            <h3 class="debug-title">Ödeme Hata Detayları</h3>
+            <button mat-stroked-button color="warn" class="copy-all-btn"
+                    (click)="copyAllDebugInfo()"
+                    matTooltip="Tüm hata bilgisini panoya kopyala">
+              <mat-icon>content_copy</mat-icon>
+              Tümünü Kopyala
+            </button>
+            <button mat-icon-button (click)="paymentError = null" matTooltip="Kapat">
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </mat-card-header>
+        <mat-card-content>
+          <p class="debug-hint">
+            Bu bilgileri BiletBank destek ekibine iletebilirsiniz.
+            <strong>Tümünü Kopyala</strong> butonuyla hepsini tek seferde panoya alabilirsiniz.
+          </p>
+
+          <div class="debug-field" *ngIf="paymentError.message">
+            <label>Hata Mesajı:</label>
+            <div class="debug-value error-msg">{{ paymentError.message }}</div>
+          </div>
+
+          <div class="debug-field" *ngIf="paymentError.correlationId">
+            <div class="debug-label-row">
+              <label>Correlation ID:</label>
+              <button mat-icon-button class="copy-btn" (click)="copyToClipboard(paymentError.correlationId!)" matTooltip="Kopyala">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+            <div class="debug-value mono">{{ paymentError.correlationId }}</div>
+          </div>
+
+          <div class="debug-field" *ngIf="paymentError.soapRequestXml">
+            <div class="debug-label-row">
+              <label>SOAP Request XML:</label>
+              <button mat-icon-button class="copy-btn" (click)="copyToClipboard(paymentError.soapRequestXml!)" matTooltip="XML'i Kopyala">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+            <pre class="debug-xml">{{ paymentError.soapRequestXml }}</pre>
+          </div>
+
+          <div class="debug-field" *ngIf="paymentError.soapResponseXml">
+            <div class="debug-label-row">
+              <label>SOAP Response XML:</label>
+              <button mat-icon-button class="copy-btn" (click)="copyToClipboard(paymentError.soapResponseXml!)" matTooltip="XML'i Kopyala">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+            </div>
+            <pre class="debug-xml">{{ paymentError.soapResponseXml }}</pre>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+  </ng-container>
+</div>

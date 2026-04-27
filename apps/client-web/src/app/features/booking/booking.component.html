@@ -1,0 +1,324 @@
+<div class="booking-page">
+  <!-- Rezervasyon Sayacı -->
+  <div class="booking-countdown" *ngIf="countdownDisplay && bookingData">
+    <mat-icon class="countdown-icon">schedule</mat-icon>
+    <span class="countdown-label">Rezervasyon süreniz:</span>
+    <span class="countdown-value" [class.warning]="isCountdownWarning">{{ countdownDisplay }}</span>
+  </div>
+
+  <!-- Paket Seçenekleri Kartı (En Üst) -->
+  <div class="package-selection-section" *ngIf="allBrandOptions.length > 0">
+    <mat-card class="package-selection-card">
+      <mat-card-header>
+        <div class="package-selection-header">
+          <div class="header-content">
+            <mat-icon class="header-icon">style</mat-icon>
+            <h2 class="header-title">Paket Seçenekleri</h2>
+          </div>
+          <p class="header-subtitle">Uçuş paketinizi yükselterek daha fazla seçeneğe sahip olabilirsiniz.</p>
+        </div>
+      </mat-card-header>
+      <mat-card-content>
+        <div class="package-carousel-container">
+          <button mat-icon-button class="carousel-nav-btn prev-btn" (click)="scrollPackages(-1)" [disabled]="packageScrollLeft <= 0">
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <div class="package-cards-wrapper" #packageCardsWrapper (scroll)="updatePackageScroll()">
+            <div
+              *ngFor="let brand of allBrandOptions"
+              class="package-selection-card-item"
+              [class.selected]="selectedBrand?.id === brand.id"
+              [class.loading]="isChangingPackage && selectedBrand?.id !== brand.id">
+              <div class="package-card-flight-info" *ngIf="selectedFlight">
+                <span class="flight-info-route">
+                  <span class="flight-info-code">{{ selectedFlight.departure.airportCode }}</span>
+                  <mat-icon class="flight-info-arrow">arrow_forward</mat-icon>
+                  <span class="flight-info-code">{{ selectedFlight.arrival.airportCode }}</span>
+                </span>
+                <span class="flight-info-badge">{{ selectedFlight.airline }} {{ selectedFlight.flightNumber }}</span>
+              </div>
+              <div class="package-card-name">{{ getBrandDisplayName(brand) }}</div>
+              <div class="package-card-features">
+                <div class="feature-item" *ngIf="brand.baggageDescription">
+                  <mat-icon class="feature-icon check">check_circle</mat-icon>
+                  <span>{{ brand.baggageDescription }}</span>
+                </div>
+                <div class="feature-item" *ngFor="let rule of brand.rules">
+                  <mat-icon class="feature-icon" [class.check]="rule.displayType === 'Included'" [class.info]="rule.displayType !== 'Included'">
+                    {{ rule.displayType === 'Included' ? 'check_circle' : 'info' }}
+                  </mat-icon>
+                  <span>{{ translateRule(rule) }}</span>
+                </div>
+              </div>
+              <div class="package-card-price">
+                <span class="price-label">Paket Fiyatı</span>
+                <span class="price-value">{{ brand.totalFare | number:'1.2-2' }} {{ brand.currency }}</span>
+              </div>
+              <button
+                mat-raised-button
+                [color]="selectedBrand?.id === brand.id ? 'primary' : 'accent'"
+                class="package-select-btn"
+                [disabled]="selectedBrand?.id === brand.id || (isChangingPackage && selectedBrand?.id !== brand.id)"
+                (click)="selectPackage(brand)">
+                <mat-spinner *ngIf="isChangingPackage && selectedBrand?.id !== brand.id" diameter="20" class="button-spinner"></mat-spinner>
+                <mat-icon *ngIf="selectedBrand?.id === brand.id && !isChangingPackage">check_circle</mat-icon>
+                <span *ngIf="selectedBrand?.id === brand.id && !isChangingPackage">Seçildi</span>
+                <span *ngIf="selectedBrand?.id !== brand.id && !isChangingPackage">Paketi Değiştir</span>
+                <span *ngIf="isChangingPackage && selectedBrand?.id !== brand.id">İşleniyor...</span>
+              </button>
+            </div>
+          </div>
+          <button mat-icon-button class="carousel-nav-btn next-btn" (click)="scrollPackages(1)" [disabled]="packageScrollLeft >= packageMaxScroll">
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <div class="booking-layout">
+    <!-- Sol Taraf: Form -->
+    <div class="booking-form-section">
+      <mat-card class="booking-card">
+        <mat-card-header>
+          <div class="booking-header">
+            <h1>Yolcu Bilgileri</h1>
+            <p class="booking-subtitle">Rezervasyonunuzu tamamlamak için yolcu bilgilerini doldurun</p>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="booking-form">
+            <!-- İletişim Bilgileri -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <mat-icon>contact_mail</mat-icon>
+                İletişim Bilgileri
+              </h2>
+              <div formGroupName="contactInfo" class="form-row">
+                <mat-form-field appearance="outline" class="form-field-half">
+                  <mat-label>E-posta</mat-label>
+                  <input matInput type="email" formControlName="email" placeholder="ornek@email.com">
+                  <mat-icon matPrefix>email</mat-icon>
+                  <mat-error *ngIf="contactInfo.get('email')?.hasError('required') && contactInfo.get('email')?.touched">
+                    E-posta gereklidir
+                  </mat-error>
+                  <mat-error *ngIf="contactInfo.get('email')?.hasError('email') && contactInfo.get('email')?.touched">
+                    Geçerli bir e-posta adresi giriniz
+                  </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="form-field-half">
+                  <mat-label>Telefon</mat-label>
+                  <input matInput type="tel" formControlName="phone" placeholder="0555 123 45 67">
+                  <mat-icon matPrefix>phone</mat-icon>
+                  <mat-error *ngIf="contactInfo.get('phone')?.hasError('required') && contactInfo.get('phone')?.touched">
+                    Telefon gereklidir
+                  </mat-error>
+                  <mat-error *ngIf="contactInfo.get('phone')?.hasError('pattern') && contactInfo.get('phone')?.touched">
+                    Geçerli bir telefon numarası giriniz
+                  </mat-error>
+                </mat-form-field>
+              </div>
+            </div>
+
+            <!-- Yolcu Bilgileri -->
+            <div class="form-section">
+              <h2 class="section-title">
+                <mat-icon>person</mat-icon>
+                Yolcu Bilgileri
+              </h2>
+              <div formArrayName="passengers">
+                <div *ngFor="let passenger of passengers.controls; let i = index" [formGroupName]="i" class="passenger-form" [id]="'passenger-' + i">
+                  <h3 class="passenger-title">Yolcu {{ i + 1 }}</h3>
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field-half">
+                      <mat-label>Ad</mat-label>
+                      <input matInput formControlName="firstName" placeholder="Ad">
+                      <mat-icon matPrefix>badge</mat-icon>
+                      <mat-error *ngIf="passenger.get('firstName')?.hasError('required') && passenger.get('firstName')?.touched">
+                        Ad gereklidir
+                      </mat-error>
+                      <mat-error *ngIf="passenger.get('firstName')?.hasError('minlength') && passenger.get('firstName')?.touched">
+                        Ad en az 2 karakter olmalıdır
+                      </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field-half">
+                      <mat-label>Soyad</mat-label>
+                      <input matInput formControlName="lastName" placeholder="Soyad">
+                      <mat-icon matPrefix>badge</mat-icon>
+                      <mat-error *ngIf="passenger.get('lastName')?.hasError('required') && passenger.get('lastName')?.touched">
+                        Soyad gereklidir
+                      </mat-error>
+                      <mat-error *ngIf="passenger.get('lastName')?.hasError('minlength') && passenger.get('lastName')?.touched">
+                        Soyad en az 2 karakter olmalıdır
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field-third">
+                    <mat-label>Doğum Tarihi</mat-label>
+                    <input matInput type="date" formControlName="birthDate" placeholder="GG/AA/YYYY">
+                    <mat-icon matPrefix>calendar_today</mat-icon>
+                    <mat-error *ngIf="passenger.get('birthDate')?.hasError('required') && passenger.get('birthDate')?.touched">
+                      Doğum tarihi gereklidir
+                    </mat-error>
+                  </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field-third">
+                      <mat-label>Cinsiyet</mat-label>
+                      <mat-select formControlName="gender">
+                        <mat-option value="M">Erkek</mat-option>
+                        <mat-option value="F">Kadın</mat-option>
+                      </mat-select>
+                      <mat-icon matPrefix>wc</mat-icon>
+                      <mat-error *ngIf="passenger.get('gender')?.hasError('required') && passenger.get('gender')?.touched">
+                        Cinsiyet seçiniz
+                      </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="form-field-third">
+                      <mat-label>Kimlik Türü</mat-label>
+                      <mat-select formControlName="idType">
+                        <mat-option value="TC">T.C. Kimlik No</mat-option>
+                        <mat-option value="PASSPORT">Pasaport No</mat-option>
+                      </mat-select>
+                      <mat-icon matPrefix>credit_card</mat-icon>
+                      <mat-error *ngIf="passenger.get('idType')?.hasError('required') && passenger.get('idType')?.touched">
+                        Kimlik türü seçiniz
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <div class="form-row">
+                    <mat-form-field appearance="outline" class="form-field-full">
+                      <mat-label>{{ passenger.get('idType')?.value === 'TC' ? 'T.C. Kimlik No' : 'Pasaport No' }}</mat-label>
+                      <input matInput formControlName="idNumber" [placeholder]="passenger.get('idType')?.value === 'TC' ? '12345678901' : 'A12345678'">
+                      <mat-icon matPrefix>fingerprint</mat-icon>
+                      <mat-error *ngIf="passenger.get('idNumber')?.hasError('required') && passenger.get('idNumber')?.touched">
+                        {{ passenger.get('idType')?.value === 'TC' ? 'T.C. Kimlik No' : 'Pasaport No' }} gereklidir
+                      </mat-error>
+                      <mat-error *ngIf="passenger.get('idNumber')?.hasError('minlength') && passenger.get('idNumber')?.touched">
+                        Geçerli bir {{ passenger.get('idType')?.value === 'TC' ? 'T.C. Kimlik No' : 'Pasaport No' }} giriniz
+                      </mat-error>
+                    </mat-form-field>
+                  </div>
+
+                  <!-- Pasaport alanları (idType=PASSPORT için) -->
+                  <div class="form-row" *ngIf="passenger.get('idType')?.value === 'PASSPORT'">
+                    <mat-form-field appearance="outline" class="form-field-half">
+                      <mat-label>Pasaport Geçerlilik Tarihi</mat-label>
+                      <input matInput type="date" formControlName="passportValidDate" placeholder="GG/AA/YYYY">
+                      <mat-icon matPrefix>event</mat-icon>
+                      <mat-error *ngIf="passenger.get('passportValidDate')?.hasError('required') && passenger.get('passportValidDate')?.touched">
+                        Pasaport geçerlilik tarihi gereklidir
+                      </mat-error>
+                    </mat-form-field>
+                    <mat-form-field appearance="outline" class="form-field-half">
+                      <mat-label>Pasaport Veren Ülke</mat-label>
+                      <input matInput formControlName="passportCountry" placeholder="TR" maxlength="2">
+                      <mat-icon matPrefix>public</mat-icon>
+                    </mat-form-field>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Butonlar -->
+            <div class="form-actions">
+              <button mat-button type="button" (click)="goBack()" class="back-button">
+                <mat-icon>arrow_back</mat-icon>
+                Geri Dön
+              </button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="isLoading" class="submit-button">
+                <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
+                <span *ngIf="!isLoading">Devam Et</span>
+                <span *ngIf="isLoading">İşleniyor...</span>
+              </button>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Sağ Taraf: Fiyat Kartı ve Paket Bilgileri -->
+    <div class="booking-summary-section">
+      <!-- Uçuş Özeti -->
+      <mat-card class="summary-card flight-summary" *ngIf="selectedFlight">
+        <mat-card-header>
+          <h2 class="summary-title">
+            <mat-icon>flight</mat-icon>
+            Uçuş Özeti
+          </h2>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="flight-info">
+            <div class="flight-route">
+              <div class="route-segment">
+                <div class="airport-code">{{ selectedFlight.departure.airportCode }}</div>
+                <div class="time">{{ selectedFlight.departure.time }}</div>
+                <div class="date">{{ selectedFlight.departure.date }}</div>
+              </div>
+              <div class="route-arrow">
+                <mat-icon>arrow_forward</mat-icon>
+                <div class="duration">{{ selectedFlight.duration }}</div>
+              </div>
+              <div class="route-segment">
+                <div class="airport-code">{{ selectedFlight.arrival.airportCode }}</div>
+                <div class="time">{{ selectedFlight.arrival.time }}</div>
+                <div class="date">{{ selectedFlight.arrival.date }}</div>
+              </div>
+            </div>
+            <div class="flight-details-summary">
+              <div class="detail-item">
+                <mat-icon>flight</mat-icon>
+                <span>{{ selectedFlight.airline }} {{ selectedFlight.flightNumber }}</span>
+              </div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Fiyat Özeti -->
+      <mat-card class="summary-card price-summary">
+        <mat-card-header>
+          <h2 class="summary-title">
+            <mat-icon>receipt</mat-icon>
+            Fiyat Özeti
+          </h2>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="price-breakdown" *ngIf="selectedBrand">
+            <div class="price-row">
+              <span>Uçuş Fiyatı</span>
+              <span>{{ selectedBrand.totalFare }} {{ selectedBrand.currency }}</span>
+            </div>
+            <div class="price-row">
+              <span>Paket</span>
+              <span>{{ selectedBrand.brandName || selectedBrand.brandCode || 'Standart' }}</span>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="price-row total">
+              <span>Toplam</span>
+              <span class="total-price">{{ selectedBrand.totalFare }} {{ selectedBrand.currency }}</span>
+            </div>
+          </div>
+          <div class="price-breakdown" *ngIf="!selectedBrand && selectedFlight">
+            <div class="price-row">
+              <span>Uçuş Fiyatı</span>
+              <span>{{ selectedFlight.price }} {{ selectedFlight.currency }}</span>
+            </div>
+            <mat-divider></mat-divider>
+            <div class="price-row total">
+              <span>Toplam</span>
+              <span class="total-price">{{ selectedFlight.price }} {{ selectedFlight.currency }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+</div>

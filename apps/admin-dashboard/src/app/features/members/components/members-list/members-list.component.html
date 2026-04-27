@@ -1,0 +1,207 @@
+<div class="page-container">
+  <!-- Stats Cards -->
+  <div class="stats-row" *ngIf="stats">
+    <div class="stat-card total">
+      <div class="stat-icon">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.total }}</span>
+        <span class="stat-label">Toplam Müşteri</span>
+      </div>
+    </div>
+    <div class="stat-card active">
+      <div class="stat-icon">
+        <mat-icon>check_circle</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.active }}</span>
+        <span class="stat-label">Aktif</span>
+      </div>
+    </div>
+    <div class="stat-card pending">
+      <div class="stat-icon">
+        <mat-icon>hourglass_empty</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.pending }}</span>
+        <span class="stat-label">Beklemede</span>
+      </div>
+    </div>
+    <div class="stat-card suspended">
+      <div class="stat-icon">
+        <mat-icon>block</mat-icon>
+      </div>
+      <div class="stat-info">
+        <span class="stat-value">{{ stats.suspended }}</span>
+        <span class="stat-label">Askıda</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>Müşteriler</h1>
+      <p class="subtitle">Kayıtlı müşterileri görüntüleyin ve yönetin</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button (click)="toggleFilters()" [class.active]="showFilters" class="filter-toggle-btn">
+        <mat-icon>filter_list</mat-icon>
+        <span>Filtreler</span>
+        <mat-icon *ngIf="hasActiveFilters()" class="filter-badge">fiber_manual_record</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Content Card -->
+  <mat-card class="content-card">
+    <!-- Filters Panel -->
+    <div class="filters-panel" *ngIf="showFilters">
+      <div class="filters-content">
+        <!-- Search Bar -->
+        <mat-form-field class="search-field" appearance="outline">
+          <input matInput [(ngModel)]="searchTerm" (keyup.enter)="onSearch()"
+            placeholder="İsim, e-posta veya telefon ile ara..." />
+        </mat-form-field>
+
+        <!-- Status Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>Durum</mat-label>
+          <mat-select [(value)]="statusFilter" (selectionChange)="onFilterChange()">
+            <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>toggle_on</mat-icon>
+        </mat-form-field>
+
+        <!-- Email Verified Filter -->
+        <mat-form-field appearance="outline" class="filter-field">
+          <mat-label>E-posta Doğrulama</mat-label>
+          <mat-select [(value)]="emailVerifiedFilter" (selectionChange)="onFilterChange()">
+            <mat-option *ngFor="let option of emailVerifiedOptions" [value]="option.value">
+              {{ option.label }}
+            </mat-option>
+          </mat-select>
+          <mat-icon matPrefix>verified</mat-icon>
+        </mat-form-field>
+
+        <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn" *ngIf="hasActiveFilters()">
+          <mat-icon>clear</mat-icon>
+          Temizle
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="table-container" *ngIf="!loading">
+      <table mat-table [dataSource]="members" class="members-table">
+
+        <!-- Member Column -->
+        <ng-container matColumnDef="member">
+          <th mat-header-cell *matHeaderCellDef>Müşteri</th>
+          <td mat-cell *matCellDef="let member">
+            <div class="member-cell">
+              <div class="member-avatar">
+                {{ member.firstName?.charAt(0)?.toUpperCase() }}{{ member.lastName?.charAt(0)?.toUpperCase() }}
+              </div>
+              <span class="member-name">{{ member.firstName }} {{ member.lastName }}</span>
+            </div>
+          </td>
+        </ng-container>
+
+        <!-- Email Column -->
+        <ng-container matColumnDef="email">
+          <th mat-header-cell *matHeaderCellDef>E-posta</th>
+          <td mat-cell *matCellDef="let member">
+            <span class="email-text">{{ member.email }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Phone Column -->
+        <ng-container matColumnDef="phone">
+          <th mat-header-cell *matHeaderCellDef>Telefon</th>
+          <td mat-cell *matCellDef="let member">
+            <span class="phone-text">{{ member.phone || '—' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Email Verified Column -->
+        <ng-container matColumnDef="emailVerified">
+          <th mat-header-cell *matHeaderCellDef>E-posta Doğrulama</th>
+          <td mat-cell *matCellDef="let member">
+            <span class="verified-badge" [class.verified]="member.emailVerified" [class.not-verified]="!member.emailVerified">
+              <mat-icon>{{ member.emailVerified ? 'verified' : 'cancel' }}</mat-icon>
+              {{ member.emailVerified ? 'Doğrulanmış' : 'Doğrulanmamış' }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Status Column -->
+        <ng-container matColumnDef="status">
+          <th mat-header-cell *matHeaderCellDef>Durum</th>
+          <td mat-cell *matCellDef="let member">
+            <span class="status-badge" [ngClass]="member.status">
+              {{ getStatusLabel(member.status) }}
+            </span>
+          </td>
+        </ng-container>
+
+        <!-- Created At Column -->
+        <ng-container matColumnDef="createdAt">
+          <th mat-header-cell *matHeaderCellDef>Kayıt Tarihi</th>
+          <td mat-cell *matCellDef="let member">
+            <span class="date-text">{{ member.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+          </td>
+        </ng-container>
+
+        <!-- Actions Column -->
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef class="actions-column">İşlemler</th>
+          <td mat-cell *matCellDef="let member" class="actions-column">
+            <button mat-icon-button [matMenuTriggerFor]="actionMenu" class="action-btn" matTooltip="İşlemler">
+              <mat-icon>more_vert</mat-icon>
+            </button>
+            <mat-menu #actionMenu="matMenu">
+              <button mat-menu-item *ngIf="member.status !== 'active'" (click)="changeStatus(member, 'active')">
+                <mat-icon>check_circle</mat-icon>
+                <span>Aktif Yap</span>
+              </button>
+              <button mat-menu-item *ngIf="member.status !== 'suspended'" (click)="changeStatus(member, 'suspended')">
+                <mat-icon>block</mat-icon>
+                <span>Askıya Al</span>
+              </button>
+              <button mat-menu-item *ngIf="member.status !== 'pending'" (click)="changeStatus(member, 'pending')">
+                <mat-icon>hourglass_empty</mat-icon>
+                <span>Beklemeye Al</span>
+              </button>
+            </mat-menu>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+        <!-- Empty State -->
+        <tr class="mat-row" *matNoDataRow>
+          <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+            <mat-icon>people_outline</mat-icon>
+            <p>Henüz kayıtlı müşteri bulunmuyor</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-container" *ngIf="loading">
+      <mat-spinner diameter="50"></mat-spinner>
+      <p>Yükleniyor...</p>
+    </div>
+
+    <!-- Paginator -->
+    <mat-paginator [length]="totalRecords" [pageSize]="limit" [pageSizeOptions]="[10, 25, 50]"
+      (page)="onPageChange($event)" showFirstLastButtons>
+    </mat-paginator>
+  </mat-card>
+</div>

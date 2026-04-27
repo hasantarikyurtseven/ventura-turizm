@@ -1,0 +1,90 @@
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>Rol Yönetimi</h1>
+            <p class="subtitle">Sistemdeki tüm rolleri görüntüleyin ve yönetin</p>
+        </div>
+        <button mat-raised-button color="primary" (click)="createRole()">
+            <mat-icon>add</mat-icon>
+            Yeni Rol
+        </button>
+    </div>
+
+    <!-- Content Card -->
+    <mat-card class="content-card">
+        <!-- Data Table -->
+        <div class="table-container" *ngIf="!loading">
+            <table mat-table [dataSource]="roles" class="roles-table">
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>ROL ADI</th>
+                    <td mat-cell *matCellDef="let role">
+                        <span class="role-name">{{ role.name }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Description Column -->
+                <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>AÇIKLAMA</th>
+                    <td mat-cell *matCellDef="let role">{{ role.description }}</td>
+                </ng-container>
+
+                <!-- Permissions Column -->
+                <ng-container matColumnDef="permissions">
+                    <th mat-header-cell *matHeaderCellDef>İZİNLER</th>
+                    <td mat-cell *matCellDef="let role">
+                        <span class="permissions-count">{{ role.permissions?.length || 0 }} izin</span>
+                    </td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>DURUM</th>
+                    <td mat-cell *matCellDef="let role">
+                        <span class="status-badge" [ngClass]="role.status">
+                            {{ role.status === 'active' ? 'Aktif' : 'Pasif' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef class="actions-column">İŞLEMLER</th>
+                    <td mat-cell *matCellDef="let role" class="actions-column">
+                        <button mat-icon-button class="action-btn edit" (click)="editRole(role)"
+                            matTooltip="Düzenle">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button class="action-btn delete" (click)="deleteRole(role)"
+                            matTooltip="Sil">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <!-- Empty State -->
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+                        <mat-icon>inbox</mat-icon>
+                        <p>Henüz rol bulunmuyor</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading-container" *ngIf="loading">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Yükleniyor...</p>
+        </div>
+
+        <!-- Paginator -->
+        <mat-paginator [length]="totalRecords" [pageSize]="limit" [pageSizeOptions]="[10, 25, 50]"
+            (page)="onPageChange($event)" showFirstLastButtons>
+        </mat-paginator>
+    </mat-card>
+</div>

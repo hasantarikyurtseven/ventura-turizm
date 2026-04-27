@@ -1,0 +1,16 @@
+<div class="contract-modal">
+  <div class="contract-modal-header">
+    <h2 mat-dialog-title>{{ title || 'Sözleşme' }}</h2>
+    <button mat-icon-button (click)="close()" aria-label="Kapat">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+  <mat-dialog-content>
+    <mat-spinner *ngIf="loading" diameter="40" class="modal-spinner"></mat-spinner>
+    <p *ngIf="error" class="modal-error">{{ error }}</p>
+    <div *ngIf="!loading && !error && content" class="contract-content" [innerHTML]="content"></div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button mat-dialog-close>Kapat</button>
+  </mat-dialog-actions>
+</div>

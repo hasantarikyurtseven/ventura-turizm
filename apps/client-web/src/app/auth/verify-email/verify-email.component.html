@@ -1,0 +1,84 @@
+<div class="verify-email-container">
+  <!-- Header Banner – maildeki header ile aynı gradient -->
+  <div class="verify-header-banner">
+    <h1 class="brand-title">VENTURA TURİZM</h1>
+    <p class="brand-subtitle">Seyahat &bull; Keşfet &bull; Yaşa</p>
+  </div>
+
+  <mat-card class="verify-card">
+    <!-- Loading -->
+    <div *ngIf="loading" class="verify-state">
+      <mat-spinner diameter="48"></mat-spinner>
+      <h2>E-posta doğrulanıyor...</h2>
+      <p>Lütfen bekleyin, hesabınız onaylanıyor.</p>
+    </div>
+
+    <!-- Success -->
+    <div *ngIf="!loading && success" class="verify-state success">
+      <div class="icon-circle success-circle">
+        <mat-icon class="state-icon">check</mat-icon>
+      </div>
+      <h2>E-posta Adresiniz Onaylandı!</h2>
+      <p>Hesabınız aktif hale getirildi. Artık Ventura Turizm'in tüm hizmetlerinden yararlanabilirsiniz.</p>
+
+      <!-- Info Box – maildeki info box tasarımıyla uyumlu -->
+      <div class="info-box success-info">
+        <mat-icon class="info-box-icon">flight_takeoff</mat-icon>
+        <div>
+          <strong>Başlayın!</strong>
+          <span>Giriş yaparak uçuşları keşfedin, kampanyaları yakalayın.</span>
+        </div>
+      </div>
+
+      <!-- Benefits – maildeki benefits ile uyumlu -->
+      <div class="benefits-list">
+        <div class="benefit-item">
+          <mat-icon class="benefit-check">check_circle</mat-icon>
+          <span>Özel kampanya ve fırsatlardan ilk siz haberdar olun</span>
+        </div>
+        <div class="benefit-item">
+          <mat-icon class="benefit-check">check_circle</mat-icon>
+          <span>Hızlı rezervasyon ve kolay ödeme seçenekleri</span>
+        </div>
+        <div class="benefit-item">
+          <mat-icon class="benefit-check">check_circle</mat-icon>
+          <span>Puan biriktirin ve ödüllere dönüştürün</span>
+        </div>
+      </div>
+
+      <a routerLink="/login" mat-raised-button class="action-button">
+        <mat-icon>login</mat-icon>
+        Giriş Yap
+      </a>
+    </div>
+
+    <!-- Error -->
+    <div *ngIf="!loading && !success" class="verify-state error">
+      <div class="icon-circle error-circle">
+        <mat-icon class="state-icon">close</mat-icon>
+      </div>
+      <h2>Doğrulama Başarısız</h2>
+      <p>{{ errorMessage }}</p>
+
+      <!-- Warning Box – maildeki security notice ile uyumlu -->
+      <div class="info-box warning-info">
+        <mat-icon class="info-box-icon">info</mat-icon>
+        <div>
+          <strong>Ne yapabilirsiniz?</strong>
+          <span>Yeniden kayıt olarak yeni bir doğrulama linki alabilirsiniz.</span>
+        </div>
+      </div>
+
+      <a routerLink="/register" mat-raised-button class="action-button">
+        <mat-icon>person_add</mat-icon>
+        Tekrar Kayıt Ol
+      </a>
+    </div>
+  </mat-card>
+
+  <!-- Footer – maildeki footer ile uyumlu -->
+  <div class="verify-footer">
+    <p>Sorularınız için <a href="mailto:destek@venturaturizm.com">destek&#64;venturaturizm.com</a> adresine yazabilirsiniz.</p>
+    <p class="copyright">&copy; {{ currentYear }} Ventura Turizm A.Ş. Tüm hakları saklıdır.</p>
+  </div>
+</div>

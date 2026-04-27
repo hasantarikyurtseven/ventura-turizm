@@ -1,0 +1,1413 @@
+.flight-results-page {
+  min-height: calc(100vh - 56px);
+  background: var(--ventura-surface-50, #f5f7fa);
+  padding: 2rem 0;
+}
+
+.results-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+// Header
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+
+  .header-content {
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--ventura-text-primary, #183641);
+      margin: 0 0 0.5rem 0;
+    }
+
+    .results-count {
+      color: var(--ventura-text-secondary, #64748b);
+      font-size: 0.9375rem;
+      margin: 0;
+    }
+  }
+
+  .toggle-filters-btn {
+    display: none; // Hidden on desktop, shown on mobile
+  }
+}
+
+// Layout
+.results-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 2rem;
+}
+
+// Filters Sidebar
+.filters-sidebar {
+  background: white;
+  border-radius: var(--ventura-radius-lg, 12px);
+  padding: 1.5rem;
+  box-shadow: var(--ventura-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+  height: fit-content;
+  position: sticky;
+  top: 2rem;
+
+  .filters-content {
+    .filters-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+
+      h3 {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--ventura-text-primary, #183641);
+        margin: 0;
+      }
+    }
+
+    .reset-filters-btn {
+      font-size: 0.8rem;
+      color: var(--ventura-primary, #1565c0);
+      mat-icon { font-size: 16px; width: 16px; height: 16px; margin-right: 2px; }
+    }
+
+    h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--ventura-text-primary, #183641);
+      margin: 0 0 1.5rem 0;
+    }
+  }
+
+  .filter-section {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--ventura-border, #e2e8f0);
+
+    &:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    h4 {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--ventura-text-primary, #183641);
+      margin: 0 0 1rem 0;
+    }
+  }
+
+  .price-range {
+    .price-slider-wrapper {
+      margin-bottom: 1.5rem;
+
+      label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 500;
+        color: var(--ventura-text-secondary, #64748b);
+        margin-bottom: 0.5rem;
+      }
+
+      .price-slider {
+        width: 100%;
+      }
+    }
+
+    .price-inputs {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+
+      .price-input {
+        flex: 1;
+        padding: 0.5rem;
+        border: 1px solid var(--ventura-border, #e2e8f0);
+        border-radius: var(--ventura-radius, 8px);
+        font-size: 0.875rem;
+
+        &:focus {
+          outline: none;
+          border-color: var(--ventura-primary, #4088b3);
+        }
+      }
+    }
+  }
+
+  .filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .filter-option {
+      justify-content: flex-start;
+      text-transform: none;
+      font-weight: 500;
+
+      &.active {
+        background: var(--ventura-primary, #4088b3);
+        color: white;
+      }
+    }
+  }
+
+  .filter-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .airline-checkbox {
+      ::ng-deep .mat-mdc-checkbox-label {
+        font-size: 0.875rem;
+      }
+
+      .airline-filter-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .airline-filter-logo {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
+
+      .airline-filter-logo-placeholder {
+        width: 24px;
+        height: 24px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--ventura-primary-100, #b3d9e8);
+        color: var(--ventura-primary-dark, #183641);
+        border-radius: 4px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        flex-shrink: 0;
+        text-transform: uppercase;
+      }
+
+      .airline-filter-name {
+        white-space: nowrap;
+      }
+
+      // Tema rengi – seçili checkbox pembe değil Ventura mavisi
+      ::ng-deep .mat-mdc-checkbox {
+        .mdc-checkbox__background {
+          border-color: var(--ventura-primary) !important;
+        }
+        .mdc-checkbox__native-control:checked ~ .mdc-checkbox__background,
+        &.mat-mdc-checkbox-checked .mdc-checkbox__background {
+          background-color: var(--ventura-primary) !important;
+          border-color: var(--ventura-primary) !important;
+        }
+        .mdc-checkbox__native-control:checked ~ .mdc-checkbox__background .mdc-checkbox__checkmark,
+        &.mat-mdc-checkbox-checked .mdc-checkbox__checkmark {
+          color: var(--ventura-text-on-primary) !important;
+        }
+        .mdc-checkbox__native-control:enabled:hover ~ .mdc-checkbox__background {
+          border-color: var(--ventura-primary-dark) !important;
+        }
+        .mdc-checkbox__native-control:checked:hover ~ .mdc-checkbox__background,
+        &.mat-mdc-checkbox-checked:hover .mdc-checkbox__background {
+          background-color: var(--ventura-primary-dark) !important;
+          border-color: var(--ventura-primary-dark) !important;
+        }
+      }
+    }
+  }
+
+  .time-range {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .time-field {
+      width: 100%;
+    }
+  }
+}
+
+// Main Content
+.results-main {
+  .sort-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    background: white;
+    padding: 1.25rem 1.5rem;
+    border-radius: var(--ventura-radius-lg, 12px);
+    box-shadow: var(--ventura-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+
+    .sort-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .sort-icon {
+        color: var(--ventura-primary, #4088b3);
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+
+      .sort-label {
+        font-weight: 600;
+        color: var(--ventura-text-primary, #183641);
+        font-size: 0.9375rem;
+      }
+    }
+
+    .sort-select-field {
+      min-width: 220px;
+      flex: 0 0 auto;
+
+      ::ng-deep .mat-mdc-form-field {
+        .mat-mdc-text-field-wrapper {
+          background: white;
+          border-radius: var(--ventura-radius, 8px);
+          border: 1px solid var(--ventura-border, #e2e8f0);
+          transition: all 0.2s ease;
+          padding: 0 !important;
+
+          &:hover {
+            border-color: var(--ventura-primary, #4088b3);
+          }
+        }
+
+        &.mat-focused .mat-mdc-text-field-wrapper {
+          border-color: var(--ventura-primary, #4088b3);
+          box-shadow: 0 0 0 3px rgba(64, 136, 179, 0.1);
+        }
+
+        .mat-mdc-form-field-flex {
+          align-items: center;
+          padding: 0 0.75rem;
+        }
+
+        .mat-mdc-select-value {
+          font-weight: 500;
+          color: var(--ventura-text-primary, #183641);
+          font-size: 0.9375rem;
+        }
+
+        .mat-mdc-select-arrow {
+          color: var(--ventura-primary, #4088b3);
+        }
+
+        .mat-mdc-form-field-subscript-wrapper {
+          display: none;
+        }
+
+        .mat-mdc-form-field-label {
+          color: var(--ventura-text-secondary, #64748b);
+          font-size: 0.875rem;
+        }
+      }
+
+      .sort-prefix-icon {
+        color: var(--ventura-primary, #4088b3);
+        font-size: 1.125rem;
+        width: 1.125rem;
+        height: 1.125rem;
+        margin-right: 0.5rem;
+      }
+
+      // Dropdown panel styling
+      ::ng-deep .mat-mdc-select-panel {
+        border-radius: var(--ventura-radius-lg, 12px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        margin-top: 0.5rem;
+        padding: 0.5rem 0;
+
+        .mat-mdc-option {
+          padding: 0.875rem 1.25rem;
+          font-size: 0.9375rem;
+          min-height: 44px;
+          transition: all 0.2s ease;
+
+          &:hover {
+            background: rgba(64, 136, 179, 0.08);
+          }
+
+          &.mdc-list-item--selected {
+            background: rgba(64, 136, 179, 0.12);
+            color: var(--ventura-primary, #4088b3);
+            font-weight: 600;
+
+            &::before {
+              content: '✓';
+              color: var(--ventura-primary, #4088b3);
+              font-weight: 700;
+              margin-right: 0.5rem;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .flight-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .flight-section {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: linear-gradient(135deg, rgba(64, 136, 179, 0.08) 0%, rgba(64, 136, 179, 0.02) 100%);
+      border-radius: var(--ventura-radius-lg, 12px);
+      border-left: 4px solid var(--ventura-primary, #4088b3);
+
+      .section-icon {
+        width: 40px;
+        height: 40px;
+        font-size: 40px;
+        color: var(--ventura-primary, #4088b3);
+        flex-shrink: 0;
+      }
+
+      .section-title-block {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .section-title {
+        margin: 0 0 0.25rem 0;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--ventura-text-primary, #183641);
+      }
+
+      .section-route {
+        margin: 0;
+        font-size: 0.9375rem;
+        color: var(--ventura-text-secondary, #64748b);
+
+        .section-date {
+          margin-left: 0.5rem;
+          color: var(--ventura-text-muted, #94a3b8);
+          font-size: 0.875rem;
+        }
+      }
+
+      .section-badge {
+        flex-shrink: 0;
+        padding: 0.35rem 0.75rem;
+        background: var(--ventura-primary, #4088b3);
+        color: white;
+        border-radius: 9999px;
+        font-size: 0.8125rem;
+        font-weight: 600;
+      }
+    }
+
+    &.return .section-header {
+      border-left-color: var(--ventura-accent, #0d9488);
+
+      .section-icon {
+        color: var(--ventura-accent, #0d9488);
+      }
+
+      .section-badge {
+        background: var(--ventura-accent, #0d9488);
+      }
+    }
+
+    .section-cards {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+}
+
+// Flight Card
+.flight-card {
+  border-radius: var(--ventura-radius-lg, 12px) !important;
+  box-shadow: var(--ventura-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1)) !important;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border: 2px solid transparent !important;
+
+  &:hover {
+    box-shadow: var(--ventura-shadow-md, 0 4px 6px rgba(0, 0, 0, 0.1)) !important;
+    transform: translateY(-2px);
+    border-color: var(--ventura-primary, #4088b3) !important;
+  }
+
+  &.selected {
+    border-color: var(--ventura-primary, #4088b3) !important;
+    box-shadow: 0 0 0 3px rgba(64, 136, 179, 0.1) !important;
+  }
+
+  &.brand-options-expanded {
+    border-color: var(--ventura-primary, #4088b3) !important;
+    box-shadow: 0 0 0 3px rgba(64, 136, 179, 0.1) !important;
+  }
+
+  mat-card-content {
+    padding: 1.5rem !important;
+  }
+
+  .flight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+
+    .airline-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      .airline-logo {
+        width: 48px;
+        height: 48px;
+        background: var(--ventura-primary, #4088b3);
+        color: white;
+        border-radius: var(--ventura-radius, 8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        font-size: 0.875rem;
+        overflow: hidden;
+        flex-shrink: 0;
+
+        &.has-logo {
+          background: transparent;
+        }
+
+        .airline-logo-img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+      }
+
+      .airline-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+
+        .airline-name {
+          font-weight: 600;
+          color: var(--ventura-text-primary, #183641);
+          font-size: 1rem;
+        }
+
+        .flight-number {
+          font-size: 0.875rem;
+          color: var(--ventura-text-secondary, #64748b);
+        }
+      }
+    }
+
+    .flight-price {
+      text-align: right;
+
+      .price-amount {
+        display: block;
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--ventura-primary, #4088b3);
+        line-height: 1.2;
+      }
+
+      .price-label {
+        display: block;
+        font-size: 0.75rem;
+        color: var(--ventura-text-secondary, #64748b);
+        margin-top: 0.25rem;
+      }
+    }
+  }
+
+  .flight-route {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1.5rem 0;
+    border-top: 1px solid var(--ventura-border, #e2e8f0);
+    border-bottom: 1px solid var(--ventura-border, #e2e8f0);
+
+    .route-segment {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      &.departure {
+        text-align: left;
+      }
+
+      &.arrival {
+        text-align: right;
+      }
+
+      .time {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--ventura-text-primary, #183641);
+      }
+
+      .airport-code {
+        font-size: 1.125rem;
+        font-weight: 600;
+        color: var(--ventura-primary, #4088b3);
+      }
+
+      .airport-name {
+        font-size: 0.875rem;
+        color: var(--ventura-text-secondary, #64748b);
+      }
+
+      .city {
+        font-size: 0.75rem;
+        color: var(--ventura-text-secondary, #64748b);
+      }
+    }
+
+    .route-connector {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0 1rem;
+
+      .duration {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.875rem;
+        color: var(--ventura-text-secondary, #64748b);
+        font-weight: 500;
+
+        mat-icon {
+          font-size: 1rem;
+          width: 1rem;
+          height: 1rem;
+        }
+      }
+
+      .route-line {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        position: relative;
+
+        .line-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--ventura-primary, #4088b3);
+          position: absolute;
+
+          &.start {
+            left: 0;
+          }
+
+          &.end {
+            right: 0;
+          }
+        }
+
+        .line {
+          width: 100%;
+          height: 2px;
+          background: var(--ventura-border, #e2e8f0);
+          position: relative;
+
+          &.has-stops {
+            background: linear-gradient(
+              to right,
+              var(--ventura-primary, #4088b3) 0%,
+              var(--ventura-primary, #4088b3) 30%,
+              var(--ventura-border, #e2e8f0) 30%,
+              var(--ventura-border, #e2e8f0) 70%,
+              var(--ventura-primary, #4088b3) 70%,
+              var(--ventura-primary, #4088b3) 100%
+            );
+
+            &::before {
+              content: '';
+              position: absolute;
+              left: 50%;
+              top: 50%;
+              transform: translate(-50%, -50%);
+              width: 12px;
+              height: 12px;
+              border-radius: 50%;
+              background: var(--ventura-primary, #4088b3);
+              border: 2px solid white;
+            }
+          }
+        }
+      }
+
+      .stops-info {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        font-size: 0.75rem;
+        color: var(--ventura-text-secondary, #64748b);
+
+        mat-icon {
+          font-size: 0.875rem;
+          width: 0.875rem;
+          height: 0.875rem;
+        }
+
+        .stop-detail {
+          color: var(--ventura-primary, #4088b3);
+        }
+
+        &.direct {
+          color: var(--ventura-success, #10b981);
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .flight-details {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+
+    .detail-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.875rem;
+      color: var(--ventura-text-secondary, #64748b);
+
+      mat-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+        color: var(--ventura-primary, #4088b3);
+      }
+
+      &.brand-count-chip {
+        background: rgba(64, 136, 179, 0.08);
+        color: var(--ventura-primary, #4088b3);
+        padding: 0.25rem 0.625rem;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.8125rem;
+      }
+    }
+  }
+
+  .flight-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    align-items: center;
+
+    .select-btn {
+      min-width: 120px;
+      font-weight: 600;
+      box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+    }
+
+    .details-btn {
+      text-transform: none;
+      color: var(--ventura-primary, #4088b3);
+    }
+
+    .select-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1rem;
+      background: #fff3cd;
+      border: 1px solid #ffc107;
+      border-radius: 8px;
+      color: #856404;
+      font-size: 0.9rem;
+      font-weight: 500;
+
+      mat-icon {
+        color: #ffc107;
+        font-size: 1.2rem;
+        width: 1.2rem;
+        height: 1.2rem;
+      }
+    }
+  }
+
+  .flight-details-panel {
+    margin-top: 1rem;
+    padding: 1.25rem 1.5rem;
+    background: var(--ventura-surface-50, #f8fafc);
+    border-radius: var(--ventura-radius-lg, 12px);
+    border: 1px solid var(--ventura-border, #e2e8f0);
+
+    .details-panel-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0 0 1rem 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--ventura-text-primary, #183641);
+
+      mat-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: var(--ventura-primary, #4088b3);
+      }
+    }
+
+    .details-summary {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+
+      .details-summary-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 0.875rem;
+
+        .label {
+          color: var(--ventura-text-secondary, #64748b);
+          font-weight: 500;
+        }
+        .value {
+          color: var(--ventura-text-primary, #183641);
+        }
+      }
+    }
+
+    .details-segments {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+
+      .segment-block {
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .layover-row {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1rem;
+        margin: 0.5rem 0 0 0;
+        background: rgba(64, 136, 179, 0.06);
+        border-left: 3px solid var(--ventura-primary, #4088b3);
+        border-radius: 0 var(--ventura-radius, 8px) var(--ventura-radius, 8px) 0;
+        font-size: 0.875rem;
+        color: var(--ventura-text-secondary, #64748b);
+        font-weight: 500;
+
+        .layover-icon {
+          font-size: 1.25rem;
+          width: 1.25rem;
+          height: 1.25rem;
+          color: var(--ventura-primary, #4088b3);
+        }
+      }
+
+      .segment-item {
+        padding: 1rem 1.25rem;
+        margin-top: 0.5rem;
+        background: white;
+        border-radius: var(--ventura-radius, 8px);
+        border: 1px solid var(--ventura-border, #e2e8f0);
+      }
+
+      .segment-header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--ventura-border, #e2e8f0);
+
+        .segment-badge {
+          font-size: 0.75rem;
+          font-weight: 700;
+          color: white;
+          background: var(--ventura-primary, #4088b3);
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          text-transform: uppercase;
+          letter-spacing: 0.03em;
+        }
+
+        .segment-route-text {
+          font-size: 0.9375rem;
+          font-weight: 600;
+          color: var(--ventura-text-primary, #183641);
+        }
+      }
+
+      .segment-body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+      }
+
+      .segment-row {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        font-size: 0.875rem;
+
+        .segment-label {
+          min-width: 5rem;
+          color: var(--ventura-text-secondary, #64748b);
+          font-weight: 500;
+        }
+        .segment-value {
+          color: var(--ventura-text-primary, #183641);
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  .flight-brand-options {
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--ventura-border, #e2e8f0);
+
+    .brand-options-header {
+      margin-bottom: 1.5rem;
+
+      h4 {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--ventura-text-primary, #183641);
+        margin: 0 0 0.25rem 0;
+      }
+
+      .brand-options-subtitle {
+        font-size: 0.875rem;
+        color: var(--ventura-text-secondary, #64748b);
+        margin: 0;
+      }
+    }
+
+    .brand-slider-controls {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1rem 0;
+      padding: 0.5rem;
+
+      .slider-nav-btn {
+        color: var(--ventura-primary, #4088b3);
+        transition: all 0.2s ease;
+
+        &:hover:not(:disabled) {
+          background: rgba(64, 136, 179, 0.1);
+        }
+
+        &:disabled {
+          opacity: 0.3;
+          cursor: not-allowed;
+        }
+
+        mat-icon {
+          font-size: 1.5rem;
+          width: 1.5rem;
+          height: 1.5rem;
+        }
+      }
+
+      .slider-indicator {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--ventura-text-secondary, #64748b);
+        min-width: 60px;
+        text-align: center;
+      }
+    }
+
+    .brand-cards-container {
+      margin-top: 1rem;
+
+      &.grid-mode {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1rem;
+        align-items: stretch; // Kartların yüksekliğini eşitle
+
+        @media screen and (max-width: 768px) {
+          grid-template-columns: 1fr;
+        }
+
+        .brand-cards-wrapper {
+          display: contents;
+        }
+      }
+
+      &.slider-mode {
+        overflow: hidden;
+        position: relative;
+        padding: 0 0.5rem;
+
+        .brand-cards-wrapper {
+          display: flex;
+          gap: 1rem;
+          align-items: stretch; // Kartların yüksekliğini eşitle
+          transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+          will-change: transform;
+
+          .brand-card {
+            flex: 0 0 calc(33.333% - 0.67rem);
+            min-width: 0;
+            max-width: calc(33.333% - 0.67rem);
+
+            @media screen and (max-width: 1024px) {
+              flex: 0 0 calc(50% - 0.5rem);
+              max-width: calc(50% - 0.5rem);
+            }
+
+            @media screen and (max-width: 768px) {
+              flex: 0 0 100%;
+              max-width: 100%;
+            }
+          }
+        }
+      }
+    }
+
+    .brand-card {
+      border-radius: var(--ventura-radius-lg, 12px);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      border: 1.5px solid var(--ventura-border, #e2e8f0);
+      background: white;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      overflow: hidden;
+
+      &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+        border-color: var(--ventura-primary, #4088b3);
+      }
+
+      &.selected {
+        border-color: var(--ventura-primary, #4088b3);
+        border-width: 2px;
+        box-shadow: 0 0 0 3px rgba(64, 136, 179, 0.15);
+      }
+
+      .brand-card-header {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid var(--ventura-border, #e2e8f0);
+        background: var(--ventura-surface-50, #f8fafc);
+
+        .brand-title-section {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: 1rem;
+
+          .brand-name {
+            font-size: 1.0625rem;
+            font-weight: 700;
+            color: var(--ventura-text-primary, #183641);
+            margin: 0;
+            flex: 1;
+          }
+
+          .brand-price {
+            text-align: right;
+            flex-shrink: 0;
+
+            .price-amount {
+              display: block;
+              font-size: 1.25rem;
+              font-weight: 700;
+              color: var(--ventura-primary, #4088b3);
+              line-height: 1.2;
+              white-space: nowrap;
+            }
+          }
+        }
+      }
+
+      .brand-card-body {
+        padding: 1rem 1.25rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+
+        .brand-feature {
+          display: flex;
+          align-items: center;
+          gap: 0.75rem;
+          padding: 0.75rem;
+          background: rgba(64, 136, 179, 0.04);
+          border-radius: var(--ventura-radius, 8px);
+          border: 1px solid rgba(64, 136, 179, 0.1);
+
+          .feature-icon {
+            color: var(--ventura-primary, #4088b3);
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+            flex-shrink: 0;
+          }
+
+          .feature-content {
+            display: flex;
+            flex-direction: column;
+            gap: 0.125rem;
+            flex: 1;
+
+            .feature-label {
+              font-size: 0.6875rem;
+              font-weight: 600;
+              color: var(--ventura-text-secondary, #64748b);
+              text-transform: uppercase;
+              letter-spacing: 0.03em;
+            }
+
+            .feature-value {
+              font-size: 0.9375rem;
+              font-weight: 600;
+              color: var(--ventura-text-primary, #183641);
+            }
+          }
+        }
+
+        .brand-rules {
+          display: flex;
+          flex-direction: column;
+          gap: 0.375rem;
+
+          .brand-rule-item {
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.5rem 0.625rem;
+            background: white;
+            border: 1px solid var(--ventura-border, #e2e8f0);
+            border-radius: var(--ventura-radius, 8px);
+            transition: all 0.2s ease;
+
+            &:hover {
+              border-color: var(--ventura-primary, #4088b3);
+              background: rgba(64, 136, 179, 0.02);
+            }
+
+            .rule-icon {
+              color: var(--ventura-primary, #4088b3);
+              font-size: 1rem;
+              width: 1rem;
+              height: 1rem;
+              flex-shrink: 0;
+            }
+
+            .rule-description {
+              font-size: 0.8125rem;
+              color: var(--ventura-text-primary, #183641);
+              line-height: 1.4;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .brand-options-indicator {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: var(--ventura-surface-50, #f5f7fa);
+    border: 2px dashed var(--ventura-border, #e2e8f0);
+    border-radius: var(--ventura-radius-lg, 12px);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      border-color: var(--ventura-primary, #4088b3);
+      background: rgba(64, 136, 179, 0.05);
+    }
+
+    mat-icon {
+      color: var(--ventura-primary, #4088b3);
+      font-size: 1.25rem;
+      width: 1.25rem;
+      height: 1.25rem;
+    }
+
+    span {
+      font-size: 0.9375rem;
+      font-weight: 600;
+      color: var(--ventura-text-primary, #183641);
+    }
+
+    .indicator-hint {
+      margin-left: auto;
+      font-size: 0.875rem;
+      font-weight: 400;
+      color: var(--ventura-text-secondary, #64748b);
+    }
+  }
+}
+
+.flight-card-skeleton {
+  cursor: default;
+  pointer-events: none;
+
+  .airline-logo,
+  .skeleton-box,
+  .skeleton-line,
+  .skeleton-button,
+  .skeleton-icon {
+    position: relative;
+    overflow: hidden;
+    background: #e2e8f0;
+  }
+
+  .skeleton-line {
+    height: 10px;
+    border-radius: 999px;
+    margin-bottom: 0.35rem;
+  }
+
+  .skeleton-icon {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+
+  .skeleton-button {
+    height: 36px;
+    border-radius: 999px;
+
+    &.primary {
+      width: 120px;
+    }
+
+    &.secondary {
+      width: 90px;
+    }
+  }
+
+  .w-30 {
+    width: 30%;
+  }
+  .w-40 {
+    width: 40%;
+  }
+  .w-50 {
+    width: 50%;
+  }
+  .w-60 {
+    width: 60%;
+  }
+
+  .skeleton-box,
+  .skeleton-line,
+  .skeleton-button,
+  .skeleton-icon {
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      animation: skeleton-loading 1.4s infinite;
+    }
+  }
+}
+
+@keyframes skeleton-loading {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+// No Results
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: var(--ventura-radius-lg, 12px);
+  box-shadow: var(--ventura-shadow-sm, 0 1px 3px rgba(0, 0, 0, 0.1));
+
+  mat-icon {
+    font-size: 4rem;
+    width: 4rem;
+    height: 4rem;
+    color: var(--ventura-text-secondary, #64748b);
+    margin-bottom: 1rem;
+  }
+
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ventura-text-primary, #183641);
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    color: var(--ventura-text-secondary, #64748b);
+    margin: 0;
+  }
+}
+
+// Responsive
+@media screen and (max-width: 1024px) {
+  .results-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .filters-sidebar {
+    position: static;
+    display: none;
+
+    &.active {
+      display: block;
+      margin-bottom: 2rem;
+    }
+  }
+
+  .results-header {
+    .toggle-filters-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+
+  .sort-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
+    .sort-header {
+      width: 100%;
+    }
+
+    .sort-select-field {
+      width: 100%;
+      min-width: auto;
+    }
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .flight-results-page {
+    padding: 1rem 0;
+  }
+
+  .results-container {
+    padding: 0 1rem;
+  }
+
+  .results-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+
+    .header-content h1 {
+      font-size: 1.5rem;
+    }
+  }
+
+  .sort-bar {
+    padding: 1rem;
+
+    .sort-header {
+      .sort-label {
+        font-size: 0.875rem;
+      }
+    }
+
+    .sort-select-field {
+      min-width: auto;
+    }
+  }
+
+  .flight-card {
+    .flight-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+
+      .flight-price {
+        text-align: left;
+        width: 100%;
+      }
+    }
+
+    .flight-route {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+
+      .route-segment.arrival {
+        text-align: left;
+      }
+
+      .route-connector {
+        padding: 0.5rem 0;
+      }
+    }
+
+    .flight-actions {
+      flex-direction: column;
+
+      .select-btn,
+      .details-btn {
+        width: 100%;
+      }
+
+      .select-hint {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

@@ -1,0 +1,272 @@
+<section class="hero-section">
+  <div class="hero-container">
+    <div class="hero-content">
+      <h1>Biletini Kolayca Bul</h1>
+      <p class="hero-subtitle">Uçak, otobüs, tur ve araç kiralama seçeneklerini tek yerde karşılaştır.</p>
+      
+      <!-- Service Tabs -->
+      <div class="service-tabs">
+        <button 
+          *ngFor="let tab of serviceTabs" 
+          mat-button
+          [class.active]="selectedService === tab.id"
+          [class.disabled-tab]="!tab.active"
+          (click)="onTabClick(tab)"
+          class="service-tab">
+          <mat-icon>{{ tab.icon }}</mat-icon>
+          <span>{{ tab.label }}</span>
+          <span class="tab-badge" *ngIf="tab.badge">{{ tab.badge }}</span>
+        </button>
+      </div>
+
+      <!-- Search Form -->
+      <mat-card class="search-form-card">
+        <mat-card-content>
+          <!-- Trip Type -->
+          <div class="trip-type-selector">
+            <mat-radio-group [(ngModel)]="tripType" (ngModelChange)="onTripTypeChange()" class="trip-type-group">
+              <mat-radio-button value="round-trip" class="trip-type-option">
+                Gidiş - Dönüş
+              </mat-radio-button>
+              <mat-radio-button value="one-way" class="trip-type-option">
+                Tek Yön
+              </mat-radio-button>
+            </mat-radio-group>
+          </div>
+
+          <!-- Search Fields - Tek satır -->
+          <div class="search-fields">
+            <div class="airport-field">
+              <app-location-selector
+                label="Nereden"
+                [control]="fromAirportControl"
+                (locationSelected)="onFromLocationSelected($event)">
+              </app-location-selector>
+            </div>
+
+            <button mat-icon-button class="swap-button" type="button" (click)="swapAirports()">
+              <mat-icon>swap_horiz</mat-icon>
+            </button>
+
+            <div class="airport-field">
+              <app-location-selector
+                label="Nereye"
+                [control]="toAirportControl"
+                (locationSelected)="onToLocationSelected($event)">
+              </app-location-selector>
+            </div>
+
+            <!-- Gidiş Tarihi -->
+            <div class="date-field-wrap" (click)="departurePicker.open()">
+              <mat-icon class="date-icon">calendar_today</mat-icon>
+              <div class="date-text-block">
+                <span class="date-label">Gidiş</span>
+                <span class="date-value" *ngIf="departureDateControl.value">{{ formatDateDisplay(departureDateControl.value) }}</span>
+                <span class="date-placeholder" *ngIf="!departureDateControl.value">Tarih seçin</span>
+              </div>
+              <div class="hidden-date-input">
+                <input matInput [matDatepicker]="departurePicker" [min]="today" [formControl]="departureDateControl" />
+                <mat-datepicker #departurePicker></mat-datepicker>
+              </div>
+            </div>
+
+            <!-- Dönüş Tarihi -->
+            <div class="date-field-wrap" *ngIf="tripType === 'round-trip'" (click)="returnPicker.open()">
+              <mat-icon class="date-icon">event</mat-icon>
+              <div class="date-text-block">
+                <span class="date-label">Dönüş</span>
+                <span class="date-value" *ngIf="returnDateControl.value">{{ formatDateDisplay(returnDateControl.value) }}</span>
+                <span class="date-placeholder" *ngIf="!returnDateControl.value">Tarih seçin</span>
+              </div>
+              <div class="hidden-date-input">
+                <input matInput [matDatepicker]="returnPicker" [min]="minReturnDate || today" [formControl]="returnDateControl" />
+                <mat-datepicker #returnPicker></mat-datepicker>
+              </div>
+            </div>
+
+            <!-- Yolcu Seçici -->
+            <div class="passenger-selector-wrapper">
+              <div class="passenger-display" (click)="togglePassengerPanel($event)">
+                <mat-icon class="field-icon">people</mat-icon>
+                <div class="passenger-text-block">
+                  <span class="passenger-label">Yolcular</span>
+                  <span class="passenger-text">{{ passengerSummary }}</span>
+                </div>
+                <mat-icon class="chevron-icon">{{ passengerPanelOpen ? 'expand_less' : 'expand_more' }}</mat-icon>
+              </div>
+              <div class="passenger-panel" *ngIf="passengerPanelOpen" (click)="$event.stopPropagation()">
+                <div class="passenger-row">
+                  <div class="passenger-info">
+                    <span class="pax-label">Yetişkin</span>
+                    <span class="passenger-desc">12 yaş ve üzeri</span>
+                  </div>
+                  <div class="passenger-controls">
+                    <button mat-icon-button [disabled]="adults <= 1" (click)="adjustPassenger('adults', -1)" class="pax-btn">
+                      <mat-icon>remove_circle_outline</mat-icon>
+                    </button>
+                    <span class="passenger-count">{{ adults }}</span>
+                    <button mat-icon-button [disabled]="adults >= 9" (click)="adjustPassenger('adults', 1)" class="pax-btn">
+                      <mat-icon>add_circle_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                <div class="passenger-row">
+                  <div class="passenger-info">
+                    <span class="pax-label">Çocuk</span>
+                    <span class="passenger-desc">2-11 yaş</span>
+                  </div>
+                  <div class="passenger-controls">
+                    <button mat-icon-button [disabled]="children <= 0" (click)="adjustPassenger('children', -1)" class="pax-btn">
+                      <mat-icon>remove_circle_outline</mat-icon>
+                    </button>
+                    <span class="passenger-count">{{ children }}</span>
+                    <button mat-icon-button [disabled]="children >= 8" (click)="adjustPassenger('children', 1)" class="pax-btn">
+                      <mat-icon>add_circle_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                <div class="passenger-row">
+                  <div class="passenger-info">
+                    <span class="pax-label">Bebek</span>
+                    <span class="passenger-desc">0-2 yaş</span>
+                  </div>
+                  <div class="passenger-controls">
+                    <button mat-icon-button [disabled]="infants <= 0" (click)="adjustPassenger('infants', -1)" class="pax-btn">
+                      <mat-icon>remove_circle_outline</mat-icon>
+                    </button>
+                    <span class="passenger-count">{{ infants }}</span>
+                    <button mat-icon-button [disabled]="infants >= adults" (click)="adjustPassenger('infants', 1)" class="pax-btn">
+                      <mat-icon>add_circle_outline</mat-icon>
+                    </button>
+                  </div>
+                </div>
+                <button mat-button color="primary" class="passenger-done-btn" (click)="closePassengerPanel()">
+                  Tamam
+                </button>
+              </div>
+            </div>
+
+            <!-- Ara Butonu -->
+            <button mat-raised-button color="primary" class="search-button" type="button" (click)="searchFlights()">
+              <mat-icon>search</mat-icon>
+              Ara
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</section>
+
+<!-- Main Services -->
+<section class="section main-services-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Hizmetlerimiz</h2>
+      <p class="section-subtitle">Seyahat ihtiyaçlarınız için tüm çözümler tek platformda</p>
+    </div>
+    <div class="main-services-grid">
+      <mat-card *ngFor="let service of mainServices" class="main-service-card" [routerLink]="service.route">
+        <div class="service-icon-wrapper" [style.background]="service.color">
+          <mat-icon>{{ service.icon }}</mat-icon>
+        </div>
+        <mat-card-content>
+          <h3>{{ service.title }}</h3>
+          <p>{{ service.description }}</p>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-button color="primary">Keşfet <mat-icon>arrow_forward</mat-icon></button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</section>
+
+<!-- Featured Offers -->
+<section class="section offers-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Özel Fırsatlar</h2>
+      <p class="section-subtitle">Size özel hazırlanmış kampanya ve fırsatlar</p>
+    </div>
+    <div class="offers-grid">
+      <mat-card *ngFor="let offer of featuredOffers" class="offer-card">
+        <div class="offer-badge">{{ offer.badge }}</div>
+        <div class="offer-icon-wrapper">
+          <mat-icon>{{ offer.icon }}</mat-icon>
+        </div>
+        <mat-card-content>
+          <h3>{{ offer.title }}</h3>
+          <p>{{ offer.description }}</p>
+          <div class="offer-price">{{ offer.price }}</div>
+        </mat-card-content>
+        <mat-card-actions>
+          <button mat-raised-button color="primary">Detaylar</button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+  </div>
+</section>
+
+<!-- Why Choose Us -->
+<section class="section why-choose-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Neden Bizi Seçmelisiniz?</h2>
+      <p class="section-subtitle">Seyahat deneyiminizi en iyi şekilde yaşamanız için</p>
+    </div>
+    <div class="why-choose-grid">
+      <mat-card *ngFor="let item of whyChooseUs" class="why-choose-card">
+        <mat-card-content>
+          <div class="why-choose-icon">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </div>
+          <h3>{{ item.title }}</h3>
+          <p>{{ item.description }}</p>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</section>
+
+<!-- Stats -->
+<section class="section stats-section">
+  <div class="container">
+    <div class="stats-grid">
+      <div *ngFor="let stat of stats" class="stat-item">
+        <div class="stat-icon">
+          <mat-icon>{{ stat.icon }}</mat-icon>
+        </div>
+        <div class="stat-number">{{ stat.number }}</div>
+        <div class="stat-label">{{ stat.label }}</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section class="section testimonials-section">
+  <div class="container">
+    <div class="section-header">
+      <h2>Müşteri Yorumları</h2>
+      <p class="section-subtitle">Bizi tercih edenler ne diyor?</p>
+    </div>
+    <div class="testimonials-grid">
+      <mat-card *ngFor="let testimonial of testimonials" class="testimonial-card">
+        <mat-card-content>
+          <div class="testimonial-header">
+            <div class="testimonial-rating">
+              <mat-icon *ngFor="let i of [1,2,3,4,5]">star</mat-icon>
+            </div>
+            <mat-chip class="service-chip">{{ testimonial.service }}</mat-chip>
+          </div>
+          <p class="testimonial-text">"{{ testimonial.text }}"</p>
+          <div class="testimonial-author">
+            <strong>{{ testimonial.name }}</strong>
+            <span>{{ testimonial.location }}</span>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</section>

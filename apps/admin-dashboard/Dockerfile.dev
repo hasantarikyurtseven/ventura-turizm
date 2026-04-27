@@ -2,8 +2,13 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install
+# Install dependencies without package-lock.json
+COPY package.json ./
+RUN rm -f package-lock.json && \
+    npm cache clean --force && \
+    npm config set legacy-peer-deps true && \
+    npm install && \
+    npm rebuild esbuild
 
 COPY . .
 

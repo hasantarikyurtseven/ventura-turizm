@@ -1,0 +1,441 @@
+// ══════════════════════════════════════════════════════════════════════
+//  My Reservations Page
+// ══════════════════════════════════════════════════════════════════════
+
+$primary:       var(--ventura-primary, #3f51b5);
+$primary-dark:  var(--ventura-primary-dark, #303f9f);
+$primary-light: var(--ventura-primary-light, #e8eaf6);
+$surface:       var(--ventura-surface-0, #fff);
+$surface-100:   var(--ventura-surface-100, #f4f6f9);
+$border:        var(--ventura-border, #e0e0e0);
+$text:          var(--ventura-text-primary, #1a1a2e);
+$text-sec:      var(--ventura-text-secondary, #6b7280);
+$radius:        var(--ventura-radius-md, 14px);
+$shadow:        var(--ventura-shadow-lg, 0 4px 24px rgba(0,0,0,.09));
+
+// ── Sayfa ─────────────────────────────────────────────────────────────
+.reservations-page {
+  min-height: calc(100vh - 80px);
+  background: $surface-100;
+}
+
+// ── Sayfa Başlığı ─────────────────────────────────────────────────────
+.page-header {
+  background: $surface;
+  border-bottom: 1px solid $border;
+  padding: 1.5rem 1.25rem;
+}
+.page-header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.page-title-block {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.page-title-icon {
+  font-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  color: $primary;
+}
+.page-title {
+  font-size: 1.375rem;
+  font-weight: 800;
+  color: $text;
+  margin: 0;
+  letter-spacing: -.02em;
+}
+.page-subtitle {
+  font-size: .8125rem;
+  color: $text-sec;
+  margin: .15rem 0 0;
+}
+.refresh-btn {
+  border-color: $border !important;
+  color: $text-sec !important;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .8125rem;
+  border-radius: 8px !important;
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+}
+
+// ── İçerik alanı ─────────────────────────────────────────────────────
+.page-content {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 4rem;
+}
+
+// ── Yükleniyor ────────────────────────────────────────────────────────
+.loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 4rem 0;
+  color: $text-sec;
+  font-size: .9375rem;
+}
+
+// ── Boş / Hata durumu ─────────────────────────────────────────────────
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 4rem 1.5rem;
+  gap: .75rem;
+}
+.empty-icon {
+  font-size: 4rem;
+  width: 4rem;
+  height: 4rem;
+  color: $border;
+  &.error { color: #ef5350; }
+}
+.empty-state h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: $text;
+  margin: 0;
+}
+.empty-state p {
+  font-size: .9rem;
+  color: $text-sec;
+  margin: 0;
+  max-width: 340px;
+  line-height: 1.6;
+}
+.empty-actions {
+  margin-top: .5rem;
+  display: flex;
+  gap: .75rem;
+}
+
+// ── Rezervasyon Grid ─────────────────────────────────────────────────
+.reservations-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// ── Rezervasyon Kartı ─────────────────────────────────────────────────
+.reservation-card {
+  background: $surface;
+  border-radius: 18px;
+  box-shadow: $shadow;
+  overflow: hidden;
+  border: 1px solid $border;
+  transition: box-shadow .2s, transform .2s;
+
+  &:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,.14);
+    transform: translateY(-2px);
+  }
+}
+
+.rc-stripe {
+  height: 5px;
+  background: linear-gradient(90deg, $primary-dark, $primary, #5c6bc0);
+
+  &.stripe-cancelled {
+    background: linear-gradient(90deg, #757575, #9e9e9e);
+  }
+}
+
+.rc-body {
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: row;
+  gap: 0;
+}
+
+// ── Sol: Uçuş rotası sütunu ───────────────────────────────────────────
+.rc-col-flight {
+  flex: 1 1 0;
+  min-width: 0;
+  padding-right: 1.5rem;
+  border-right: 1px solid $border;
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+}
+
+// ── Sağ: Bilgi sütunu ─────────────────────────────────────────────────
+.rc-col-info {
+  width: 320px;
+  flex-shrink: 0;
+  padding-left: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+  justify-content: space-between;
+}
+
+// ── Üst satır: PNR + Durum ───────────────────────────────────────────
+.rc-top-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.rc-pnr-block {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+}
+.rc-meta-label {
+  font-size: .625rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: $text-sec;
+}
+.rc-pnr {
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: .16em;
+  color: $primary;
+  font-family: 'Roboto Mono', monospace;
+  line-height: 1;
+}
+
+// ── Durum rozeti ─────────────────────────────────────────────────────
+.rc-status {
+  font-size: .75rem;
+  font-weight: 700;
+  border-radius: 20px;
+  padding: .3rem .8rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+
+  &.status-confirmed {
+    background: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #a5d6a7;
+  }
+  &.status-cancelled {
+    background: #ffebee;
+    color: #c62828;
+    border: 1px solid #ef9a9a;
+  }
+  &.status-pending {
+    background: #fff8e1;
+    color: #e65100;
+    border: 1px solid #ffe082;
+  }
+}
+
+// ── Uçuş rotası ──────────────────────────────────────────────────────
+.rc-route {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+  background: $surface-100;
+  border-radius: 12px;
+  padding: .875rem 1rem;
+  border: 1px solid $border;
+}
+
+.rc-airline-row {
+  display: flex;
+  align-items: center;
+  gap: .625rem;
+}
+.rc-airline-logo {
+  height: 26px;
+  width: auto;
+  object-fit: contain;
+  border-radius: 4px;
+  border: 1px solid $border;
+  padding: 1px 5px;
+  background: #fff;
+}
+.rc-airline-fallback {
+  width: 36px; height: 26px;
+  border-radius: 6px;
+  background: $primary-light;
+  border: 1px solid rgba(63,81,181,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .6875rem; font-weight: 800; color: $primary;
+}
+.rc-airline-name {
+  font-size: .875rem;
+  font-weight: 600;
+  color: $text;
+  flex: 1;
+}
+.rc-flight-no {
+  font-size: .75rem;
+  color: $text-sec;
+  font-family: 'Roboto Mono', monospace;
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 5px;
+  padding: .15rem .45rem;
+}
+.rc-cabin {
+  font-size: .7rem;
+  font-weight: 600;
+  color: $primary;
+  background: $primary-light;
+  border-radius: 20px;
+  padding: .2rem .6rem;
+}
+
+// ── Havalimanları ─────────────────────────────────────────────────────
+.rc-airports {
+  display: flex;
+  align-items: center;
+  gap: .75rem;
+}
+.rc-airport {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-width: 60px;
+  &.right { align-items: flex-end; }
+}
+.rc-iata {
+  font-size: 1.875rem;
+  font-weight: 900;
+  color: $text;
+  line-height: 1;
+  letter-spacing: -.02em;
+}
+.rc-time {
+  font-size: 1rem;
+  font-weight: 700;
+  color: $primary;
+  margin-top: .2rem;
+}
+.rc-date {
+  font-size: .7rem;
+  color: $text-sec;
+}
+.rc-mid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .3rem;
+}
+.rc-mid-line {
+  display: flex;
+  align-items: center;
+  gap: .25rem;
+  width: 100%;
+  justify-content: center;
+  mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; color: $primary; }
+}
+.rc-dot {
+  flex: 1;
+  height: 1px;
+  background: $border;
+}
+.rc-duration {
+  font-size: .7rem;
+  color: $text-sec;
+  font-weight: 500;
+}
+
+// ── Bagaj ─────────────────────────────────────────────────────────────
+.rc-baggage {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: .75rem;
+  color: $text-sec;
+  border-top: 1px dashed $border;
+  padding-top: .625rem;
+  mat-icon { font-size: .9rem; width: .9rem; height: .9rem; color: #ff9800; }
+}
+
+// ── Yolcular ─────────────────────────────────────────────────────────
+.rc-pax {}
+.rc-section-label {
+  font-size: .625rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: $text-sec;
+  margin-bottom: .4rem;
+}
+.rc-pax-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem;
+}
+.rc-pax-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  background: $surface-100;
+  border: 1px solid $border;
+  border-radius: 20px;
+  padding: .3rem .75rem;
+  font-size: .8125rem;
+  font-weight: 500;
+  color: $text;
+  mat-icon { font-size: .875rem; width: .875rem; height: .875rem; color: $text-sec; }
+}
+.pax-type-tag {
+  font-size: .6875rem;
+  color: $text-sec;
+  margin-left: .2rem;
+}
+
+// ── Alt satır ─────────────────────────────────────────────────────────
+.rc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: .75rem;
+  border-top: 1px solid $border;
+}
+.rc-amount, .rc-created {
+  display: flex;
+  align-items: center;
+  gap: .375rem;
+  font-size: .875rem;
+  color: $text-sec;
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+}
+.rc-amount {
+  font-weight: 700;
+  color: $text;
+  mat-icon { color: #4caf50; }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────
+@media (max-width: 768px) {
+  .rc-body {
+    flex-direction: column;
+  }
+  .rc-col-flight {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid $border;
+    padding-bottom: 1rem;
+  }
+  .rc-col-info {
+    width: 100%;
+    padding-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  .rc-iata { font-size: 1.5rem; }
+  .page-header-inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

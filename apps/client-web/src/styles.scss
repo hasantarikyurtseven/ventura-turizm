@@ -1,1 +1,169 @@
 /* You can add global styles to this file, and also import other style files */
+
+// Material Icons Font
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// Ventura Turizm Theme Colors
+:root {
+  // Primary Brand Colors
+  --ventura-primary: #4088b3;
+  --ventura-primary-dark: #183641;
+  
+  // Primary Color Variations
+  --ventura-primary-50: #e6f2f8;
+  --ventura-primary-100: #b3d9e8;
+  --ventura-primary-200: #80c0d8;
+  --ventura-primary-300: #4da7c8;
+  --ventura-primary-400: #4088b3;
+  --ventura-primary-500: #4088b3;
+  --ventura-primary-600: #33709f;
+  --ventura-primary-700: #26588b;
+  --ventura-primary-800: #1a4077;
+  --ventura-primary-900: #183641;
+  
+  // Dark Color Variations
+  --ventura-dark-50: #e8ecef;
+  --ventura-dark-100: #c5d0d6;
+  --ventura-dark-200: #a2b4bd;
+  --ventura-dark-300: #7f98a4;
+  --ventura-dark-400: #5c7c8b;
+  --ventura-dark-500: #396072;
+  --ventura-dark-600: #2d4d5a;
+  --ventura-dark-700: #213a42;
+  --ventura-dark-800: #15272a;
+  --ventura-dark-900: #183641;
+  
+  // Neutral Colors
+  --ventura-surface-0: #ffffff;
+  --ventura-surface-50: #f8fafc;
+  --ventura-surface-100: #f1f5f9;
+  --ventura-surface-200: #e2e8f0;
+  --ventura-surface-300: #cbd5e1;
+  --ventura-surface-400: #94a3b8;
+  --ventura-surface-500: #64748b;
+  --ventura-surface-600: #475569;
+  --ventura-surface-700: #334155;
+  --ventura-surface-800: #1e293b;
+  --ventura-surface-900: #0f172a;
+  
+  // Text Colors
+  --ventura-text-primary: #183641;
+  --ventura-text-secondary: #64748b;
+  --ventura-text-disabled: #94a3b8;
+  --ventura-text-on-primary: #ffffff;
+  
+  // Border & Divider
+  --ventura-border: #e2e8f0;
+  --ventura-divider: #cbd5e1;
+  
+  // Shadows
+  --ventura-shadow-sm: 0 1px 2px 0 rgba(24, 54, 65, 0.05);
+  --ventura-shadow: 0 1px 3px 0 rgba(24, 54, 65, 0.1), 0 1px 2px 0 rgba(24, 54, 65, 0.06);
+  --ventura-shadow-md: 0 4px 6px -1px rgba(24, 54, 65, 0.1), 0 2px 4px -1px rgba(24, 54, 65, 0.06);
+  --ventura-shadow-lg: 0 10px 15px -3px rgba(24, 54, 65, 0.1), 0 4px 6px -2px rgba(24, 54, 65, 0.05);
+  --ventura-shadow-xl: 0 20px 25px -5px rgba(24, 54, 65, 0.1), 0 10px 10px -5px rgba(24, 54, 65, 0.04);
+  
+  // Border Radius
+  --ventura-radius-sm: 4px;
+  --ventura-radius: 8px;
+  --ventura-radius-md: 12px;
+  --ventura-radius-lg: 16px;
+  --ventura-radius-full: 9999px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: var(--ventura-text-primary);
+  background-color: var(--ventura-surface-0);
+}
+
+// Flight Search Loading Dialog Panel
+::ng-deep .flight-search-loading-dialog-panel {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    border-radius: var(--ventura-radius-lg) !important;
+  }
+  .mat-mdc-dialog-surface {
+    border-radius: var(--ventura-radius-lg) !important;
+    box-shadow: var(--ventura-shadow-xl) !important;
+  }
+}
+
+// Login Modal Panel Styles
+::ng-deep .login-modal-panel {
+  .mat-mdc-dialog-container {
+    padding: 0 !important;
+    border-radius: var(--ventura-radius-lg) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .mat-mdc-dialog-surface {
+    border-radius: var(--ventura-radius-lg) !important;
+  }
+}
+
+// Global Material Checkbox – Ventura tema rengi
+.mat-mdc-checkbox.mat-accent .mdc-checkbox__background,
+.mat-mdc-checkbox .mdc-checkbox__background {
+  border-color: var(--ventura-primary) !important;
+}
+.mat-mdc-checkbox.mat-accent .mdc-checkbox__native-control:checked ~ .mdc-checkbox__background,
+.mat-mdc-checkbox .mdc-checkbox__native-control:checked ~ .mdc-checkbox__background,
+.mat-mdc-checkbox-checked .mdc-checkbox__background {
+  background-color: var(--ventura-primary) !important;
+  border-color: var(--ventura-primary) !important;
+}
+.mat-mdc-checkbox .mdc-checkbox__native-control:checked ~ .mdc-checkbox__background .mdc-checkbox__checkmark {
+  color: #fff !important;
+}
+.mat-mdc-checkbox .mdc-checkbox__ripple,
+.mat-mdc-checkbox .mdc-checkbox__native-control:focus ~ .mdc-checkbox__ripple {
+  background-color: var(--ventura-primary) !important;
+}
+
+// Snackbar Styles
+::ng-deep {
+  .success-snackbar {
+    .mdc-snackbar__surface {
+      background-color: #4caf50 !important;
+      color: white !important;
+    }
+  }
+
+  .warning-snackbar {
+    .mdc-snackbar__surface {
+      background-color: #ff9800 !important;
+      color: white !important;
+    }
+  }
+
+  .error-snackbar {
+    .mdc-snackbar__surface {
+      background-color: #f44336 !important;
+      color: white !important;
+    }
+  }
+}

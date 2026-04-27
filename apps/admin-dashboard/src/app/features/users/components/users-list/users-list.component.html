@@ -1,0 +1,161 @@
+<div class="page-container">
+        <!-- Modern Header -->
+        <div class="page-header">
+            <div class="header-content">
+                <h1>Kullanıcılar</h1>
+                <p class="subtitle">Ekip üyelerini ve erişim seviyelerini yönetin</p>
+            </div>
+            <div class="header-actions">
+                <button mat-stroked-button (click)="toggleFilters()" [class.active]="showFilters" class="filter-toggle-btn">
+                    <mat-icon>filter_list</mat-icon>
+                    <span>Filtreler</span>
+                    <mat-icon *ngIf="hasActiveFilters()" class="filter-badge">fiber_manual_record</mat-icon>
+                </button>
+                <button mat-raised-button color="primary" (click)="createUser()">
+                    <mat-icon>add</mat-icon>
+                    Yeni Kullanıcı Ekle
+                </button>
+            </div>
+        </div>
+
+    <!-- Main Content Card -->
+    <mat-card class="content-card">
+        <!-- Filters Panel -->
+        <div class="filters-panel" *ngIf="showFilters">
+            <div class="filters-content">
+                <!-- Search Bar -->
+                <mat-form-field class="search-field" appearance="outline">
+                    <input matInput [(ngModel)]="searchTerm" (keyup.enter)="onSearch()"
+                        placeholder="İsim veya e-posta ile ara..." />
+                </mat-form-field>
+
+                <!-- Filter Selects -->
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Durum</mat-label>
+                    <mat-select [(value)]="statusFilter" (selectionChange)="onFilterChange()">
+                        <mat-option *ngFor="let option of statusOptions" [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>toggle_on</mat-icon>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="filter-field">
+                    <mat-label>Rol</mat-label>
+                    <mat-select [(value)]="roleFilter" (selectionChange)="onFilterChange()">
+                        <mat-option *ngFor="let option of roleOptions" [value]="option.value">
+                            {{ option.label }}
+                        </mat-option>
+                    </mat-select>
+                    <mat-icon matPrefix>shield</mat-icon>
+                </mat-form-field>
+
+                <button mat-stroked-button (click)="clearFilters()" class="clear-filters-btn" *ngIf="hasActiveFilters()">
+                    <mat-icon>clear</mat-icon>
+                    Temizle
+                </button>
+            </div>
+        </div>
+
+        <!-- Modern Data Table -->
+        <div class="table-container" *ngIf="!loading">
+            <table mat-table [dataSource]="users" class="users-table">
+                <!-- User Column -->
+                <ng-container matColumnDef="user">
+                    <th mat-header-cell *matHeaderCellDef>Kullanıcı</th>
+                    <td mat-cell *matCellDef="let user">
+                        <span class="user-name">{{ user.name }} {{ user.surName }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Email Column -->
+                <ng-container matColumnDef="email">
+                    <th mat-header-cell *matHeaderCellDef>E-posta</th>
+                    <td mat-cell *matCellDef="let user">
+                        <span class="email-text">{{ user.email }}</span>
+                    </td>
+                </ng-container>
+
+                    <!-- Phone Column -->
+                    <ng-container matColumnDef="phone">
+                        <th mat-header-cell *matHeaderCellDef>Telefon</th>
+                        <td mat-cell *matCellDef="let user">
+                            <span class="phone-text">{{ user.phone || '—' }}</span>
+                        </td>
+                    </ng-container>
+
+                    <!-- Roles Column -->
+                    <ng-container matColumnDef="roles">
+                        <th mat-header-cell *matHeaderCellDef>Roller</th>
+                        <td mat-cell *matCellDef="let user">
+                            <div class="roles-container">
+                                <mat-chip-set *ngIf="user.roles && user.roles.length > 0">
+                                    <mat-chip *ngFor="let role of user.roles" class="role-chip">
+                                        {{ getRoleName(role) }}
+                                    </mat-chip>
+                                </mat-chip-set>
+                                <span *ngIf="!user.roles || user.roles.length === 0" class="no-roles">—</span>
+                            </div>
+                        </td>
+                    </ng-container>
+
+                    <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>Durum</th>
+                    <td mat-cell *matCellDef="let user">
+                        <span class="status-badge" [ngClass]="user.status">
+                            {{ user.status === 'active' ? 'Aktif' : 'Pasif' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Last Active Column -->
+                <ng-container matColumnDef="lastActive">
+                    <th mat-header-cell *matHeaderCellDef>Son Aktif</th>
+                    <td mat-cell *matCellDef="let user">
+                        <span class="last-active-text">
+                            {{ user.lastLoginAt ? (user.lastLoginAt | date:'dd.MM.yyyy HH:mm') : '—' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef class="actions-column">İşlemler</th>
+                    <td mat-cell *matCellDef="let user" class="actions-column">
+                        <button mat-icon-button class="action-btn edit" (click)="editUser(user)"
+                            matTooltip="Düzenle">
+                            <mat-icon>mode_edit</mat-icon>
+                        </button>
+                        <button mat-icon-button class="action-btn delete" (click)="deleteUser(user)"
+                            matTooltip="Sil">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <!-- Empty State -->
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+                        <mat-icon>people_outline</mat-icon>
+                        <p>Henüz kullanıcı bulunmuyor</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading-container" *ngIf="loading">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Yükleniyor...</p>
+        </div>
+
+        <!-- Paginator -->
+        <mat-paginator [length]="totalRecords" [pageSize]="limit" [pageSizeOptions]="[10, 25, 50]"
+            (page)="onPageChange($event)" showFirstLastButtons>
+        </mat-paginator>
+    </mat-card>
+</div>

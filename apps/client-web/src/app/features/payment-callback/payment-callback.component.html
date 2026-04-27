@@ -1,0 +1,237 @@
+<div class="callback-page">
+
+  <!-- ══ İşleniyor ════════════════════════════════════════════════ -->
+  <div class="processing-wrap" *ngIf="isProcessing">
+    <div class="processing-ring">
+      <mat-spinner diameter="52" strokeWidth="4"></mat-spinner>
+    </div>
+    <h2 class="processing-title">Biletiniz Oluşturuluyor…</h2>
+    <p class="processing-subtitle">Lütfen sayfayı kapatmayın, rezervasyonunuz tamamlanıyor.</p>
+    <div class="processing-steps">
+      <span class="step active"><mat-icon>payment</mat-icon> Ödeme Onaylandı</span>
+      <mat-icon class="step-sep">chevron_right</mat-icon>
+      <span class="step active"><mat-icon>sync</mat-icon> Bilet Kesiliyor</span>
+      <mat-icon class="step-sep">chevron_right</mat-icon>
+      <span class="step"><mat-icon>confirmation_number</mat-icon> Tamamlandı</span>
+    </div>
+  </div>
+
+  <!-- ══ Başarılı ══════════════════════════════════════════════════ -->
+  <div class="success-page" *ngIf="isSuccess && !isProcessing">
+
+    <!-- Konfeti -->
+    <div class="confetti-layer" aria-hidden="true">
+      <span *ngFor="let i of [1,2,3,4,5,6,7,8,9,10,11,12]" class="confetti-dot"></span>
+    </div>
+
+    <!-- Başlık Kartı (col-12) -->
+    <div class="success-header-card">
+      <div class="success-badge"><mat-icon>check_circle</mat-icon></div>
+      <div class="success-header-texts">
+        <h1 class="success-title">Biletiniz Oluşturuldu!</h1>
+        <p class="success-subtitle">Ödemeniz onaylandı ve rezervasyonunuz tamamlandı.</p>
+      </div>
+      <div class="success-header-meta" *ngIf="bookingCode">
+        <span class="header-pnr-label">PNR</span>
+        <span class="header-pnr-value">{{ bookingCode }}</span>
+      </div>
+    </div>
+
+    <!-- İki Sütun: Boarding Pass + Ödeme Özeti -->
+    <div class="two-col-layout">
+
+      <!-- SOL: Boarding Pass -->
+      <div class="boarding-pass-col">
+        <div class="boarding-pass">
+
+          <!-- Üst şerit: havayolu renk çubuğu -->
+          <div class="bp-stripe"></div>
+
+          <!-- Bilet başlığı: Havayolu + Uçuş No + Kabin -->
+          <div class="bp-header" *ngIf="flight">
+            <div class="bp-airline-info">
+              <img
+                *ngIf="flight.resolvedLogoUrl"
+                [src]="flight.resolvedLogoUrl"
+                [alt]="flight.airline"
+                class="bp-airline-logo"
+              />
+              <div class="bp-airline-fallback" *ngIf="!flight.resolvedLogoUrl">
+                {{ (flight.airline || flight.flightNumber || '').substring(0, 2).toUpperCase() }}
+              </div>
+              <div class="bp-airline-texts">
+                <span class="bp-airline-name">{{ flight.airline }}</span>
+                <span class="bp-flight-code">{{ flight.flightNumber }}</span>
+              </div>
+            </div>
+            <div class="bp-cabin-badge" *ngIf="selectedBrand?.brandName">
+              {{ selectedBrand?.brandName }}
+            </div>
+          </div>
+
+          <!-- Uçuş Rotası -->
+          <div class="bp-route" *ngIf="flight">
+            <div class="bp-endpoint">
+              <span class="bp-iata">{{ flight.departure.airportCode }}</span>
+              <span class="bp-city">{{ flight.departure.city || flight.departure.airportCode }}</span>
+              <span class="bp-time">{{ flight.departure.time }}</span>
+              <span class="bp-date">{{ flight.departure.date }}</span>
+            </div>
+
+            <div class="bp-arrow-block">
+              <div class="bp-track">
+                <span class="bp-circle"></span>
+                <div class="bp-track-line"></div>
+                <mat-icon class="bp-plane">flight</mat-icon>
+                <div class="bp-track-line"></div>
+                <span class="bp-circle"></span>
+              </div>
+              <span class="bp-duration">{{ flight.duration }}</span>
+            </div>
+
+            <div class="bp-endpoint right">
+              <span class="bp-iata">{{ flight.arrival.airportCode }}</span>
+              <span class="bp-city">{{ flight.arrival.city || flight.arrival.airportCode }}</span>
+              <span class="bp-time">{{ flight.arrival.time }}</span>
+              <span class="bp-date">{{ flight.arrival.date }}</span>
+            </div>
+          </div>
+
+          <!-- Bagaj -->
+          <div class="bp-baggage" *ngIf="selectedBrand?.baggageDescription">
+            <mat-icon>luggage</mat-icon>
+            {{ selectedBrand?.baggageDescription }}
+          </div>
+
+          <!-- Delikli kesim çizgisi -->
+          <div class="bp-tear">
+            <span class="tear-notch left"></span>
+            <div class="tear-dots"></div>
+            <span class="tear-notch right"></span>
+          </div>
+
+          <!-- Alt kopye: PNR + Yolcular -->
+          <div class="bp-stub">
+            <div class="bp-pnr-cell">
+              <span class="bp-stub-label">PNR / Rezervasyon Kodu</span>
+              <span class="bp-pnr-code">{{ bookingCode }}</span>
+            </div>
+            <div class="bp-pax-cell" *ngIf="passengers.length > 0">
+              <span class="bp-stub-label">Yolcular</span>
+              <div class="bp-pax-list">
+                <div class="bp-pax-row" *ngFor="let p of passengers">
+                  <mat-icon>person</mat-icon>
+                  <span class="pax-name">{{ p.firstName }} {{ p.lastName }}</span>
+                  <span class="pax-badge">
+                    {{ p.type === 'ADT' ? 'Yetişkin' : p.type === 'CHD' ? 'Çocuk' : 'Bebek' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!-- /boarding-pass -->
+
+        <!-- Koltuk Seçimi bilgi çipi -->
+        <div class="seat-chip">
+          <mat-icon>airline_seat_recline_normal</mat-icon>
+          <div class="seat-chip-text">
+            <strong>Koltuk seçimi:</strong>
+            <span *ngIf="flight?.airline"> {{ flight?.airline }} online check-in sayfasını kullanarak</span>
+            uçuşunuzdan <strong>24 saat önce</strong> koltuk seçiminizi yapabilirsiniz.
+            PNR: <strong class="pnr-inline">{{ bookingCode }}</strong>
+          </div>
+        </div>
+
+      </div><!-- /boarding-pass-col -->
+
+      <!-- SAĞ: Ödeme Özeti -->
+      <div class="payment-col">
+        <div class="payment-card">
+          <div class="pc-title">
+            <mat-icon>receipt_long</mat-icon>
+            Ödeme Özeti
+          </div>
+
+          <div class="pc-amount" *ngIf="totalFare">
+            <span class="pc-amount-label">Toplam Tutar</span>
+            <span class="pc-amount-value">{{ totalFare | number:'1.2-2' }} {{ currency }}</span>
+          </div>
+
+          <div class="pc-divider"></div>
+
+          <div class="pc-row" *ngIf="cardNumber">
+            <mat-icon>credit_card</mat-icon>
+            <div class="pc-row-texts">
+              <span class="pc-row-label">Kart</span>
+              <span class="pc-row-value mono">{{ cardNumber }}</span>
+            </div>
+          </div>
+
+          <div class="pc-row" *ngIf="bankName">
+            <mat-icon>account_balance</mat-icon>
+            <div class="pc-row-texts">
+              <span class="pc-row-label">Banka</span>
+              <span class="pc-row-value">{{ bankName }}</span>
+            </div>
+          </div>
+
+          <div class="pc-row" *ngIf="finalizedDate">
+            <mat-icon>schedule</mat-icon>
+            <div class="pc-row-texts">
+              <span class="pc-row-label">Tarih</span>
+              <span class="pc-row-value">{{ finalizedDate }}</span>
+            </div>
+          </div>
+
+          <div class="pc-row" *ngIf="paymentId">
+            <mat-icon>tag</mat-icon>
+            <div class="pc-row-texts">
+              <span class="pc-row-label">Ödeme ID</span>
+              <span class="pc-row-value mono small">{{ paymentId }}</span>
+            </div>
+          </div>
+
+          <div class="pc-divider"></div>
+
+          <div class="pc-email-note">
+            <mat-icon>mark_email_read</mat-icon>
+            Bilet detayları e-posta adresinize gönderilecektir.
+          </div>
+
+          <!-- Aksiyonlar -->
+          <div class="pc-actions">
+            <button mat-flat-button color="primary" class="pc-btn primary" (click)="goMyReservations()">
+              <mat-icon>list_alt</mat-icon>
+              Rezervasyonlarım
+            </button>
+            <button mat-stroked-button class="pc-btn ghost" (click)="goHome()">
+              <mat-icon>home</mat-icon>
+              Ana Sayfa
+            </button>
+          </div>
+        </div>
+      </div><!-- /payment-col -->
+
+    </div><!-- /two-col-layout -->
+
+  </div><!-- /success-page -->
+
+  <!-- ══ Hata ══════════════════════════════════════════════════════ -->
+  <div class="error-wrap" *ngIf="isError && !isProcessing">
+    <div class="error-icon-circle"><mat-icon>cancel</mat-icon></div>
+    <h1 class="result-title error">Ödeme Başarısız</h1>
+    <p class="result-subtitle">{{ errorMessage }}</p>
+    <div class="result-actions">
+      <button mat-stroked-button class="pc-btn ghost" (click)="retryPayment()">
+        <mat-icon>refresh</mat-icon>
+        Tekrar Dene
+      </button>
+      <button mat-flat-button color="primary" class="pc-btn primary" (click)="goHome()">
+        <mat-icon>home</mat-icon>
+        Ana Sayfaya Dön
+      </button>
+    </div>
+  </div>
+
+</div>

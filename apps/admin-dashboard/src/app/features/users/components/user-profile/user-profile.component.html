@@ -1,0 +1,143 @@
+<div class="page-container">
+    <!-- Modern Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>Profil</h1>
+            <p class="subtitle">Hesap bilgilerinizi görüntüleyin ve güncelleyin</p>
+        </div>
+    </div>
+
+    <!-- Main Content Card -->
+    <mat-card class="content-card">
+        <!-- Profile Header -->
+        <div class="profile-header">
+            <div class="avatar-section">
+                <div class="user-avatar-large">
+                    {{ getInitials(currentUser?.name, currentUser?.surName) }}
+                </div>
+                <div class="user-info">
+                    <h2>{{ currentUser?.name }} {{ currentUser?.surName }}</h2>
+                    <p class="user-email">{{ currentUser?.email }}</p>
+                    <p class="user-username">{{ '@' + currentUser?.username }}</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Form -->
+        <form [formGroup]="profileForm" (ngSubmit)="onUpdateProfile()">
+            <div class="form-section">
+                <h3 class="section-title">Kişisel Bilgiler</h3>
+                <div class="fields-grid">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Ad <span class="required">*</span></mat-label>
+                        <input matInput formControlName="name" placeholder="Adınız" />
+                        <mat-error *ngIf="profileForm.get('name')?.hasError('required')">
+                            Ad zorunludur
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Soyad <span class="required">*</span></mat-label>
+                        <input matInput formControlName="surName" placeholder="Soyadınız" />
+                        <mat-error *ngIf="profileForm.get('surName')?.hasError('required')">
+                            Soyad zorunludur
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="fields-grid">
+                    <mat-form-field appearance="outline">
+                        <mat-label>E-posta <span class="required">*</span></mat-label>
+                        <input matInput type="email" formControlName="email" placeholder="ornek@ventura.com" />
+                        <mat-icon matPrefix>email</mat-icon>
+                        <mat-error *ngIf="profileForm.get('email')?.hasError('required')">
+                            E-posta zorunludur
+                        </mat-error>
+                        <mat-error *ngIf="profileForm.get('email')?.hasError('email')">
+                            Geçerli bir e-posta adresi giriniz
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Telefon</mat-label>
+                        <input matInput formControlName="phone" placeholder="+90 (5XX) XXX XX XX" />
+                        <mat-icon matPrefix>phone</mat-icon>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                    <button mat-raised-button color="primary" type="submit" 
+                        [disabled]="profileForm.invalid || loading">
+                        <mat-icon *ngIf="!loading">save</mat-icon>
+                        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+                        Bilgileri Güncelle
+                    </button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Password Change Form -->
+        <form [formGroup]="passwordForm" (ngSubmit)="onChangePassword()">
+            <div class="form-section">
+                <h3 class="section-title">Şifre Değiştir</h3>
+                <div class="fields-grid">
+                    <mat-form-field appearance="outline" class="password-field">
+                        <mat-label>Mevcut Şifre <span class="required">*</span></mat-label>
+                        <input matInput [type]="hidePassword ? 'password' : 'text'" 
+                            formControlName="currentPassword" placeholder="Mevcut şifrenizi girin" />
+                        <mat-icon matPrefix>lock</mat-icon>
+                        <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+                            <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                        <mat-error *ngIf="passwordForm.get('currentPassword')?.hasError('required')">
+                            Mevcut şifre zorunludur
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="fields-grid">
+                    <mat-form-field appearance="outline" class="password-field">
+                        <mat-label>Yeni Şifre <span class="required">*</span></mat-label>
+                        <input matInput [type]="hideNewPassword ? 'password' : 'text'" 
+                            formControlName="newPassword" placeholder="Yeni şifrenizi girin (min 6 karakter)" />
+                        <mat-icon matPrefix>lock_outline</mat-icon>
+                        <button mat-icon-button matSuffix type="button" (click)="hideNewPassword = !hideNewPassword">
+                            <mat-icon>{{hideNewPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                        <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('required')">
+                            Yeni şifre zorunludur
+                        </mat-error>
+                        <mat-error *ngIf="passwordForm.get('newPassword')?.hasError('minlength')">
+                            Şifre en az 6 karakter olmalıdır
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline" class="password-field">
+                        <mat-label>Yeni Şifre Tekrar <span class="required">*</span></mat-label>
+                        <input matInput [type]="hideConfirmPassword ? 'password' : 'text'" 
+                            formControlName="confirmPassword" placeholder="Yeni şifrenizi tekrar girin" />
+                        <mat-icon matPrefix>lock_outline</mat-icon>
+                        <button mat-icon-button matSuffix type="button" (click)="hideConfirmPassword = !hideConfirmPassword">
+                            <mat-icon>{{hideConfirmPassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                        </button>
+                        <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('required')">
+                            Şifre tekrarı zorunludur
+                        </mat-error>
+                        <mat-error *ngIf="passwordForm.get('confirmPassword')?.hasError('passwordMismatch')">
+                            Şifreler eşleşmiyor
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="form-actions">
+                    <button mat-raised-button color="primary" type="submit" 
+                        [disabled]="passwordForm.invalid || loading">
+                        <mat-icon *ngIf="!loading">lock</mat-icon>
+                        <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+                        Şifreyi Değiştir
+                    </button>
+                </div>
+            </div>
+        </form>
+    </mat-card>
+</div>

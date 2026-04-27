@@ -1,0 +1,108 @@
+<div class="location-selector">
+  <div #inputRef class="location-input" (click)="openPanel()">
+    <mat-icon class="location-icon">flight_takeoff</mat-icon>
+    <div class="location-text-block">
+      <span class="location-label">{{ label }}</span>
+      <span class="location-value" *ngIf="displayText || control.value">
+        {{ displayText || control.value }}
+      </span>
+      <span class="location-placeholder" *ngIf="!displayText && !control.value">
+        Şehir veya havalimanı
+      </span>
+    </div>
+    <mat-icon class="chevron-icon">expand_more</mat-icon>
+  </div>
+
+  <div class="location-panel" *ngIf="panelOpen" [ngStyle]="panelStyle">
+    <div class="panel-overlay" (click)="closePanel()" aria-hidden="true"></div>
+    <div class="panel-content">
+      <div class="airports-column">
+        <div class="search-row">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Şehir veya havalimanı ara"
+            [value]="searchQuery"
+            (input)="onSearchChange($any($event.target).value)"
+          />
+        </div>
+        <div class="recent-searches" *ngIf="recentSearches.length > 0">
+          <div class="recent-searches-title">Son aramalar</div>
+          <button
+            type="button"
+            class="recent-search-item"
+            *ngFor="let item of recentSearches"
+            (click)="selectRecent(item)"
+          >
+            <mat-icon class="recent-search-icon">schedule</mat-icon>
+            <span class="recent-search-text">{{ item.displayText }}</span>
+          </button>
+        </div>
+        <div class="airports-list" *ngIf="!isLoading; else loadingTpl">
+          <button
+            type="button"
+            class="airport-item"
+            *ngFor="let a of airports"
+            (click)="selectAirport(a)"
+          >
+            <div class="airport-main">
+              {{ a.airportName || a.cityName }}
+            </div>
+            <div class="airport-sub">
+              {{ a.countryName }}
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div class="countries-column">
+        <div class="countries-title">ÜLKELER</div>
+        <div class="search-row countries-search-row">
+          <mat-icon>search</mat-icon>
+          <input
+            type="text"
+            placeholder="Ülke ara"
+            [value]="countrySearchQuery"
+            (input)="onCountrySearchChange($any($event.target).value)"
+          />
+        </div>
+        <div class="countries-list">
+          <div
+            role="button"
+            tabindex="0"
+            class="country-item"
+            *ngFor="let c of filteredCountries"
+            [class.active]="c.countryCode === selectedCountry?.countryCode"
+            (click)="selectCountry(c)"
+            (keydown.enter)="selectCountry(c)"
+            (keydown.space)="selectCountry(c); $event.preventDefault()"
+          >
+            <span class="country-item-label">{{ c.countryName }}</span>
+            <button
+              *ngIf="c.countryCode === selectedCountry?.countryCode"
+              type="button"
+              class="country-item-clear"
+              (click)="clearCountrySelection($event)"
+              aria-label="Seçimi kaldır"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class="panel-footer">
+        <button type="button" class="reset-search-btn" (click)="resetSearch()">
+          Aramayı Sıfırla
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #loadingTpl>
+    <div class="loading-row">
+      <mat-spinner diameter="24"></mat-spinner>
+      <span>Yükleniyor...</span>
+    </div>
+  </ng-template>
+</div>
+

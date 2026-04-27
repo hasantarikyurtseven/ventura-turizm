@@ -1,0 +1,103 @@
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>İzin Yönetimi</h1>
+            <p class="subtitle">Sistemdeki tüm izinleri görüntüleyin ve yönetin</p>
+        </div>
+        <div class="header-actions">
+            <mat-form-field class="search-field" appearance="outline">
+                <input matInput [(ngModel)]="searchTerm" (keyup.enter)="onSearch()"
+                    placeholder="İzin ara..." />
+            </mat-form-field>
+            <button mat-raised-button color="primary" (click)="createPermission()">
+                <mat-icon>add</mat-icon>
+                Yeni İzin
+            </button>
+        </div>
+    </div>
+
+    <!-- Content Card -->
+    <mat-card class="content-card">
+
+        <!-- Data Table -->
+        <div class="table-container" *ngIf="!loading">
+            <table mat-table [dataSource]="permissions" class="permissions-table">
+                <!-- Code Column -->
+                <ng-container matColumnDef="code">
+                    <th mat-header-cell *matHeaderCellDef>KOD</th>
+                    <td mat-cell *matCellDef="let permission">
+                        <code class="permission-code">{{ permission.code }}</code>
+                    </td>
+                </ng-container>
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <th mat-header-cell *matHeaderCellDef>İZİN ADI</th>
+                    <td mat-cell *matCellDef="let permission">
+                        <span class="permission-name">{{ permission.name }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Module Column -->
+                <ng-container matColumnDef="module">
+                    <th mat-header-cell *matHeaderCellDef>MODÜL</th>
+                    <td mat-cell *matCellDef="let permission">{{ permission.module }}</td>
+                </ng-container>
+
+                <!-- Description Column -->
+                <ng-container matColumnDef="description">
+                    <th mat-header-cell *matHeaderCellDef>AÇIKLAMA</th>
+                    <td mat-cell *matCellDef="let permission">{{ permission.description }}</td>
+                </ng-container>
+
+                <!-- Status Column -->
+                <ng-container matColumnDef="status">
+                    <th mat-header-cell *matHeaderCellDef>DURUM</th>
+                    <td mat-cell *matCellDef="let permission">
+                        <span class="status-badge" [ngClass]="permission.status">
+                            {{ permission.status === 'active' ? 'Aktif' : 'Pasif' }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Actions Column -->
+                <ng-container matColumnDef="actions">
+                    <th mat-header-cell *matHeaderCellDef class="actions-column">İŞLEMLER</th>
+                    <td mat-cell *matCellDef="let permission" class="actions-column">
+                        <button mat-icon-button class="action-btn edit" (click)="editPermission(permission)"
+                            matTooltip="Düzenle">
+                            <mat-icon>edit</mat-icon>
+                        </button>
+                        <button mat-icon-button class="action-btn delete" (click)="deletePermission(permission)"
+                            matTooltip="Sil">
+                            <mat-icon>delete</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                <!-- Empty State -->
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+                        <mat-icon>inbox</mat-icon>
+                        <p>Henüz izin bulunmuyor</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <!-- Loading Spinner -->
+        <div class="loading-container" *ngIf="loading">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Yükleniyor...</p>
+        </div>
+
+        <!-- Paginator -->
+        <mat-paginator [length]="totalRecords" [pageSize]="limit" [pageSizeOptions]="[10, 25, 50]"
+            (page)="onPageChange($event)" showFirstLastButtons>
+        </mat-paginator>
+    </mat-card>
+</div>

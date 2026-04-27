@@ -1,0 +1,202 @@
+<div class="res-detail">
+  <!-- Üst: tür + durum + PNR -->
+  <header class="res-detail__hero" [ngClass]="'res-detail__hero--' + statusClass(reservation.status)">
+    <div class="res-detail__hero-inner">
+      <div class="res-detail__hero-top">
+        <div class="res-detail__chips">
+          <span class="type-badge" [ngClass]="reservation.type">
+            <mat-icon>{{ getTypeIcon(reservation.type) }}</mat-icon>
+            {{ getTypeLabel(reservation.type) }}
+          </span>
+          <span class="status-badge" [ngClass]="statusClass(reservation.status)">
+            {{ getStatusLabel(reservation.status) }}
+          </span>
+        </div>
+        <button
+          mat-icon-button
+          type="button"
+          class="res-detail__close"
+          (click)="close()"
+          aria-label="Kapat"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+
+      <div class="res-detail__pnr">
+        <span class="res-detail__pnr-label">Rezervasyon kodu</span>
+        <div class="res-detail__pnr-row">
+          <code class="res-detail__pnr-value">{{ reservation.reservationNo }}</code>
+          <button
+            mat-icon-button
+            type="button"
+            class="res-detail__copy"
+            (click)="copyReservationNo()"
+            matTooltip="Kodu kopyala"
+            aria-label="Rezervasyon kodunu kopyala"
+          >
+            <mat-icon>content_copy</mat-icon>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <mat-dialog-content class="res-detail__body">
+    <!-- Müşteri + özet üst sıra -->
+    <div class="res-detail__panels">
+      <section class="res-panel res-panel--contact">
+        <div class="res-panel__head">
+          <mat-icon>person_outline</mat-icon>
+          <h3>İletişim</h3>
+        </div>
+        <ul class="res-kv">
+          <li>
+            <span class="res-kv__k">Ad soyad</span>
+            <span class="res-kv__v">{{ reservation.memberFirstName }} {{ reservation.memberLastName }}</span>
+          </li>
+          <li>
+            <span class="res-kv__k">E-posta</span>
+            <span class="res-kv__v">{{ reservation.memberEmail || '—' }}</span>
+          </li>
+          <li>
+            <span class="res-kv__k">Telefon</span>
+            <span class="res-kv__v">{{ reservation.memberPhone || '—' }}</span>
+          </li>
+          <li>
+            <span class="res-kv__k">Kayıt tarihi</span>
+            <span class="res-kv__v">{{ reservation.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+          </li>
+          <li *ngIf="reservation.completedAt">
+            <span class="res-kv__k">Tamamlanma</span>
+            <span class="res-kv__v">{{ reservation.completedAt | date:'dd.MM.yyyy HH:mm' }}</span>
+          </li>
+          <li *ngIf="reservation.cancelledAt">
+            <span class="res-kv__k">İptal</span>
+            <span class="res-kv__v">{{ reservation.cancelledAt | date:'dd.MM.yyyy HH:mm' }}</span>
+          </li>
+        </ul>
+      </section>
+
+      <section class="res-panel res-panel--amount">
+        <div class="res-panel__head">
+          <mat-icon>payments</mat-icon>
+          <h3>Ödeme özeti</h3>
+        </div>
+        <div class="res-amount">
+          <span class="res-amount__label">Toplam</span>
+          <span class="res-amount__value">
+            {{ reservation.totalAmount | number:'1.2-2' }}
+            <span class="res-amount__cur">{{ reservation.currency }}</span>
+          </span>
+        </div>
+        <ul class="res-kv res-kv--compact">
+          <li>
+            <span class="res-kv__k">Yöntem</span>
+            <span class="res-kv__v">{{ getPaymentMethodLabel(reservation.payment?.method) }}</span>
+          </li>
+          <li *ngIf="reservation.payment?.transactionId">
+            <span class="res-kv__k">İşlem no</span>
+            <span class="res-kv__v res-kv__v--mono">{{ reservation.payment?.transactionId }}</span>
+          </li>
+          <li *ngIf="reservation.payment?.paidAt">
+            <span class="res-kv__k">Ödeme tarihi</span>
+            <span class="res-kv__v">{{ reservation.payment?.paidAt | date:'dd.MM.yyyy HH:mm' }}</span>
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <div class="res-alert res-alert--danger" *ngIf="reservation.cancellationReason">
+      <mat-icon>cancel</mat-icon>
+      <div>
+        <strong>İptal nedeni</strong>
+        <p>{{ reservation.cancellationReason }}</p>
+      </div>
+    </div>
+
+    <div class="res-alert res-alert--warn" *ngIf="reservation.failureReason">
+      <mat-icon>error_outline</mat-icon>
+      <div>
+        <strong>Ödeme / işlem</strong>
+        <p>{{ reservation.failureReason }}</p>
+      </div>
+    </div>
+
+    <!-- Uçuş güzergahları -->
+    <section class="res-panel res-panel--full" *ngIf="reservation.segments?.length">
+      <div class="res-panel__head">
+        <mat-icon>route</mat-icon>
+        <h3>Uçuş güzergahları</h3>
+      </div>
+      <div class="res-timeline">
+        <div class="res-leg" *ngFor="let seg of reservation.segments; let i = index; let last = last">
+          <div class="res-leg__rail">
+            <span class="res-leg__dot"></span>
+            <span class="res-leg__line" *ngIf="!last"></span>
+          </div>
+          <div class="res-leg__card">
+            <div class="res-leg__meta">
+              <span class="res-leg__idx">{{ i + 1 }}. bacak</span>
+              <span class="res-leg__flight" *ngIf="seg.airline || seg.flightNo">
+                {{ seg.airline }} {{ seg.flightNo }}
+              </span>
+              <span class="res-leg__cabin" *ngIf="seg.cabinClass">{{ seg.cabinClass }}</span>
+            </div>
+            <div class="res-leg__route">
+              <div class="res-ap">
+                <span class="res-ap__code">{{ seg.origin }}</span>
+                <span class="res-ap__time">{{ seg.departureAt | date:'dd.MM.yyyy HH:mm' }}</span>
+              </div>
+              <div class="res-leg__arrow">
+                <mat-icon>flight</mat-icon>
+              </div>
+              <div class="res-ap">
+                <span class="res-ap__code">{{ seg.destination }}</span>
+                <span class="res-ap__time">{{ seg.arrivalAt | date:'dd.MM.yyyy HH:mm' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Yolcular -->
+    <section class="res-panel res-panel--full" *ngIf="reservation.passengers?.length">
+      <div class="res-panel__head">
+        <mat-icon>groups</mat-icon>
+        <h3>Yolcular <span class="res-panel__count">({{ reservation.passengers!.length }})</span></h3>
+      </div>
+      <div class="res-pax-grid">
+        <article class="res-pax-card" *ngFor="let p of reservation.passengers; let idx = index">
+          <div class="res-pax-card__avatar">
+            {{ initials(p) }}
+          </div>
+          <div class="res-pax-card__main">
+            <div class="res-pax-card__name">{{ p.firstName }} {{ p.lastName }}</div>
+            <div class="res-pax-card__tags">
+              <span class="res-tag">{{ passengerDemographic(p) }}</span>
+              <span class="res-tag" *ngIf="p.nationality">Uyruk {{ p.nationality }}</span>
+            </div>
+          </div>
+          <div class="res-pax-card__id">
+            <span class="res-pax-card__id-label">Kimlik / pasaport</span>
+            <span class="res-pax-card__id-value">{{ p.tcNo || p.passportNo || '—' }}</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="res-panel res-panel--notes" *ngIf="reservation.notes">
+      <div class="res-panel__head">
+        <mat-icon>sticky_note_2</mat-icon>
+        <h3>Notlar</h3>
+      </div>
+      <p class="res-notes">{{ reservation.notes }}</p>
+    </section>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="res-detail__actions" align="end">
+    <button mat-flat-button color="primary" type="button" (click)="close()">Kapat</button>
+  </mat-dialog-actions>
+</div>

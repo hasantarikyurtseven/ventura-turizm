@@ -1,0 +1,36 @@
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tem:UpdatePassengers>
+         <tem:request>
+            <trev:AuthenticationHeader>
+               <trev:SessionId>7160861</trev:SessionId>
+               <trev:SessionToken>3c0f93c3-1edb-43a3-a744-da5c03724a54</trev:SessionToken>
+            </trev:AuthenticationHeader>
+            <trev1:Form>
+               <trev1:ModifiedPassengers/>
+               <trev1:NewPassengers>
+                  <trev2:T_Passenger>
+                     <trev2:BirthDate>1980-01-01</trev2:BirthDate>
+                     <trev2:CitizenNo>00000000000</trev2:CitizenNo>
+                     <trev2:Email>AYDIN@GMAIL.COM</trev2:Email>
+                     <trev2:FirstName>AYDIN</trev2:FirstName>
+                     <trev2:Gender>M</trev2:Gender>
+                     <trev2:Id>08c98a90-ef84-4f2c-9cd8-50401cf4bcf3</trev2:Id>
+                     <trev2:IfContact>true</trev2:IfContact>
+                     <trev2:LastName>DENIZ</trev2:LastName>
+                     <trev2:Phone>+90-5356896542</trev2:Phone>
+                     <trev2:SequenceNo>1</trev2:SequenceNo>
+                     <trev2:TempTag>6b80ae12-1993-49f1-ac92-d6c7abdd632e</trev2:TempTag>
+                     <trev2:Type>ADT</trev2:Type>
+                     <trev2:WheelChairServiceType>0</trev2:WheelChairServiceType>
+                  </trev2:T_Passenger>
+               </trev1:NewPassengers>
+               <trev1:ProductIds>
+                  <arr:guid>08c98a90-ef84-4f2c-9cd8-50401cf4bcf3</arr:guid>
+               </trev1:ProductIds>
+            </trev1:Form>
+         </tem:request>
+      </tem:UpdatePassengers>
+   </soapenv:Body>
+</soapenv:Envelope>

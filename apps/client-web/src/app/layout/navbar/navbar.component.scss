@@ -1,0 +1,588 @@
+// Top Bar
+.topbar {
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 0;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  z-index: 1001;
+}
+
+.topbar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 100%;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.topbar-link {
+  color: #333 !important;
+  font-size: 0.875rem !important;
+  font-weight: 400 !important;
+  text-transform: none !important;
+  padding: 0.25rem 0.5rem !important;
+  min-width: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  text-decoration: none;
+  transition: color 0.2s ease;
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: #666;
+  }
+
+  &:hover {
+    color: #1976d2 !important;
+    
+    mat-icon {
+      color: #1976d2;
+    }
+  }
+
+  &.phone-link {
+    font-weight: 500;
+    color: #1976d2 !important;
+    
+    mat-icon {
+      color: #1976d2;
+    }
+  }
+
+  &.login-link,
+  &.register-link {
+    font-weight: 500;
+  }
+}
+
+.topbar-separator {
+  color: #ccc;
+  font-size: 0.75rem;
+  margin: 0 0.25rem;
+  user-select: none;
+}
+
+// Menu Bar
+.menu-bar {
+  background: #183641 !important;
+  color: white !important;
+  position: sticky;
+  top: 56px;
+  z-index: 1000;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  padding: 0 !important;
+  height: auto !important;
+  min-height: 48px !important;
+}
+
+.menu-bar-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 48px;
+}
+
+// Logo Section
+.logo-section {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.2s ease;
+
+  &:hover {
+    transform: translateY(-1px);
+  }
+
+  .logo-image {
+    height: 48px;
+    width: auto;
+    object-fit: contain;
+  }
+}
+
+// Desktop Menu
+.desktop-menu {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex: 1;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.nav-button {
+  color: rgba(255, 255, 255, 0.9) !important;
+  font-weight: 400 !important;
+  font-size: 0.875rem !important;
+  text-transform: none !important;
+  padding: 0.375rem 0.75rem !important;
+  border-radius: 4px !important;
+  transition: color 0.2s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.25rem !important;
+  min-width: auto !important;
+  line-height: 1.2 !important;
+  background-color: transparent !important;
+
+  .nav-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.2s ease;
+  }
+
+  // Material button hover override
+  ::ng-deep .mdc-button__ripple,
+  ::ng-deep .mat-mdc-button-ripple,
+  ::ng-deep .mat-ripple-element {
+    display: none !important;
+  }
+
+  &:hover {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #4088b3 !important;
+
+    .nav-icon {
+      color: #4088b3;
+    }
+
+    ::ng-deep .mdc-button__ripple,
+    ::ng-deep .mat-mdc-button-ripple {
+      display: none !important;
+    }
+  }
+
+  &.active {
+    background-color: transparent !important;
+    background: transparent !important;
+    color: #4088b3 !important;
+    font-weight: 500 !important;
+
+    .nav-icon {
+      color: #4088b3;
+    }
+  }
+
+  &.highlight {
+    color: #4088b3 !important;
+    font-weight: 500 !important;
+
+    .nav-icon {
+      color: #4088b3;
+    }
+
+    &:hover {
+      background-color: transparent !important;
+      background: transparent !important;
+      color: #4088b3 !important;
+    }
+
+    &.active {
+      background-color: transparent !important;
+      background: transparent !important;
+    }
+  }
+}
+
+.mobile-menu-toggle {
+  display: none;
+  color: white !important;
+}
+
+// Mobile Sidenav
+.sidenav-wrapper {
+  display: none;
+}
+
+.sidenav-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.mobile-sidenav {
+  width: 280px;
+  background: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.sidenav-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  background: white;
+
+  .sidenav-logo {
+    display: flex;
+    align-items: center;
+
+    .logo-image {
+      height: 28px;
+      width: auto;
+      object-fit: contain;
+    }
+  }
+
+  .close-button {
+    color: #333 !important;
+  }
+}
+
+.mobile-menu {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+}
+
+.mobile-nav-button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  width: 100% !important;
+  justify-content: flex-start !important;
+  padding: 1rem 1.5rem !important;
+  text-align: left !important;
+  color: #333 !important;
+  font-size: 1rem !important;
+  text-transform: none !important;
+  border-radius: 0 !important;
+  transition: background-color 0.2s ease !important;
+
+  mat-icon {
+    color: #666;
+    margin-right: 0;
+  }
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.04) !important;
+  }
+
+  &.active {
+    background-color: rgba(25, 118, 210, 0.08) !important;
+    color: #1976d2 !important;
+    font-weight: 500 !important;
+
+    mat-icon {
+      color: #1976d2;
+    }
+  }
+
+  &.highlight {
+    color: #d32f2f !important;
+    font-weight: 500 !important;
+
+    mat-icon {
+      color: #d32f2f;
+    }
+
+    &.active {
+      background-color: rgba(211, 47, 47, 0.12) !important;
+    }
+  }
+}
+
+.sidenav-topbar {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.mobile-topbar-button {
+  display: flex !important;
+  align-items: center !important;
+  gap: 1rem !important;
+  width: 100% !important;
+  justify-content: flex-start !important;
+  padding: 0.75rem 1.5rem !important;
+  text-align: left !important;
+  color: #666 !important;
+  font-size: 0.9rem !important;
+  text-transform: none !important;
+  border-radius: 0 !important;
+
+  mat-icon {
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    color: #666;
+  }
+}
+
+.sidenav-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+  margin-top: auto;
+}
+
+.mobile-action-button {
+  width: 100% !important;
+  justify-content: center !important;
+  padding: 0.75rem !important;
+  text-transform: none !important;
+  border-radius: 8px !important;
+
+  mat-icon {
+    margin-right: 0.5rem;
+  }
+
+  &.primary {
+    background-color: #1976d2 !important;
+    color: white !important;
+  }
+}
+
+// Responsive Design
+@media (max-width: 960px) {
+  .topbar {
+    display: none;
+  }
+
+  .menu-bar {
+    top: 0;
+  }
+
+  .desktop-menu {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: block !important;
+  }
+
+  .sidenav-wrapper {
+    display: block;
+  }
+
+  .menu-bar-container {
+    padding: 0 1rem;
+  }
+
+}
+
+@media (max-width: 600px) {
+  .menu-bar-container {
+    padding: 0 0.75rem;
+  }
+
+  .logo-section {
+    .logo-image {
+      height: 28px;
+    }
+  }
+}
+
+// ─── User Chip (Header'daki giriş yapmış kullanıcı butonu) ───
+::ng-deep .user-chip {
+  padding: 0 !important;
+  min-width: auto !important;
+  height: auto !important;
+  line-height: 1 !important;
+  border-radius: 24px !important;
+  overflow: hidden;
+
+  .mdc-button__label {
+    display: flex !important;
+  }
+}
+
+.user-chip-inner {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  background: linear-gradient(135deg, #183641 0%, #2a5a73 100%);
+  padding: 6px 12px 6px 8px;
+  border-radius: 24px;
+  transition: all 0.2s ease;
+  border: 1.5px solid transparent;
+
+  &:hover {
+    background: linear-gradient(135deg, #1e4250 0%, #3a7a9a 100%);
+    box-shadow: 0 2px 8px rgba(24, 54, 65, 0.25);
+  }
+}
+
+.user-chip-icon {
+  font-size: 18px !important;
+  width: 18px !important;
+  height: 18px !important;
+  color: rgba(255, 255, 255, 0.85) !important;
+  margin: 0 !important;
+}
+
+.user-chip-name {
+  color: white !important;
+  font-size: 0.8125rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  line-height: 1 !important;
+}
+
+.user-chip-arrow {
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
+  color: rgba(255, 255, 255, 0.6) !important;
+  margin: 0 !important;
+  transition: transform 0.2s;
+}
+
+// ─── User Dropdown Panel ───
+::ng-deep .user-dropdown-panel {
+  margin-top: 6px !important;
+  border-radius: 14px !important;
+  box-shadow: 0 10px 40px rgba(24, 54, 65, 0.18), 0 2px 8px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid #e8edf2;
+  min-width: 260px !important;
+  overflow: hidden;
+
+  .mat-mdc-menu-content {
+    padding: 0 !important;
+  }
+}
+
+.user-dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 18px;
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  cursor: default;
+}
+
+.user-dropdown-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #183641, #4088b3);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.875rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 6px rgba(24, 54, 65, 0.2);
+}
+
+.user-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.user-dropdown-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #183641;
+  line-height: 1.3;
+}
+
+.user-dropdown-email {
+  font-size: 0.75rem;
+  color: #64748b;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+::ng-deep .user-dropdown-item {
+  padding: 10px 18px !important;
+  height: auto !important;
+  min-height: 42px !important;
+  transition: all 0.15s ease !important;
+
+  &:hover {
+    background: #f8fafc !important;
+    padding-left: 22px !important;
+  }
+
+  .mat-mdc-menu-item-text,
+  .mdc-list-item__content {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+
+  mat-icon {
+    color: #4088b3 !important;
+    font-size: 1.125rem !important;
+    width: 1.125rem !important;
+    height: 1.125rem !important;
+    margin-right: 10px !important;
+    margin-left: 0 !important;
+    flex-shrink: 0;
+  }
+
+  span {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #334155;
+  }
+}
+
+::ng-deep .logout-item {
+  &:hover {
+    background: #fef2f2 !important;
+  }
+
+  mat-icon {
+    color: #ef4444 !important;
+  }
+
+  span {
+    color: #ef4444;
+  }
+}
+
+// ─── Mobil User Info ───
+.mobile-user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-weight: 600;
+  color: #183641;
+}

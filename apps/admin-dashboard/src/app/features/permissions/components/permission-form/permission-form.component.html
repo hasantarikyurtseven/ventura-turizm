@@ -1,0 +1,86 @@
+<div class="page-container">
+    <!-- Modern Header -->
+    <div class="page-header">
+        <div class="header-content">
+            <h1>{{ isEditMode ? 'İzin Düzenle' : 'Yeni İzin' }}</h1>
+            <p class="subtitle">{{ isEditMode ? 'İzin bilgilerini güncelleyin' : 'Yeni bir izin oluşturun' }}</p>
+        </div>
+        <button mat-button (click)="cancel()">
+            <mat-icon>arrow_back</mat-icon>
+            Geri Dön
+        </button>
+    </div>
+
+    <!-- Main Content Card -->
+    <mat-card class="content-card">
+        <form [formGroup]="permissionForm" (ngSubmit)="onSubmit()">
+            <!-- Temel Bilgiler -->
+            <div class="form-section">
+                <h3 class="section-title">Temel Bilgiler</h3>
+                <div class="fields-grid">
+                    <mat-form-field appearance="outline">
+                        <mat-label>İzin Kodu <span class="required">*</span></mat-label>
+                        <input matInput formControlName="code" placeholder="Örn: users.create" />
+                        <mat-hint>Benzersiz bir kod kullanın (nokta ile ayrılmış)</mat-hint>
+                        <mat-error *ngIf="permissionForm.get('code')?.hasError('required')">
+                            İzin kodu zorunludur
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>İzin Adı <span class="required">*</span></mat-label>
+                        <input matInput formControlName="name" placeholder="Örn: Kullanıcı Oluştur" />
+                        <mat-error *ngIf="permissionForm.get('name')?.hasError('required')">
+                            İzin adı zorunludur
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Modül <span class="required">*</span></mat-label>
+                        <input matInput formControlName="module" placeholder="Örn: Kullanıcılar" />
+                        <mat-hint>İznin ait olduğu modül</mat-hint>
+                        <mat-error *ngIf="permissionForm.get('module')?.hasError('required')">
+                            Modül zorunludur
+                        </mat-error>
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Durum <span class="required">*</span></mat-label>
+                        <mat-select formControlName="status" placeholder="Durum Seçin">
+                            <mat-option *ngFor="let status of statuses" [value]="status.value">
+                                {{ status.label }}
+                            </mat-option>
+                        </mat-select>
+                        <mat-error *ngIf="permissionForm.get('status')?.hasError('required')">
+                            Durum seçimi zorunludur
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+
+                <div class="fields-grid-full">
+                    <mat-form-field appearance="outline">
+                        <mat-label>Açıklama <span class="required">*</span></mat-label>
+                        <textarea matInput formControlName="description" rows="3"
+                            placeholder="Bu iznin ne işe yaradığını açıklayın"></textarea>
+                        <mat-error *ngIf="permissionForm.get('description')?.hasError('required')">
+                            Açıklama zorunludur
+                        </mat-error>
+                    </mat-form-field>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <button mat-button type="button" (click)="cancel()">
+                    İptal
+                </button>
+                <button mat-raised-button color="primary" type="submit" 
+                    [disabled]="permissionForm.invalid || loading">
+                    <mat-icon *ngIf="!loading">check</mat-icon>
+                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+                    {{ isEditMode ? 'Güncelle' : 'Kaydet' }}
+                </button>
+            </div>
+        </form>
+    </mat-card>
+</div>

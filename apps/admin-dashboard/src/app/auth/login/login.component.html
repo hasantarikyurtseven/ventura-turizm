@@ -1,0 +1,63 @@
+<div class="login-container">
+    <!-- Left Side - Visual Content -->
+    <div class="login-visual">
+        <div class="visual-content">
+            <img src="/img/logo/yonetim-logo.svg" alt="Ventura Logo" class="brand-logo">
+            <p class="brand-description">
+                Modern ve güçlü yönetim araçları ile işinizi kolaylaştırın
+            </p>
+        </div>
+        <div class="crafted-by">
+            Crafted by With Look Production.
+        </div>
+    </div>
+
+    <!-- Right Side - Login Form -->
+    <div class="login-form-section">
+        <div class="form-wrapper">
+            <div class="form-header">
+                <h2>Hoş Geldiniz</h2>
+                <p>Devam etmek için giriş yapın</p>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Kullanıcı Adı</mat-label>
+                    <input matInput formControlName="username" type="text" placeholder="Kullanıcı adınızı girin" />
+                    <mat-icon matPrefix>person</mat-icon>
+                    <mat-error *ngIf="loginForm.get('username')?.hasError('required')">
+                        Kullanıcı adı zorunludur
+                    </mat-error>
+                </mat-form-field>
+
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Şifre</mat-label>
+                    <input matInput [type]="hidePassword ? 'password' : 'text'" 
+                        formControlName="password" placeholder="Şifrenizi girin" />
+                    <mat-icon matPrefix>lock</mat-icon>
+                    <button mat-icon-button matSuffix type="button" (click)="hidePassword = !hidePassword">
+                        <mat-icon>{{hidePassword ? 'visibility_off' : 'visibility'}}</mat-icon>
+                    </button>
+                    <mat-error *ngIf="loginForm.get('password')?.hasError('required')">
+                        Şifre zorunludur
+                    </mat-error>
+                </mat-form-field>
+
+                <button mat-raised-button color="primary" type="submit" 
+                    class="login-button" [disabled]="loginForm.invalid || loading">
+                    <mat-spinner *ngIf="loading" diameter="20"></mat-spinner>
+                    <span *ngIf="!loading">Giriş Yap</span>
+                </button>
+
+                <div class="demo-info">
+                    <mat-icon>info</mat-icon>
+                    <span>Demo: admin / admin123</span>
+                </div>
+            </form>
+
+            <a href="https://withlookproduction.com/" target="_blank" rel="noopener noreferrer" class="wlp-logo-link">
+                <img src="/assets/images/wlp-logo.svg" alt="With Look Production" class="wlp-logo">
+            </a>
+        </div>
+    </div>
+</div>

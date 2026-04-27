@@ -1,0 +1,46 @@
+.flight-search-loading-dialog {
+  padding: 2.5rem 3rem;
+  min-width: 400px;
+  text-align: center;
+}
+
+.loading-visual {
+  margin-bottom: 2rem;
+
+  .flight-icon {
+    font-size: 80px;
+    width: 80px;
+    height: 80px;
+    color: var(--ventura-primary, #1565c0);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+.loading-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--ventura-text-primary, #183641);
+  margin: 0 0 0.5rem 0;
+}
+
+.loading-subtitle {
+  font-size: 1rem;
+  color: var(--ventura-text-secondary, #64748b);
+  margin: 0 0 2rem 0;
+}
+
+.loading-progress {
+  height: 4px;
+  border-radius: 2px;
+}

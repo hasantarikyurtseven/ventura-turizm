@@ -1,0 +1,9 @@
+.main-content {
+  min-height: calc(100vh - 104px); // 56px topbar + 48px menubar
+  width: 100%;
+  background: #f5f5f5;
+
+  @media (max-width: 960px) {
+    min-height: calc(100vh - 48px); // Sadece menubar mobilde
+  }
+}

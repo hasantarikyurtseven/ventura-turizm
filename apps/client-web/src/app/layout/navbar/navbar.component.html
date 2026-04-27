@@ -1,0 +1,176 @@
+<!-- Top Bar -->
+<div class="topbar">
+  <div class="topbar-container">
+    <div class="topbar-left">
+      <div class="logo-section" routerLink="/">
+        <img src="/images/logo/logo.svg" alt="Ventura Turizm" class="logo-image">
+      </div>
+    </div>
+    <div class="topbar-right">
+      <a href="tel:4440644" class="topbar-link phone-link">
+        <mat-icon>phone</mat-icon>
+        <span>444 0 644</span>
+      </a>
+      <span class="topbar-separator">|</span>
+      <button 
+        *ngFor="let item of topBarItems" 
+        mat-button 
+        [routerLink]="item.route"
+        class="topbar-link">
+        <mat-icon *ngIf="item.icon">{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </button>
+      <span class="topbar-separator">|</span>
+
+      <!-- Giriş yapmamış -->
+      <ng-container *ngIf="!(authService.currentUser$ | async)">
+        <button mat-button class="topbar-link login-link" (click)="openLoginModal()">
+          <span>Giriş Yap</span>
+        </button>
+        <button mat-button class="topbar-link register-link" routerLink="/register">
+          <span>Üye Ol</span>
+        </button>
+      </ng-container>
+
+      <!-- Giriş yapmış -->
+      <ng-container *ngIf="authService.currentUser$ | async as user">
+        <button mat-button [matMenuTriggerFor]="userMenu" class="user-chip">
+          <div class="user-chip-inner">
+            <mat-icon class="user-chip-icon">person</mat-icon>
+            <span class="user-chip-name">{{ user.firstName }} {{ user.lastName }}</span>
+            <mat-icon class="user-chip-arrow">expand_more</mat-icon>
+          </div>
+        </button>
+        <mat-menu #userMenu="matMenu" class="user-dropdown-panel">
+          <!-- Kullanıcı bilgi kartı -->
+          <div class="user-dropdown-header" (click)="$event.stopPropagation()">
+            <div class="user-dropdown-avatar">{{ getUserInitials() }}</div>
+            <div class="user-dropdown-info">
+              <span class="user-dropdown-name">{{ user.firstName }} {{ user.lastName }}</span>
+              <span class="user-dropdown-email">{{ user.email }}</span>
+            </div>
+          </div>
+          <hr style="margin:0;border:none;border-top:1px solid #f1f5f9;" />
+          <button mat-menu-item class="user-dropdown-item">
+            <mat-icon>account_circle</mat-icon>
+            <span>Profilim</span>
+          </button>
+          <button mat-menu-item class="user-dropdown-item" routerLink="/rezervasyonlarim">
+            <mat-icon>confirmation_number</mat-icon>
+            <span>Rezervasyonlarım</span>
+          </button>
+          <button mat-menu-item class="user-dropdown-item">
+            <mat-icon>favorite_border</mat-icon>
+            <span>Favorilerim</span>
+          </button>
+          <hr style="margin:0;border:none;border-top:1px solid #f1f5f9;" />
+          <button mat-menu-item class="user-dropdown-item logout-item" (click)="onLogout()">
+            <mat-icon>logout</mat-icon>
+            <span>Çıkış Yap</span>
+          </button>
+        </mat-menu>
+      </ng-container>
+    </div>
+  </div>
+</div>
+
+<!-- Menu Bar -->
+<mat-toolbar class="menu-bar">
+  <div class="menu-bar-container">
+    <!-- Desktop Menu -->
+    <nav class="desktop-menu">
+      <button 
+        *ngFor="let item of menuItems" 
+        mat-button 
+        [routerLink]="item.route"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{exact: item.route === '/'}"
+        [class.highlight]="item.highlight"
+        class="nav-button">
+        <mat-icon *ngIf="item.icon" class="nav-icon">{{ item.icon }}</mat-icon>
+        <span>{{ item.label }}</span>
+      </button>
+    </nav>
+
+    <!-- Mobile Menu Toggle -->
+    <button 
+      mat-icon-button 
+      class="mobile-menu-toggle"
+      (click)="sidenav.toggle()"
+      *ngIf="(isHandset$ | async)">
+      <mat-icon>menu</mat-icon>
+    </button>
+  </div>
+</mat-toolbar>
+
+<!-- Mobile Sidenav -->
+<div class="sidenav-wrapper" *ngIf="isHandset$ | async">
+  <mat-sidenav-container class="sidenav-container">
+    <mat-sidenav 
+      #sidenav 
+      mode="over" 
+      position="end"
+      class="mobile-sidenav">
+      <div class="sidenav-header">
+        <div class="sidenav-logo">
+          <img src="/images/logo/ventura-logo.svg" alt="Ventura Turizm" class="logo-image">
+        </div>
+        <button mat-icon-button (click)="sidenav.close()" class="close-button">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      
+      <nav class="mobile-menu">
+        <button 
+          *ngFor="let item of menuItems" 
+          mat-button 
+          [routerLink]="item.route"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{exact: item.route === '/'}"
+          (click)="sidenav.close()"
+          [class.highlight]="item.highlight"
+          class="mobile-nav-button">
+          <mat-icon>{{ item.icon }}</mat-icon>
+          <span>{{ item.label }}</span>
+        </button>
+      </nav>
+
+      <div class="sidenav-topbar">
+        <button mat-button class="mobile-topbar-button" routerLink="/help" (click)="sidenav.close()">
+          <mat-icon>help_outline</mat-icon>
+          <span>Yardım</span>
+        </button>
+        <button mat-button class="mobile-topbar-button" routerLink="/blog" (click)="sidenav.close()">
+          <mat-icon>article</mat-icon>
+          <span>Blog</span>
+        </button>
+      </div>
+
+      <div class="sidenav-actions">
+        <ng-container *ngIf="!(authService.currentUser$ | async)">
+          <button mat-button class="mobile-action-button" routerLink="/login" (click)="sidenav.close()">
+            <mat-icon>login</mat-icon>
+            <span>Giriş Yap</span>
+          </button>
+          <button mat-raised-button color="accent" class="mobile-action-button primary" routerLink="/register" (click)="sidenav.close()">
+            <span>Üye Ol</span>
+          </button>
+        </ng-container>
+        <ng-container *ngIf="authService.currentUser$ | async as user">
+          <div class="mobile-user-info">
+            <span>{{ user.firstName }} {{ user.lastName }}</span>
+          </div>
+          <button mat-button class="mobile-action-button" routerLink="/rezervasyonlarim" (click)="sidenav.close()">
+            <mat-icon>confirmation_number</mat-icon>
+            <span>Rezervasyonlarım</span>
+          </button>
+          <button mat-button class="mobile-action-button" (click)="onLogout(); sidenav.close()">
+            <mat-icon>logout</mat-icon>
+            <span>Çıkış Yap</span>
+          </button>
+        </ng-container>
+      </div>
+    </mat-sidenav>
+    <mat-sidenav-content></mat-sidenav-content>
+  </mat-sidenav-container>
+</div>

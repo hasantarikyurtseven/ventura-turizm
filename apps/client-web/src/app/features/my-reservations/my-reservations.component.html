@@ -1,0 +1,162 @@
+<div class="reservations-page">
+
+  <!-- Başlık -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-title-block">
+        <mat-icon class="page-title-icon">confirmation_number</mat-icon>
+        <div>
+          <h1 class="page-title">Rezervasyonlarım</h1>
+          <p class="page-subtitle">Tüm uçak biletleriniz ve rezervasyonlarınız</p>
+        </div>
+      </div>
+      <button mat-stroked-button class="refresh-btn" (click)="loadReservations()" [disabled]="isLoading">
+        <mat-icon>refresh</mat-icon>
+        Yenile
+      </button>
+    </div>
+  </div>
+
+  <div class="page-content">
+
+    <!-- Yükleniyor -->
+    <div class="loading-wrap" *ngIf="isLoading">
+      <mat-spinner diameter="44" strokeWidth="4"></mat-spinner>
+      <p>Rezervasyonlarınız yükleniyor…</p>
+    </div>
+
+
+    <!-- Hata -->
+    <div class="empty-state" *ngIf="!isLoading && errorMessage">
+      <mat-icon class="empty-icon error">error_outline</mat-icon>
+      <h2>Yüklenemedi</h2>
+      <p>{{ errorMessage }}</p>
+      <button mat-flat-button color="primary" (click)="loadReservations()">
+        <mat-icon>refresh</mat-icon>
+        Tekrar Dene
+      </button>
+    </div>
+
+    <!-- Boş Liste -->
+    <div class="empty-state" *ngIf="!isLoading && !errorMessage && reservations.length === 0">
+      <mat-icon class="empty-icon">airplane_ticket</mat-icon>
+      <h2>Henüz Rezervasyon Yok</h2>
+      <p>Yaptığınız bilet rezervasyonları burada görünecek.</p>
+      <div class="empty-actions">
+        <button mat-flat-button color="primary" (click)="goSearch()">
+          <mat-icon>search</mat-icon>
+          Bilet Ara
+        </button>
+      </div>
+    </div>
+
+    <!-- Rezervasyon Listesi -->
+    <div class="reservations-grid" *ngIf="!isLoading && !errorMessage && reservations.length > 0">
+      <div
+        class="reservation-card"
+        *ngFor="let r of reservations"
+      >
+        <!-- Kart üst şerit -->
+        <div class="rc-stripe" [class.stripe-cancelled]="r.status === 'CANCELLED'"></div>
+
+        <!-- Kart İçeriği -->
+        <div class="rc-body">
+
+          <!-- Sol: Uçuş Rotası -->
+          <div class="rc-col-flight" *ngIf="r.flight">
+
+            <!-- Havayolu -->
+            <div class="rc-airline-row">
+              <img
+                *ngIf="r.flight.airlineLogo && r.flight.airlineLogo.startsWith('http')"
+                [src]="r.flight.airlineLogo"
+                [alt]="r.flight.airline"
+                class="rc-airline-logo"
+              />
+              <span class="rc-airline-fallback"
+                *ngIf="!r.flight.airlineLogo || !r.flight.airlineLogo.startsWith('http')">
+                {{ (r.flight.airline || '').substring(0, 2).toUpperCase() }}
+              </span>
+              <span class="rc-airline-name">{{ r.flight.airline }}</span>
+              <span class="rc-flight-no">{{ r.flight.flightNumber }}</span>
+              <span class="rc-cabin" *ngIf="r.flight.brandName">{{ r.flight.brandName }}</span>
+            </div>
+
+            <!-- Kalkış → Varış -->
+            <div class="rc-airports">
+              <div class="rc-airport">
+                <span class="rc-iata">{{ r.flight.departure.airportCode }}</span>
+                <span class="rc-time">{{ r.flight.departure.time }}</span>
+                <span class="rc-date">{{ r.flight.departure.date }}</span>
+              </div>
+              <div class="rc-mid">
+                <div class="rc-mid-line">
+                  <span class="rc-dot"></span>
+                  <mat-icon>flight</mat-icon>
+                  <span class="rc-dot"></span>
+                </div>
+                <span class="rc-duration">{{ r.flight.duration }}</span>
+              </div>
+              <div class="rc-airport right">
+                <span class="rc-iata">{{ r.flight.arrival.airportCode }}</span>
+                <span class="rc-time">{{ r.flight.arrival.time }}</span>
+                <span class="rc-date">{{ r.flight.arrival.date }}</span>
+              </div>
+            </div>
+
+            <!-- Bagaj -->
+            <div class="rc-baggage" *ngIf="r.flight.baggageDescription">
+              <mat-icon>luggage</mat-icon>
+              {{ r.flight.baggageDescription }}
+            </div>
+
+          </div>
+
+          <!-- Sağ: PNR + Yolcular + Fiyat -->
+          <div class="rc-col-info">
+
+            <!-- PNR + Durum -->
+            <div class="rc-top-row">
+              <div class="rc-pnr-block">
+                <span class="rc-meta-label">PNR / Rezervasyon Kodu</span>
+                <span class="rc-pnr">{{ r.bookingCode }}</span>
+              </div>
+              <span class="rc-status" [ngClass]="getStatusClass(r.status)">
+                {{ getStatusLabel(r.status) }}
+              </span>
+            </div>
+
+            <!-- Yolcular -->
+            <div class="rc-pax" *ngIf="r.passengers && r.passengers.length > 0">
+              <div class="rc-section-label">Yolcular</div>
+              <div class="rc-pax-chips">
+                <span class="rc-pax-chip" *ngFor="let p of r.passengers">
+                  <mat-icon>person</mat-icon>
+                  {{ p.firstName }} {{ p.lastName }}
+                  <span class="pax-type-tag">
+                    {{ p.type === 'ADT' ? 'Yetişkin' : p.type === 'CHD' ? 'Çocuk' : 'Bebek' }}
+                  </span>
+                </span>
+              </div>
+            </div>
+
+            <!-- Tutar + Tarih -->
+            <div class="rc-footer">
+              <div class="rc-amount" *ngIf="r.totalFare">
+                <mat-icon>payments</mat-icon>
+                <span>{{ r.totalFare | number:'1.2-2' }} {{ r.currency }}</span>
+              </div>
+              <div class="rc-created" *ngIf="r.createdAt">
+                <mat-icon>calendar_today</mat-icon>
+                <span>{{ r.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
+              </div>
+            </div>
+
+          </div>
+
+        </div><!-- /rc-body -->
+      </div>
+    </div><!-- /reservations-grid -->
+
+  </div><!-- /page-content -->
+</div>

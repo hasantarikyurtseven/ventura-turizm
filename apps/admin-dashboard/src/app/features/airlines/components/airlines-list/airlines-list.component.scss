@@ -1,0 +1,111 @@
+.page-container {
+    padding: 1.5rem;
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+
+    .header-content h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .subtitle {
+        margin: 0.25rem 0 0;
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 0.875rem;
+    }
+}
+
+.search-row {
+    margin-bottom: 1rem;
+
+    .search-field {
+        width: 100%;
+        max-width: 320px;
+    }
+}
+
+.content-card {
+    padding: 1rem;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.airline-logo {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.no-logo {
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.code-badge {
+    font-weight: 600;
+    font-size: 0.875rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 4px;
+}
+
+.status-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 500;
+
+    &.active {
+        background: rgba(76, 175, 80, 0.15);
+        color: #2e7d32;
+    }
+
+    &.passive {
+        background: rgba(158, 158, 158, 0.2);
+        color: #616161;
+    }
+}
+
+.actions-column {
+    width: 120px;
+}
+
+.action-btn {
+    &.edit {
+        color: #1976d2;
+    }
+    &.delete {
+        color: #d32f2f;
+    }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem !important;
+    color: rgba(0, 0, 0, 0.5);
+
+    mat-icon {
+        font-size: 48px;
+        width: 48px;
+        height: 48px;
+        margin-bottom: 0.5rem;
+    }
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    gap: 1rem;
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+	<soap:Header/>
+	<soap:Body>
+		<tem:UpdatePassengers>
+			<tem:request>
+				<trev:AuthenticationHeader>
+					<trev:SessionId>7279321</trev:SessionId>
+					<trev:SessionToken>47c0e796-1f91-4d43-9124-4042799baa17</trev:SessionToken>
+				</trev:AuthenticationHeader>
+				<trev1:Form>
+					<trev1:ModifiedPassengers i:nil="true"/>
+					<trev1:NewPassengers>
+						<trev2:T_Passenger>
+							<trev2:BirthDate>2000-11-17</trev2:BirthDate>
+							<trev2:CitizenNo>00000000000</trev2:CitizenNo>
+							<trev2:Email>support@bilet.com</trev2:Email>
+							<trev2:FirstName>TUG</trev2:FirstName>
+							<trev2:Gender>M</trev2:Gender>
+							<trev2:Id>c6150e81-8079-44a8-827d-41ea07341457</trev2:Id>
+							<trev2:IfContact>true</trev2:IfContact>
+							<trev2:LastName>TOR</trev2:LastName>
+							<trev2:Nationality>TR</trev2:Nationality>
+							<trev2:PassportCountry/>
+							<trev2:PassportNo/>
+							<trev2:PassportValidDate/>
+							<trev2:Phone>+90-5357823469</trev2:Phone>
+							<trev2:SequenceNo>1</trev2:SequenceNo>
+							<trev2:TempTag>a4e066dc-7335-49cc-b842-8165a18ff2a4</trev2:TempTag>
+							<trev2:Type>ADT</trev2:Type>
+							<trev2:WheelChairServiceType>0</trev2:WheelChairServiceType>
+						</trev2:T_Passenger>
+					</trev1:NewPassengers>
+					<trev1:ProductIds>
+						<arr:guid>bbd4db41-8928-4896-a9f4-37a31180ae18</arr:guid>
+						<arr:guid>05620684-31d4-4622-a2d4-53f0cf9f8bec</arr:guid>
+					</trev1:ProductIds>
+				</trev1:Form>
+			</tem:request>
+		</tem:UpdatePassengers>
+	</soap:Body>
+</soap:Envelope>

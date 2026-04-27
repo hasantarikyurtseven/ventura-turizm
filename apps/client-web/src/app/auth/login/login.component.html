@@ -1,0 +1,178 @@
+<div class="login-page">
+  <div class="login-layout">
+    <!-- Left Side - Form -->
+    <div class="login-form-section">
+      <mat-card class="login-card">
+        <mat-card-header>
+          <div class="login-header">
+            <h1>Giriş Yap</h1>
+            <p class="login-subtitle">Hesabınıza giriş yaparak devam edin</p>
+          </div>
+        </mat-card-header>
+
+        <mat-card-content>
+          <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+            <!-- Email -->
+            <mat-form-field appearance="outline" class="form-field-full">
+              <mat-label>E-posta</mat-label>
+              <input matInput type="email" formControlName="email" placeholder="ornek@email.com">
+              <mat-icon matPrefix>email</mat-icon>
+              <mat-error *ngIf="loginForm.get('email')?.hasError('required') && loginForm.get('email')?.touched">
+                {{ getErrorMessage('email') }}
+              </mat-error>
+              <mat-error *ngIf="loginForm.get('email')?.hasError('email') && loginForm.get('email')?.touched">
+                {{ getErrorMessage('email') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Password -->
+            <mat-form-field appearance="outline" class="form-field-full">
+              <mat-label>Şifre</mat-label>
+              <input 
+                matInput 
+                [type]="hidePassword ? 'password' : 'text'" 
+                formControlName="password" 
+                placeholder="Şifrenizi giriniz">
+              <mat-icon matPrefix>lock</mat-icon>
+              <button 
+                mat-icon-button 
+                matSuffix 
+                (click)="togglePasswordVisibility()" 
+                type="button"
+                [attr.aria-label]="'Şifreyi göster'"
+                [attr.aria-pressed]="hidePassword">
+                <mat-icon>{{ hidePassword ? 'visibility_off' : 'visibility' }}</mat-icon>
+              </button>
+              <mat-error *ngIf="loginForm.get('password')?.hasError('required') && loginForm.get('password')?.touched">
+                {{ getErrorMessage('password') }}
+              </mat-error>
+              <mat-error *ngIf="loginForm.get('password')?.hasError('minlength') && loginForm.get('password')?.touched">
+                {{ getErrorMessage('password') }}
+              </mat-error>
+            </mat-form-field>
+
+            <!-- Remember Me & Forgot Password -->
+            <div class="login-options">
+              <mat-checkbox formControlName="rememberMe">Beni hatırla</mat-checkbox>
+              <a href="/forgot-password" class="forgot-password-link">Şifremi unuttum</a>
+            </div>
+
+            <!-- reCAPTCHA -->
+            <div class="recaptcha-wrapper">
+              <div id="login-recaptcha" class="g-recaptcha" data-sitekey="6LeIxAcTAAAAAJcZVRqyHh71UMIEGNQ_MXjiZKhI"></div>
+            </div>
+
+            <!-- Submit Button -->
+            <button 
+              mat-raised-button 
+              color="primary" 
+              type="submit" 
+              class="submit-button"
+              [disabled]="isLoading || loginForm.invalid">
+              <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
+              <span *ngIf="!isLoading">Giriş Yap</span>
+              <span *ngIf="isLoading">Giriş yapılıyor...</span>
+            </button>
+
+            <!-- Register Link -->
+            <div class="register-link">
+              <p>Hesabınız yok mu? <a routerLink="/register">Üye olun</a></p>
+            </div>
+          </form>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Right Side - Info Cards -->
+    <div class="login-info-section">
+      <!-- Benefits Card -->
+      <mat-card class="info-card">
+        <mat-card-content>
+          <div class="info-card-header">
+            <mat-icon class="info-icon">stars</mat-icon>
+            <h3>Üyelik Avantajları</h3>
+          </div>
+          <ul class="benefits-list">
+            <li>
+              <mat-icon>check_circle</mat-icon>
+              <span>Özel kampanya ve fırsatlardan ilk siz haberdar olun</span>
+            </li>
+            <li>
+              <mat-icon>check_circle</mat-icon>
+              <span>Hızlı rezervasyon ve kolay ödeme seçenekleri</span>
+            </li>
+            <li>
+              <mat-icon>check_circle</mat-icon>
+              <span>Rezervasyon geçmişinize kolayca erişin</span>
+            </li>
+            <li>
+              <mat-icon>check_circle</mat-icon>
+              <span>Puan biriktirin ve ödüllendirin</span>
+            </li>
+          </ul>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Campaign Card -->
+      <mat-card class="info-card campaign-card">
+        <div class="campaign-card-image"></div>
+        <mat-card-content>
+          <div class="campaign-badge">Özel Fırsat</div>
+          <div class="info-card-header">
+            <mat-icon class="info-icon">local_offer</mat-icon>
+            <h3>Hoş Geldin Kampanyası</h3>
+          </div>
+          <p class="campaign-text">
+            İlk rezervasyonunuzda <strong>%10 indirim</strong> kazanın!
+          </p>
+          <div class="campaign-details">
+            <div class="campaign-item">
+              <mat-icon>flight</mat-icon>
+              <span>Uçak biletlerinde geçerli</span>
+            </div>
+            <div class="campaign-item">
+              <mat-icon>hotel</mat-icon>
+              <span>Otel rezervasyonlarında geçerli</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Small Campaign Cards - Grid -->
+      <div class="campaign-grid">
+        <mat-card class="campaign-square campaign-france">
+          <div class="campaign-image"></div>
+          <div class="campaign-badge-small">%20</div>
+          <mat-card-content>
+            <div class="campaign-square-content">
+              <h4>Fransa Tur Fırsatı</h4>
+              <p class="campaign-square-text">Paris, Lyon, Nice</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="campaign-square campaign-germany">
+          <div class="campaign-image"></div>
+          <div class="campaign-badge-small">%15</div>
+          <mat-card-content>
+            <div class="campaign-square-content">
+              <h4>Almanya Uçuşları</h4>
+              <p class="campaign-square-text">Berlin, Münih, Frankfurt</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="campaign-square campaign-italy">
+          <div class="campaign-image"></div>
+          <div class="campaign-badge-small">%25</div>
+          <mat-card-content>
+            <div class="campaign-square-content">
+              <h4>İtalya Özel Fırsat</h4>
+              <p class="campaign-square-text">Roma, Venedik, Milano</p>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,130 @@
+<div class="form-container">
+    <div class="form-header">
+        <div class="header-content">
+            <h1>{{ isEditMode ? ('USERS.FORM.EDIT_TITLE' | translate) : ('USERS.FORM.NEW_TITLE' | translate) }}</h1>
+            <p class="subtitle">{{ isEditMode ? ('USERS.FORM.EDIT_SUBTITLE' | translate) : ('USERS.FORM.NEW_SUBTITLE' |
+                translate) }}</p>
+        </div>
+        <button pButton type="button" label="PLACEHOLDER" icon="pi pi-arrow-left"
+            class="p-button-text p-button-secondary" (click)="cancel()"></button>
+    </div>
+
+    <div class="form-card">
+        <form [formGroup]="userForm" (ngSubmit)="onSubmit()">
+
+            <!-- Personal Information Section -->
+            <div class="form-section">
+                <h3 class="section-title">PLACEHOLDER</h3>
+                <div class="grid">
+                    <div class="col-12 md:col-6">
+                        <div class="field">
+                            <label for="name">PLACEHOLDER <span
+                                    class="text-red-500">*</span></label>
+                            <input pInputText id="name" formControlName="name"
+                                placeholder="PLACEHOLDER"
+                                class="w-full" />
+                            <small class="p-error"
+                                *ngIf="userForm.get('name')?.touched && userForm.get('name')?.invalid">
+                                Name is required
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <div class="field">
+                            <label for="surName">PLACEHOLDER <span
+                                    class="text-red-500">*</span></label>
+                            <input pInputText id="surName" formControlName="surName"
+                                placeholder="PLACEHOLDER"
+                                class="w-full" />
+                            <small class="p-error"
+                                *ngIf="userForm.get('surName')?.touched && userForm.get('surName')?.invalid">
+                                Surname is required
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Account Details Section -->
+            <div class="form-section">
+                <h3 class="section-title">PLACEHOLDER</h3>
+                <div class="grid">
+                    <div class="col-12 md:col-6">
+                        <div class="field">
+                            <label for="username">PLACEHOLDER <span
+                                    class="text-red-500">*</span></label>
+                            <input pInputText id="username" formControlName="username"
+                                placeholder="PLACEHOLDER"
+                                class="w-full" />
+                            <small class="p-error"
+                                *ngIf="userForm.get('username')?.touched && userForm.get('username')?.invalid">
+                                Username is required
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <div class="field">
+                            <label for="email">PLACEHOLDER <span
+                                    class="text-red-500">*</span></label>
+                            <input pInputText id="email" type="email" formControlName="email"
+                                placeholder="user@example.com" class="w-full" />
+                            <small class="p-error"
+                                *ngIf="userForm.get('email')?.touched && userForm.get('email')?.invalid">
+                                Valid email is required
+                            </small>
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <div class="field">
+                            <label for="phone">PLACEHOLDER</label>
+                            <input pInputText id="phone" formControlName="phone" placeholder="+90 (XXX) XXX XX XX"
+                                class="w-full" />
+                        </div>
+                    </div>
+                    <div class="col-12 md:col-6">
+                        <div class="field">
+                            <label for="status">PLACEHOLDER <span
+                                    class="text-red-500">*</span></label>
+                            <select id="status" formControlName="status" class="w-full p-2 border border-gray-300 rounded">
+                                <option value="">PLACEHOLDER</option>
+                                <option *ngFor="let status of statuses" [value]="status.value">{{ status.label }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Section -->
+            <div class="form-section">
+                <h3 class="section-title">PLACEHOLDER</h3>
+                <div class="grid">
+                    <div class="col-12 md:col-6">
+                        <div class="field">
+                            <label for="password">PLACEHOLDER {{ isEditMode ?
+                                ('COMMON.OPTIONAL' | translate) : '*' }}</label>
+                            <p-password id="password" formControlName="passwordHash" [feedback]="true"
+                                [toggleMask]="true"
+                                placeholder="{{ isEditMode ? ('USERS.FORM.FIELDS.PASSWORD_HINT' | translate) : ('USERS.FORM.FIELDS.PASSWORD_PLACEHOLDER' | translate) }}"
+                                styleClass="w-full" [inputStyle]="{'width':'100%'}"></p-password>
+                            <small class="p-error"
+                                *ngIf="userForm.get('passwordHash')?.touched && userForm.get('passwordHash')?.invalid">
+                                Password is required (min 6 characters)
+                            </small>
+                            <small class="text-gray-500 block mt-1" *ngIf="isEditMode">
+                                Leave blank to keep current password
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+                <button pButton type="button" label="PLACEHOLDER"
+                    class="p-button-text p-button-secondary" (click)="cancel()"></button>
+                <button pButton type="submit" label="PLACEHOLDER" icon="pi pi-check"
+                    class="p-button-primary px-4" [loading]="loading" [disabled]="userForm.invalid"></button>
+            </div>
+        </form>
+    </div>
+</div>

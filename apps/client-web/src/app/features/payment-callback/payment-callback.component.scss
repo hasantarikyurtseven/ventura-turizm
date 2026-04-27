@@ -1,0 +1,496 @@
+@use 'sass:list';
+
+// ══════════════════════════════════════════════════════════════════════
+//  Payment Callback – Boarding Pass + 2-Column Layout
+// ══════════════════════════════════════════════════════════════════════
+
+$primary:        var(--ventura-primary, #3f51b5);
+$primary-dark:   var(--ventura-primary-dark, #303f9f);
+$primary-light:  var(--ventura-primary-light, #e8eaf6);
+$surface:        var(--ventura-surface-0, #fff);
+$surface-100:    var(--ventura-surface-100, #f4f6f9);
+$border:         var(--ventura-border, #e0e0e0);
+$text:           var(--ventura-text-primary, #1a1a2e);
+$text-sec:       var(--ventura-text-secondary, #6b7280);
+$radius-md:      var(--ventura-radius-md, 14px);
+$shadow-lg:      var(--ventura-shadow-lg, 0 8px 40px rgba(0,0,0,.12));
+
+// ── Sayfa kapsayıcı ──────────────────────────────────────────────────
+.callback-page {
+  min-height: calc(100vh - 80px);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 2.5rem 1.25rem 4rem;
+  background: $surface-100;
+}
+
+// ══ İşleniyor ════════════════════════════════════════════════════════
+.processing-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 1.25rem;
+  margin-top: 5rem;
+  max-width: 400px;
+}
+.processing-ring {
+  width: 72px; height: 72px;
+  border-radius: 50%;
+  background: $primary-light;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 0 0 10px rgba(63,81,181,.07);
+}
+.processing-title {
+  font-size: 1.375rem; font-weight: 700; color: $text; margin: 0;
+}
+.processing-subtitle {
+  font-size: .9rem; color: $text-sec; margin: 0; line-height: 1.6;
+}
+.processing-steps {
+  display: flex; align-items: center; gap: .5rem;
+  flex-wrap: wrap; justify-content: center;
+}
+.step {
+  display: flex; align-items: center; gap: .3rem;
+  font-size: .75rem; padding: .3rem .65rem;
+  border-radius: 20px;
+  background: $surface; border: 1px solid $border; color: $text-sec;
+  mat-icon { font-size: .9rem; width: .9rem; height: .9rem; }
+  &.active { color: $primary; border-color: rgba(63,81,181,.35); background: $primary-light; }
+}
+.step-sep { color: $border; font-size: 1rem; width: 1rem; height: 1rem; }
+
+// ══ Başarılı Sayfa ════════════════════════════════════════════════════
+.success-page {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+// ── Konfeti ──────────────────────────────────────────────────────────
+.confetti-layer {
+  pointer-events: none;
+  position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: hidden; z-index: 0;
+}
+.confetti-dot {
+  position: absolute; top: -20px;
+  animation: confettiFall 3s ease-in infinite;
+  $colors: #3f51b5, #4caf50, #ff9800, #e91e63, #00bcd4, #9c27b0;
+  @for $i from 1 through 12 {
+    &:nth-child(#{$i}) {
+      $idx: ($i % 6) + 1;
+      left: ($i * 8%) - 2%;
+      background-color: list.nth($colors, $idx);
+      animation-delay: $i * 0.22s;
+      animation-duration: 2.5s + ($i * 0.14s);
+      width: 8px + ($i % 3) * 3px;
+      height: 8px + ($i % 3) * 3px;
+      border-radius: if($i % 2 == 0, 50%, 3px);
+    }
+  }
+}
+@keyframes confettiFall {
+  0%   { transform: translateY(0) rotate(0);      opacity: 1; }
+  80%  { opacity: .5; }
+  100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+}
+
+// ── Başlık Kartı (col-12) ─────────────────────────────────────────────
+.success-header-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  background: $surface;
+  border-radius: 18px;
+  padding: 1.375rem 1.75rem;
+  box-shadow: $shadow-lg;
+  position: relative; z-index: 1;
+  animation: slideUp .35s ease both;
+  border-left: 5px solid #43a047;
+}
+.success-badge {
+  width: 52px; height: 52px; border-radius: 50%; flex-shrink: 0;
+  background: linear-gradient(135deg, #43a047, #66bb6a);
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 16px rgba(76,175,80,.4);
+  animation: popIn .45s cubic-bezier(.34,1.56,.64,1);
+  mat-icon { color: #fff; font-size: 1.75rem; width: 1.75rem; height: 1.75rem; }
+}
+@keyframes popIn {
+  0%   { transform: scale(0); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.success-header-texts { flex: 1; }
+.success-title {
+  font-size: 1.375rem; font-weight: 800; color: $text; margin: 0; letter-spacing: -.02em;
+}
+.success-subtitle {
+  font-size: .875rem; color: $text-sec; margin: .2rem 0 0; line-height: 1.5;
+}
+.success-header-meta {
+  display: flex; flex-direction: column; align-items: flex-end; gap: .2rem;
+  flex-shrink: 0;
+}
+.header-pnr-label {
+  font-size: .6rem; text-transform: uppercase; letter-spacing: .12em; color: $text-sec;
+}
+.header-pnr-value {
+  font-size: 1.5rem; font-weight: 900; letter-spacing: .18em;
+  color: $primary; font-family: 'Roboto Mono', monospace;
+}
+
+// ══ 2 Sütun ══════════════════════════════════════════════════════════
+.two-col-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1.5rem;
+  align-items: start;
+  position: relative; z-index: 1;
+}
+
+// ── Sol sütun ─────────────────────────────────────────────────────────
+.boarding-pass-col {
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+}
+
+// ══ Boarding Pass Kartı ═══════════════════════════════════════════════
+.boarding-pass {
+  background: $surface;
+  border-radius: 18px;
+  box-shadow: $shadow-lg;
+  overflow: hidden;
+  animation: slideUp .4s ease .05s both;
+}
+@keyframes slideUp {
+  from { transform: translateY(18px); opacity: 0; }
+  to   { transform: translateY(0);    opacity: 1; }
+}
+
+// Üst renk şeridi
+.bp-stripe {
+  height: 5px;
+  background: linear-gradient(90deg, $primary-dark, $primary, #5c6bc0);
+}
+
+// ── Bilet başlık ─────────────────────────────────────────────────────
+.bp-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem .75rem;
+  border-bottom: 1px solid $border;
+}
+.bp-airline-info {
+  display: flex; align-items: center; gap: .75rem;
+}
+.bp-airline-logo {
+  height: 34px; width: auto; object-fit: contain;
+  border-radius: 6px; border: 1px solid $border; padding: 2px 6px;
+  background: #fff;
+}
+.bp-airline-fallback {
+  width: 42px; height: 34px;
+  border-radius: 8px;
+  background: $primary-light;
+  border: 1px solid rgba(63,81,181,.25);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 800; color: $primary;
+  letter-spacing: .05em;
+}
+.bp-airline-texts {
+  display: flex; flex-direction: column; gap: .1rem;
+}
+.bp-airline-name {
+  font-size: .9375rem; font-weight: 700; color: $text;
+}
+.bp-flight-code {
+  font-size: .75rem; color: $text-sec;
+  font-family: 'Roboto Mono', monospace;
+}
+.bp-cabin-badge {
+  font-size: .75rem; font-weight: 600;
+  color: $primary; background: $primary-light;
+  border-radius: 20px; padding: .25rem .75rem;
+  letter-spacing: .03em;
+}
+
+// ── Uçuş Rotası ──────────────────────────────────────────────────────
+.bp-route {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 1rem;
+  gap: 1rem;
+}
+.bp-endpoint {
+  display: flex; flex-direction: column; align-items: flex-start; gap: .1rem;
+  &.right { align-items: flex-end; }
+}
+.bp-iata {
+  font-size: 3rem; font-weight: 900; color: $text;
+  line-height: 1; letter-spacing: -.03em;
+}
+.bp-city {
+  font-size: .75rem; color: $text-sec;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 120px;
+}
+.bp-time {
+  font-size: 1.25rem; font-weight: 700; color: $primary; margin-top: .35rem;
+}
+.bp-date {
+  font-size: .75rem; color: $text-sec;
+}
+.bp-arrow-block {
+  flex: 1;
+  display: flex; flex-direction: column; align-items: center; gap: .4rem;
+}
+.bp-track {
+  display: flex; align-items: center; width: 100%; gap: .2rem;
+}
+.bp-circle {
+  width: 7px; height: 7px; border-radius: 50%;
+  border: 2px solid $primary; background: $surface; flex-shrink: 0;
+}
+.bp-track-line {
+  flex: 1; height: 1px;
+  background: repeating-linear-gradient(
+    to right, $primary 0, $primary 5px, transparent 5px, transparent 10px
+  );
+}
+.bp-plane {
+  font-size: 1.5rem; width: 1.5rem; height: 1.5rem;
+  color: $primary; flex-shrink: 0;
+}
+.bp-duration {
+  font-size: .75rem; color: $text-sec; font-weight: 500;
+}
+
+// ── Bagaj satırı ─────────────────────────────────────────────────────
+.bp-baggage {
+  display: flex; align-items: center; gap: .4rem;
+  font-size: .8125rem; color: $text-sec;
+  padding: .625rem 1.5rem;
+  border-top: 1px dashed $border;
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; color: #ff9800; }
+}
+
+// ── Delikli Çizgi ─────────────────────────────────────────────────────
+.bp-tear {
+  display: flex; align-items: center;
+  position: relative; height: 0; overflow: visible;
+}
+.tear-notch {
+  position: absolute; width: 22px; height: 22px; border-radius: 50%;
+  background: $surface-100; border: 1px solid $border; top: 50%;
+  transform: translateY(-50%); z-index: 2;
+  &.left  { left: -11px; }
+  &.right { right: -11px; }
+}
+.tear-dots {
+  width: 100%; height: 0;
+  border-top: 2px dashed $border;
+  margin: 0 .5rem;
+}
+
+// ── Alt kopye (stub) ─────────────────────────────────────────────────
+.bp-stub {
+  padding: 1rem 1.5rem 1.375rem;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 1.25rem;
+  border-top: 1px solid $border;
+}
+.bp-pnr-cell {
+  display: flex; flex-direction: column; gap: .25rem;
+}
+.bp-stub-label {
+  font-size: .625rem; text-transform: uppercase; letter-spacing: .1em; color: $text-sec;
+}
+.bp-pnr-code {
+  font-size: 2.25rem; font-weight: 900;
+  letter-spacing: .2em; color: $primary;
+  font-family: 'Roboto Mono', monospace;
+  line-height: 1;
+}
+.bp-pax-cell {
+  display: flex; flex-direction: column; gap: .25rem;
+}
+.bp-pax-list {
+  display: flex; flex-direction: column; gap: .3rem;
+}
+.bp-pax-row {
+  display: flex; align-items: center; gap: .375rem;
+  font-size: .875rem; font-weight: 500; color: $text;
+  mat-icon { font-size: .9rem; width: .9rem; height: .9rem; color: $text-sec; }
+}
+.pax-name { flex: 1; }
+.pax-badge {
+  font-size: .6875rem; color: $text-sec;
+  background: $surface-100; border: 1px solid $border;
+  border-radius: 4px; padding: .1rem .4rem;
+}
+
+// ── Koltuk Seçimi çipi ───────────────────────────────────────────────
+.seat-chip {
+  display: flex; align-items: flex-start; gap: .75rem;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 12px;
+  padding: .875rem 1rem;
+  animation: slideUp .4s ease .15s both;
+
+  mat-icon {
+    font-size: 1.25rem; width: 1.25rem; height: 1.25rem;
+    color: #e65100; flex-shrink: 0; margin-top: .05rem;
+  }
+}
+.seat-chip-text {
+  font-size: .8125rem; color: #5d4037; line-height: 1.6;
+}
+.pnr-inline {
+  color: #e65100;
+}
+
+// ══ Sağ Sütun: Ödeme Kartı ═══════════════════════════════════════════
+.payment-col {
+  position: sticky;
+  top: 80px;
+}
+.payment-card {
+  background: $surface;
+  border-radius: 18px;
+  box-shadow: $shadow-lg;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: slideUp .4s ease .1s both;
+}
+.pc-title {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .875rem; font-weight: 700; color: $text;
+  text-transform: uppercase; letter-spacing: .06em;
+  mat-icon { font-size: 1.2rem; width: 1.2rem; height: 1.2rem; color: $primary; }
+}
+.pc-amount {
+  background: linear-gradient(135deg, $primary-dark, $primary);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: flex; flex-direction: column; gap: .25rem;
+  color: #fff;
+}
+.pc-amount-label {
+  font-size: .625rem; text-transform: uppercase; letter-spacing: .1em; opacity: .8;
+}
+.pc-amount-value {
+  font-size: 1.625rem; font-weight: 800; letter-spacing: .04em;
+}
+.pc-divider {
+  height: 1px; background: $border; margin: 0 -.25rem;
+}
+.pc-row {
+  display: flex; align-items: flex-start; gap: .75rem;
+  mat-icon {
+    font-size: 1.1rem; width: 1.1rem; height: 1.1rem;
+    color: $text-sec; margin-top: .15rem; flex-shrink: 0;
+  }
+}
+.pc-row-texts {
+  display: flex; flex-direction: column; gap: .15rem;
+}
+.pc-row-label {
+  font-size: .6875rem; text-transform: uppercase; letter-spacing: .06em; color: $text-sec;
+}
+.pc-row-value {
+  font-size: .9375rem; font-weight: 600; color: $text;
+  &.mono { font-family: 'Roboto Mono', monospace; font-size: .8125rem; }
+  &.small { font-size: .75rem; }
+}
+.pc-email-note {
+  display: flex; align-items: center; gap: .5rem;
+  font-size: .8rem; color: $text-sec; line-height: 1.5;
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; color: #4caf50; flex-shrink: 0; }
+}
+.pc-actions {
+  display: flex; flex-direction: column; gap: .625rem;
+}
+.pc-btn {
+  height: 44px; font-size: .875rem; font-weight: 600;
+  border-radius: 10px !important;
+  display: flex; align-items: center; justify-content: center; gap: .5rem;
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+
+  &.primary {
+    background: linear-gradient(135deg, $primary-dark, $primary) !important;
+    box-shadow: 0 3px 10px rgba(63,81,181,.3) !important;
+    color: #fff !important;
+  }
+  &.ghost {
+    border-color: $border !important;
+    color: $text !important;
+  }
+}
+
+// ══ Hata ══════════════════════════════════════════════════════════════
+.error-wrap {
+  margin-top: 5rem;
+  text-align: center;
+  background: $surface;
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+  max-width: 480px;
+  box-shadow: $shadow-lg;
+  width: 100%;
+}
+.error-icon-circle {
+  width: 72px; height: 72px; border-radius: 50%;
+  background: linear-gradient(135deg, #c62828, #ef5350);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 1.25rem;
+  box-shadow: 0 4px 16px rgba(198,40,40,.35);
+  mat-icon { color: #fff; font-size: 2.25rem; width: 2.25rem; height: 2.25rem; }
+}
+.result-title {
+  font-size: 1.625rem; font-weight: 800; margin: 0 0 .75rem;
+  &.error { color: #c62828; }
+}
+.result-subtitle {
+  font-size: .9375rem; color: $text-sec; margin: 0 0 2rem; line-height: 1.6;
+}
+.result-actions {
+  display: flex; gap: .75rem; justify-content: center; flex-wrap: wrap;
+}
+
+// ══ Responsive ════════════════════════════════════════════════════════
+@media (max-width: 800px) {
+  .two-col-layout {
+    grid-template-columns: 1fr;
+  }
+  .payment-col {
+    position: static;
+  }
+  .pc-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .pc-btn { flex: 1; min-width: 140px; }
+}
+
+@media (max-width: 500px) {
+  .bp-iata { font-size: 2.25rem; }
+  .bp-pnr-code { font-size: 1.75rem; letter-spacing: .12em; }
+  .bp-stub { grid-template-columns: 1fr; }
+  .bp-route { padding: 1rem; gap: .5rem; }
+  .success-header { flex-direction: column; text-align: center; }
+  .callback-page { padding: 1.25rem .75rem 3rem; }
+}

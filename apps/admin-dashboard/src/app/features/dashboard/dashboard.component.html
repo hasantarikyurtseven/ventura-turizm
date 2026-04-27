@@ -1,0 +1,304 @@
+<div class="dashboard-container">
+    <!-- Hoş geldin bildirim şeridi (otomatik kaybolur) -->
+    <div
+        class="welcome-banner"
+        *ngIf="welcomeBannerVisible"
+        [class.welcome-banner--exiting]="welcomeBannerExiting"
+        role="status"
+        aria-live="polite"
+    >
+        <div class="welcome-banner__inner">
+            <mat-icon class="welcome-banner__icon" aria-hidden="true">campaign</mat-icon>
+            <div class="welcome-banner__main">
+                <span class="welcome-banner__title">Kontrol Paneli</span>
+                <span class="welcome-banner__subtitle">Ventura Turizm Yönetim Paneline Hoş Geldiniz</span>
+            </div>
+            <div class="welcome-banner__meta">
+                <span class="welcome-banner__meta-label">Son Giriş</span>
+                <time class="welcome-banner__meta-value" [attr.datetime]="currentDate.toISOString()">
+                    {{ currentDate | date:'dd.MM.yyyy HH:mm' }}
+                </time>
+            </div>
+            <button
+                mat-icon-button
+                type="button"
+                class="welcome-banner__close"
+                (click)="closeWelcomeBanner()"
+                aria-label="Bildirimi kapat"
+            >
+                <mat-icon>close</mat-icon>
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <mat-card class="stat-card stat-card-primary">
+            <mat-card-content>
+                <div class="stat-content">
+                    <div>
+                        <p class="stat-label">Toplam Müşteri</p>
+                        <h2 class="stat-value">{{ stats.totalMembers }}</h2>
+                        <p class="stat-change positive">
+                            <mat-icon>groups</mat-icon> Kayıtlı üyeler
+                        </p>
+                    </div>
+                    <div class="stat-icon stat-icon-primary">
+                        <mat-icon>people</mat-icon>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card stat-card-success">
+            <mat-card-content>
+                <div class="stat-content">
+                    <div>
+                        <p class="stat-label">Rezervasyonlar</p>
+                        <h2 class="stat-value">{{ stats.totalReservations }}</h2>
+                        <p class="stat-change neutral">
+                            <mat-icon>confirmation_number</mat-icon> Toplam kayıt
+                        </p>
+                    </div>
+                    <div class="stat-icon stat-icon-success">
+                        <mat-icon>confirmation_number</mat-icon>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card stat-card-warning">
+            <mat-card-content>
+                <div class="stat-content">
+                    <div>
+                        <p class="stat-label">Hatalı Rezervasyonlar</p>
+                        <h2 class="stat-value">{{ stats.faultyReservations }}</h2>
+                        <p class="stat-change" [ngClass]="stats.faultyReservations > 0 ? 'negative' : 'neutral'">
+                            <mat-icon>{{ stats.faultyReservations > 0 ? 'warning' : 'check_circle' }}</mat-icon>
+                            {{ stats.faultyReservations > 0 ? 'İptal edilen kayıtlar' : 'İptal kaydı yok' }}
+                        </p>
+                    </div>
+                    <div class="stat-icon stat-icon-warning">
+                        <mat-icon>report_problem</mat-icon>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="stat-card stat-card-info">
+            <mat-card-content>
+                <div class="stat-content">
+                    <div>
+                        <p class="stat-label">Toplam Gelir</p>
+                        <h2 class="stat-value stat-value--revenue">{{ stats.totalRevenue | number:'1.0-0' }} <span class="stat-currency">₺</span></h2>
+                        <p class="stat-change positive">
+                            <mat-icon>payments</mat-icon> Onaylı ve tamamlanan işlemler
+                        </p>
+                    </div>
+                    <div class="stat-icon stat-icon-info">
+                        <mat-icon>payments</mat-icon>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Son Rezervasyonlar + Yeni Müşteriler -->
+    <div class="dashboard-panels">
+        <mat-card class="reservations-card">
+            <mat-card-content class="reservations-card__content">
+                <div class="reservations-card__head">
+                    <div class="reservations-card__title">
+                        <mat-icon class="reservations-card__icon" aria-hidden="true">confirmation_number</mat-icon>
+                        <span class="reservations-card__title-text">Son Rezervasyonlar</span>
+                    </div>
+                    <button mat-stroked-button color="primary" type="button" routerLink="/reservations" class="reservations-card__cta">
+                        <mat-icon>arrow_forward</mat-icon>
+                        Tümünü Gör
+                    </button>
+                </div>
+                <div class="reservations-card__body">
+                    <div class="reservations-loading" *ngIf="reservationsLoading">
+                        <mat-spinner diameter="40"></mat-spinner>
+                    </div>
+                    <div class="reservations-table-scroll" *ngIf="!reservationsLoading">
+                        <table mat-table [dataSource]="recentReservations" class="reservations-table">
+
+                            <ng-container matColumnDef="customer">
+                                <th mat-header-cell *matHeaderCellDef>Müşteri</th>
+                                <td mat-cell *matCellDef="let r">
+                                    <div class="customer-cell">
+                                        <span class="customer-name">{{ r.memberFirstName }} {{ r.memberLastName }}</span>
+                                        <span class="customer-email" *ngIf="r.memberEmail">{{ r.memberEmail }}</span>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="type">
+                                <th mat-header-cell *matHeaderCellDef>Tür</th>
+                                <td mat-cell *matCellDef="let r">{{ getReservationTypeLabel(r.type) }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef>Durum</th>
+                                <td mat-cell *matCellDef="let r">
+                                    <span class="res-status-badge" [ngClass]="reservationStatusClass(r.status)">
+                                        {{ getReservationStatusLabel(r.status) }}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="amount">
+                                <th mat-header-cell *matHeaderCellDef>Tutar</th>
+                                <td mat-cell *matCellDef="let r">
+                                    {{ r.totalAmount | number:'1.2-2' }} {{ r.currency }}
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="date">
+                                <th mat-header-cell *matHeaderCellDef>Tarih</th>
+                                <td mat-cell *matCellDef="let r">{{ r.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="reservationColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: reservationColumns;" class="reservation-row"></tr>
+
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell empty-message" [attr.colspan]="reservationColumns.length">
+                                    <mat-icon>event_busy</mat-icon>
+                                    <p>Henüz rezervasyon kaydı yok</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+
+        <mat-card class="new-members-card">
+            <mat-card-content class="new-members-card__content">
+                <div class="new-members-card__head">
+                    <div class="new-members-card__title">
+                        <mat-icon class="new-members-card__icon" aria-hidden="true">person_add</mat-icon>
+                        <span class="new-members-card__title-text">Yeni Müşteriler</span>
+                    </div>
+                    <button mat-stroked-button color="primary" type="button" routerLink="/members" class="new-members-card__cta">
+                        <mat-icon>arrow_forward</mat-icon>
+                        Tümünü Gör
+                    </button>
+                </div>
+                <div class="new-members-card__body">
+                    <div class="new-members-loading" *ngIf="membersLoading">
+                        <mat-spinner diameter="40"></mat-spinner>
+                    </div>
+                    <div class="new-members-table-scroll" *ngIf="!membersLoading">
+                        <table mat-table [dataSource]="recentMembers" class="new-members-table">
+                            <ng-container matColumnDef="customer">
+                                <th mat-header-cell *matHeaderCellDef>Müşteri</th>
+                                <td mat-cell *matCellDef="let m">
+                                    <div class="customer-cell">
+                                        <span class="customer-name">{{ m.firstName }} {{ m.lastName }}</span>
+                                        <span class="customer-email">{{ m.email }}</span>
+                                    </div>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="phone">
+                                <th mat-header-cell *matHeaderCellDef>Telefon</th>
+                                <td mat-cell *matCellDef="let m">{{ m.phone }}</td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="status">
+                                <th mat-header-cell *matHeaderCellDef>Durum</th>
+                                <td mat-cell *matCellDef="let m">
+                                    <span class="member-status-badge" [ngClass]="memberStatusClass(m.status)">
+                                        {{ getMemberStatusLabel(m.status) }}
+                                    </span>
+                                </td>
+                            </ng-container>
+
+                            <ng-container matColumnDef="date">
+                                <th mat-header-cell *matHeaderCellDef>Kayıt</th>
+                                <td mat-cell *matCellDef="let m">{{ m.createdAt | date:'dd.MM.yyyy HH:mm' }}</td>
+                            </ng-container>
+
+                            <tr mat-header-row *matHeaderRowDef="memberColumns"></tr>
+                            <tr mat-row *matRowDef="let row; columns: memberColumns;"></tr>
+
+                            <tr class="mat-row" *matNoDataRow>
+                                <td class="mat-cell empty-message" [attr.colspan]="memberColumns.length">
+                                    <mat-icon>person_off</mat-icon>
+                                    <p>Henüz müşteri kaydı yok</p>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </mat-card-content>
+        </mat-card>
+    </div>
+
+    <!-- Son Aktiviteler -->
+    <mat-card class="activity-card">
+        <mat-card-content class="activity-card__content">
+            <div class="activity-card__head">
+                <div class="activity-card__title">
+                    <mat-icon class="activity-card__icon" aria-hidden="true">history</mat-icon>
+                    <span class="activity-card__title-text">Son Aktiviteler</span>
+                </div>
+            </div>
+            <div class="activity-card__body">
+                <div class="activity-table-scroll">
+                    <table mat-table [dataSource]="recentActivities" class="activity-table">
+                        <ng-container matColumnDef="action">
+                            <th mat-header-cell *matHeaderCellDef>İşlem</th>
+                            <td mat-cell *matCellDef="let activity">
+                                <mat-icon class="action-icon">{{ activity.icon }}</mat-icon>
+                                {{ activity.action }}
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="user">
+                            <th mat-header-cell *matHeaderCellDef>Kullanıcı</th>
+                            <td mat-cell *matCellDef="let activity">
+                                <div class="user-cell">
+                                    <span class="user-name">{{ activity.userName || activity.user }}</span>
+                                    <span class="user-username" *ngIf="activity.userName && activity.user !== 'System'">{{ '@' + activity.user }}</span>
+                                </div>
+                            </td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="entity">
+                            <th mat-header-cell *matHeaderCellDef>Varlık</th>
+                            <td mat-cell *matCellDef="let activity">{{ activity.entity }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="time">
+                            <th mat-header-cell *matHeaderCellDef>Zaman</th>
+                            <td mat-cell *matCellDef="let activity">{{ activity.time }}</td>
+                        </ng-container>
+
+                        <ng-container matColumnDef="status">
+                            <th mat-header-cell *matHeaderCellDef>Durum</th>
+                            <td mat-cell *matCellDef="let activity">
+                                <span [class]="'badge badge-' + activity.statusClass">
+                                    {{ activity.status }}
+                                </span>
+                            </td>
+                        </ng-container>
+
+                        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+                        <tr class="mat-row" *matNoDataRow>
+                            <td class="mat-cell empty-message" [attr.colspan]="displayedColumns.length">
+                                <mat-icon>inbox</mat-icon>
+                                <p>Henüz aktivite yok</p>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </mat-card-content>
+    </mat-card>
+</div>

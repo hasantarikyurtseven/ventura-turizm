@@ -1,0 +1,45 @@
+STAGE — CLIENT WEB (SSR) UI KIT SETUP + HERO ONLY
+
+SCOPE
+- Work ONLY in: apps/client-web
+- Goal: install/configure Angular Material and add a small hero section to the home page (/).
+- Do NOT implement auth, search, booking, cart, payment, invoice, minio, jobs, or any backend changes.
+
+ANGULAR RULES
+- This app is Angular SSR.
+- NgModule architecture ONLY. Standalone components/bootstrap are strictly forbidden.
+- Keep AppModule + AppRoutingModule structure.
+- Use SCSS for styling.
+- SSR safety: do not use window/document/localStorage directly in components.
+
+UI KIT
+- Use Angular Material only (no Tailwind, no extra UI libraries).
+- Create a MaterialModule (NgModule) to centralize Material imports.
+
+HOME PAGE HERO REQUIREMENTS
+- Route: `/` must render HomeComponent.
+- Hero content (exact text):
+  - H1: "Biletini Kolayca Bul"
+  - Subtitle: "Uçak, otobüs, tur ve araç kiralama seçeneklerini tek yerde karşılaştır."
+  - Primary CTA button: "Bilet Ara"
+  - Secondary CTA button: "Üye Ol"
+- Use Angular Material components:
+  - MatButton (required)
+  - MatToolbar (optional)
+  - MatCard or simple container (optional)
+- Add minimal responsive SCSS:
+  - max-width container (e.g., 1200px)
+  - padding
+  - buttons spacing
+- Keep it clean and minimal: no over-engineering.
+
+DELIVERABLES
+- Angular Material installed and working in SSR build.
+- MaterialModule created and imported into AppModule.
+- Home page hero visible on `/`.
+- App builds/runs in SSR mode without runtime errors.
+
+CONSTRAINTS
+- Do NOT convert to standalone.
+- Do NOT add feature modules beyond what is needed for home routing and Material setup.
+- Keep changes minimal and focused.

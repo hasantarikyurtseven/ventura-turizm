@@ -1,0 +1,405 @@
+@use "sass:color";
+
+$primary-brand: #4088b3;
+$primary-dark: #183641;
+$text-primary: #0f172a;
+$text-secondary: #64748b;
+
+.login-container {
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+}
+
+// Left Side - Visual Content
+.login-visual {
+    flex: 1;
+    background: 
+        url('/assets/images/login-bg.webp'),
+        $primary-brand;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(135deg, rgba(24, 54, 65, 0.9) 0%, rgba(64, 136, 179, 0.85) 100%);
+        z-index: 0;
+    }
+
+    .visual-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+        max-width: 500px;
+        animation: fadeInUp 0.8s ease-out;
+    }
+
+    .brand-logo {
+        height: 180px;
+        width: auto;
+        margin-bottom: 3rem;
+        filter: brightness(0) invert(1) drop-shadow(0 6px 30px rgba(0, 0, 0, 0.3));
+    }
+
+    .brand-description {
+        font-size: 1.125rem;
+        color: rgba(255, 255, 255, 0.85);
+        line-height: 1.8;
+        margin: 0;
+        font-weight: 400;
+        text-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .crafted-by {
+        position: absolute;
+        bottom: 1.5rem;
+        left: 1.5rem;
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 400;
+        letter-spacing: 0.02em;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+        z-index: 1;
+    }
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// Right Side - Login Form
+.login-form-section {
+    flex: 0 0 480px;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
+}
+
+.form-wrapper {
+    width: 100%;
+    max-width: 400px;
+    animation: fadeIn 0.8s ease-out 0.2s backwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.form-header {
+    margin-bottom: 2.5rem;
+    text-align: center;
+
+    h2 {
+        font-size: 1.875rem;
+        font-weight: 700;
+        color: $primary-dark;
+        margin: 0 0 0.5rem 0;
+        letter-spacing: -0.02em;
+    }
+
+    p {
+        font-size: 0.9375rem;
+        color: $text-secondary;
+        margin: 0;
+        font-weight: 500;
+    }
+}
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.full-width {
+    width: 100%;
+}
+
+::ng-deep mat-form-field {
+    .mat-mdc-text-field-wrapper {
+        border-radius: 10px;
+        background: #f8fafc;
+        transition: all 0.25s ease;
+
+        .mdc-notched-outline {
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+                border-color: #e2e8f0 !important;
+                border-width: 1.5px !important;
+            }
+        }
+    }
+
+    &:hover:not(.mat-focused) .mat-mdc-text-field-wrapper {
+        background: #f1f5f9;
+        
+        .mdc-notched-outline {
+            .mdc-notched-outline__leading,
+            .mdc-notched-outline__notch,
+            .mdc-notched-outline__trailing {
+                border-color: rgba(64, 136, 179, 0.3) !important;
+            }
+        }
+    }
+
+    .mat-icon {
+        color: $text-secondary;
+        opacity: 0.8;
+        transition: all 0.2s;
+    }
+
+    // Remove divider line after prefix icon
+    .mat-mdc-form-field-icon-prefix > .mat-icon {
+        padding: 0 12px !important;
+    }
+
+    .mat-mdc-form-field-text-prefix {
+        border-right: none !important;
+        padding-right: 0 !important;
+    }
+
+    // Hide the divider specifically
+    .mdc-text-field--outlined .mat-mdc-form-field-infix {
+        padding-left: 0 !important;
+    }
+
+    &.mat-focused {
+        .mat-mdc-text-field-wrapper {
+            background: white;
+            box-shadow: 0 0 0 3px rgba(64, 136, 179, 0.08);
+            
+            .mdc-notched-outline {
+                .mdc-notched-outline__leading,
+                .mdc-notched-outline__notch,
+                .mdc-notched-outline__trailing {
+                    border-color: $primary-brand !important;
+                    border-width: 2px !important;
+                }
+            }
+        }
+
+        .mat-icon {
+            color: $primary-brand;
+            opacity: 1;
+        }
+    }
+
+    .mat-mdc-form-field-subscript-wrapper {
+        margin-top: 0.5rem;
+    }
+
+    input {
+        font-size: 0.9375rem;
+        color: $text-primary;
+        font-weight: 500;
+    }
+}
+
+.login-button {
+    width: 100%;
+    height: 52px !important;
+    padding: 0 2rem !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    border-radius: 10px !important;
+    margin-top: 0.5rem;
+    text-transform: none !important;
+    letter-spacing: 0.02em;
+    background: $primary-dark !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.6s;
+    }
+
+    &:hover:not([disabled]) {
+        background: color.adjust($primary-dark, $lightness: 5%) !important;
+        transform: translateY(-2px);
+
+        &::before {
+            left: 100%;
+        }
+    }
+
+    &:active:not([disabled]) {
+        transform: translateY(0);
+    }
+
+    &[disabled] {
+        opacity: 0.6;
+        cursor: not-allowed;
+    }
+
+    mat-spinner {
+        display: inline-block;
+        margin-right: 0.5rem;
+        vertical-align: middle;
+    }
+}
+
+::ng-deep .login-button mat-spinner {
+    circle {
+        stroke: white !important;
+    }
+}
+
+.demo-info {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.625rem;
+    margin-top: 1.75rem;
+    padding: 1rem 1.25rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1.5px solid #e2e8f0;
+
+    mat-icon {
+        font-size: 1.125rem;
+        width: 1.125rem;
+        height: 1.125rem;
+        color: $primary-brand;
+        flex-shrink: 0;
+        opacity: 0.9;
+    }
+
+    span {
+        font-size: 0.875rem;
+        color: $text-secondary;
+        font-weight: 500;
+    }
+}
+
+.wlp-logo-link {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    display: block;
+    width: 80px;
+    height: auto;
+    transition: all 0.3s ease;
+    opacity: 0.25;
+    text-decoration: none;
+    z-index: 10;
+
+    &:hover {
+        opacity: 1;
+        transform: scale(1.08);
+    }
+
+    .wlp-logo {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+}
+
+// Responsive Design
+@media (max-width: 992px) {
+    .login-container {
+        flex-direction: column;
+    }
+
+    .login-visual {
+        flex: 0 0 40vh;
+        padding: 3rem 2rem;
+        min-height: 40vh;
+
+        .visual-content {
+            max-width: 100%;
+        }
+
+        .brand-logo {
+            height: 120px;
+        }
+
+        .brand-description {
+            font-size: 1rem;
+        }
+    }
+
+    .login-form-section {
+        flex: 1;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.1);
+    }
+}
+
+@media (max-width: 576px) {
+    .login-visual {
+        padding: 2rem 1.5rem;
+        min-height: 35vh;
+
+        .brand-logo {
+            height: 100px;
+            margin-bottom: 2rem;
+        }
+
+        .brand-description {
+            font-size: 0.9375rem;
+        }
+    }
+
+    .login-form-section {
+        padding: 2rem 1.5rem;
+    }
+
+    .form-wrapper {
+        max-width: 100%;
+    }
+
+    .form-header {
+        margin-bottom: 2rem;
+
+        h2 {
+            font-size: 1.625rem;
+        }
+    }
+
+    .login-button {
+        height: 50px !important;
+    }
+
+    .wlp-logo-link {
+        width: 60px;
+        bottom: 0.75rem;
+        right: 0.75rem;
+    }
+}

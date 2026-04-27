@@ -1,0 +1,45 @@
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-content">
+            <button mat-icon-button (click)="back()" class="back-btn">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div>
+                <h1>{{ isEditMode ? 'Sözleşme Düzenle' : 'Yeni Sözleşme' }}</h1>
+                <p class="subtitle">{{ isEditMode ? 'Başlık ve içeriği güncelleyin. Slug değiştirilmez.' : 'Başlıktan otomatik slug oluşturulur.' }}</p>
+            </div>
+        </div>
+        <button mat-raised-button color="primary" (click)="save()" [disabled]="saving || form.invalid">
+            <mat-icon>save</mat-icon>
+            {{ saving ? 'Kaydediliyor...' : 'Kaydet' }}
+        </button>
+    </div>
+
+    <mat-card class="content-card" *ngIf="!loading">
+        <div class="card-content">
+            <form [formGroup]="form">
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Başlık</mat-label>
+                    <input matInput formControlName="title" placeholder="Örn: Kullanım Şartları" maxlength="200" />
+                    <mat-hint align="end">{{ form.get('title')?.value?.length || 0 }}/200</mat-hint>
+                    <mat-error *ngIf="form.get('title')?.hasError('required')">Başlık zorunludur</mat-error>
+                </mat-form-field>
+
+                <div class="editor-section">
+                    <label class="editor-label">İçerik</label>
+                    <quill-editor
+                        formControlName="content"
+                        [modules]="editorModules"
+                        placeholder="Sözleşme metnini yazın..."
+                        class="quill-editor-wrapper">
+                    </quill-editor>
+                </div>
+            </form>
+        </div>
+    </mat-card>
+
+    <div class="loading-container" *ngIf="loading">
+        <mat-progress-spinner mode="indeterminate" diameter="50"></mat-progress-spinner>
+        <p>Yükleniyor...</p>
+    </div>
+</div>

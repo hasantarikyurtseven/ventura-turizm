@@ -1,0 +1,713 @@
+@use "sass:color";
+
+:host {
+    display: block;
+    background: #f8fafc;
+    min-height: 100vh;
+}
+
+// Variables
+$primary-brand: #4088b3;
+$primary-dark: #183641;
+$text-primary: #0f172a;
+$text-secondary: #64748b;
+$border-radius: 16px;
+$card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+
+.dashboard-container {
+    background: #f8fafc;
+    padding: 2rem;
+    min-height: calc(100vh - 60px);
+    max-width: 1800px;
+    margin: 0 auto;
+}
+
+/* Üst hoş geldin kartı (diğer mat-card’larla aynı dil) */
+.welcome-banner {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 1.75rem;
+    border-radius: $border-radius;
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    box-shadow: $card-shadow;
+    transition:
+        opacity 0.4s ease,
+        transform 0.4s ease,
+        max-height 0.45s ease,
+        margin-bottom 0.45s ease,
+        padding 0.45s ease,
+        box-shadow 0.3s ease;
+    max-height: 200px;
+    opacity: 1;
+    transform: translateY(0);
+
+    &:hover {
+        box-shadow:
+            0 20px 25px -5px rgba(0, 0, 0, 0.08),
+            0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    &--exiting {
+        opacity: 0;
+        transform: translateY(-12px);
+        max-height: 0;
+        margin-bottom: 0;
+        padding-top: 0;
+        padding-bottom: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+}
+
+.welcome-banner__inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    padding: 1.25rem 1rem 1.25rem 1.5rem;
+    flex-wrap: wrap;
+}
+
+.welcome-banner__icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba($primary-dark, 0.08), rgba($primary-brand, 0.12));
+    color: $primary-brand;
+}
+
+.welcome-banner__main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    min-width: 0;
+    flex: 1 1 200px;
+}
+
+.welcome-banner__title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    color: $primary-dark;
+}
+
+.welcome-banner__subtitle {
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: $text-secondary;
+}
+
+.welcome-banner__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    text-align: right;
+    flex-shrink: 0;
+    padding: 0 0.5rem 0 1rem;
+    border-left: 1px solid #e2e8f0;
+    margin-left: auto;
+}
+
+.welcome-banner__meta-label {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: $text-secondary;
+}
+
+.welcome-banner__meta-value {
+    font-size: 0.9375rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    margin-top: 0.125rem;
+    color: $text-primary;
+}
+
+::ng-deep .welcome-banner__close.mat-mdc-icon-button {
+    flex-shrink: 0;
+    color: $text-secondary !important;
+    margin-left: 0.25rem;
+
+    &:hover {
+        color: $primary-brand !important;
+        background: rgba($primary-brand, 0.08) !important;
+    }
+
+    mat-icon {
+        font-size: 1.25rem;
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+}
+
+/* Statistics Cards */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+::ng-deep .stat-card {
+    border-radius: $border-radius !important;
+    border: 1px solid #e2e8f0;
+    box-shadow: $card-shadow !important;
+    transition: all 0.3s ease;
+    background: white;
+
+    &:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+    }
+
+    .mat-mdc-card-content {
+        padding: 2rem;
+    }
+}
+
+.stat-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 0.875rem;
+    color: $text-secondary;
+    margin: 0 0 0.5rem 0;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.stat-value {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin: 0 0 0.75rem 0;
+    color: $text-primary;
+    line-height: 1;
+
+    &--revenue {
+        font-size: clamp(1.35rem, 4vw, 2.1rem);
+        font-variant-numeric: tabular-nums;
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 0.125rem;
+    }
+}
+
+.stat-currency {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: $text-secondary;
+    margin-left: 0.125rem;
+}
+
+.stat-change {
+    font-size: 0.8rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-weight: 600;
+
+    &.positive {
+        color: #10b981;
+    }
+
+    &.negative {
+        color: #ef4444;
+    }
+
+    &.neutral {
+        color: $text-secondary;
+    }
+
+    mat-icon {
+        font-size: 1rem;
+        width: 1rem;
+        height: 1rem;
+    }
+}
+
+.stat-icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s;
+
+    &:hover {
+        transform: scale(1.05);
+    }
+
+    mat-icon {
+        font-size: 2.5rem;
+        width: 2.5rem;
+        height: 2.5rem;
+        color: white;
+    }
+
+    &.stat-icon-primary {
+        background: linear-gradient(135deg, $primary-brand 0%, color.adjust($primary-brand, $lightness: -15%) 100%);
+    }
+
+    &.stat-icon-success {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+
+    &.stat-icon-warning {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+
+    &.stat-icon-info {
+        background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    }
+}
+
+::ng-deep mat-card {
+    border-radius: $border-radius !important;
+    box-shadow: $card-shadow !important;
+    border: 1px solid #e2e8f0;
+    background: white;
+
+    .mat-mdc-card-header {
+        padding: 1.5rem 1.5rem 0;
+        border-bottom: 2px solid #f1f5f9;
+        margin-bottom: 1.5rem;
+
+        .mat-mdc-card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: $primary-dark;
+            margin: 0 0 1.5rem 0;
+        }
+    }
+
+    .mat-mdc-card-content {
+        padding: 0 1.5rem 1.5rem;
+    }
+}
+
+/* Badges */
+.badge {
+    padding: 0.375rem 0.875rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+
+    &.badge-success {
+        background: linear-gradient(135deg, #10b981, #059669);
+        color: white;
+        box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+    }
+
+    &.badge-warning {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+    }
+
+    &.badge-danger {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    }
+
+    &.badge-info {
+        background: linear-gradient(135deg, $primary-brand, color.adjust($primary-brand, $lightness: -10%));
+        color: white;
+        box-shadow: 0 2px 4px rgba($primary-brand, 0.3);
+    }
+
+    &.badge-error {
+        background: linear-gradient(135deg, #ef4444, #dc2626);
+        color: white;
+        box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+    }
+}
+
+/* Son Rezervasyonlar + Yeni Müşteriler yan yana */
+.dashboard-panels {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    align-items: stretch;
+}
+
+@media (max-width: 1100px) {
+    .dashboard-panels {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Son Rezervasyonlar / Yeni Müşteriler / Son Aktiviteler — aynı panel düzeni */
+::ng-deep .reservations-card.mat-mdc-card,
+::ng-deep .new-members-card.mat-mdc-card,
+::ng-deep .activity-card.mat-mdc-card {
+    margin-bottom: 2rem;
+    overflow: hidden;
+}
+
+::ng-deep .dashboard-panels .reservations-card.mat-mdc-card,
+::ng-deep .dashboard-panels .new-members-card.mat-mdc-card {
+    margin-bottom: 0 !important;
+    height: 100%;
+}
+
+::ng-deep .reservations-card .reservations-card__content.mat-mdc-card-content,
+::ng-deep .new-members-card .new-members-card__content.mat-mdc-card-content,
+::ng-deep .activity-card .activity-card__content.mat-mdc-card-content {
+    padding: 0 !important;
+    display: block;
+}
+
+.reservations-card__head,
+.new-members-card__head,
+.activity-card__head {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem 1.25rem;
+    padding: 1.25rem 1.5rem;
+    background: linear-gradient(
+        135deg,
+        rgba($primary-dark, 0.06) 0%,
+        rgba($primary-brand, 0.08) 100%
+    );
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.reservations-card__title,
+.new-members-card__title,
+.activity-card__title {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+}
+
+.reservations-card__icon,
+.new-members-card__icon,
+.activity-card__icon {
+    flex-shrink: 0;
+    color: $primary-brand;
+    font-size: 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.reservations-card__title-text,
+.new-members-card__title-text,
+.activity-card__title-text {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: $primary-dark;
+    letter-spacing: -0.02em;
+    line-height: 1.3;
+}
+
+::ng-deep .reservations-card__cta.mat-mdc-outlined-button,
+::ng-deep .new-members-card__cta.mat-mdc-outlined-button {
+    flex-shrink: 0;
+    border-radius: 10px !important;
+    font-weight: 600;
+
+    .mdc-button__label,
+    .mat-mdc-button-touch-target {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+}
+
+.reservations-card__body,
+.new-members-card__body,
+.activity-card__body {
+    padding: 0;
+}
+
+.reservations-loading,
+.new-members-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 160px;
+    padding: 2rem 1.5rem;
+}
+
+.reservations-table-scroll,
+.new-members-table-scroll,
+.activity-table-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.res-code {
+    font-family: ui-monospace, 'Courier New', monospace;
+    font-size: 0.8125rem;
+    font-weight: 700;
+    color: $primary-dark;
+    background: rgba($primary-dark, 0.06);
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    border: 1px solid rgba($primary-dark, 0.08);
+}
+
+.customer-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+
+    .customer-name {
+        font-weight: 600;
+        color: $text-primary;
+    }
+
+    .customer-email {
+        font-size: 0.8rem;
+        color: $text-secondary;
+    }
+}
+
+.res-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    &.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    &.confirmed {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+
+    &.completed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    &.cancelled {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+
+    &.payment_failed {
+        background: #ffedd5;
+        color: #9a3412;
+    }
+}
+
+.member-status-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.3rem 0.7rem;
+    border-radius: 9999px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    &.pending {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    &.active {
+        background: #d1fae5;
+        color: #065f46;
+    }
+
+    &.suspended {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+}
+
+::ng-deep .reservations-card .reservations-table.mat-mdc-table,
+::ng-deep .new-members-card .new-members-table.mat-mdc-table,
+::ng-deep .activity-card .activity-table.mat-mdc-table {
+    width: 100%;
+    min-width: 720px;
+
+    .mat-mdc-header-cell {
+        background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+        color: $primary-dark;
+        font-weight: 700;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 0.875rem 1.25rem;
+        border-bottom: 2px solid $primary-brand;
+    }
+
+    .mat-mdc-cell {
+        padding: 1rem 1.25rem;
+        border-bottom: 1px solid #f1f5f9;
+        color: $text-primary;
+        font-size: 0.9rem;
+        vertical-align: middle;
+
+        .action-icon {
+            vertical-align: middle;
+            margin-right: 0.5rem;
+            color: $primary-brand;
+            font-size: 1.25rem;
+            width: 1.25rem;
+            height: 1.25rem;
+        }
+
+        .user-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+
+            .user-name {
+                font-weight: 600;
+                color: $text-primary;
+            }
+
+            .user-username {
+                font-size: 0.8rem;
+                color: $text-secondary;
+                font-weight: 400;
+            }
+        }
+    }
+
+    .mat-mdc-row:hover .mat-mdc-cell {
+        background-color: #f8fafc;
+    }
+
+    .empty-message {
+        text-align: center;
+        padding: 2.5rem 1.5rem !important;
+        color: $text-secondary;
+
+        mat-icon {
+            font-size: 2.5rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            opacity: 0.35;
+            display: block;
+            margin: 0 auto 0.75rem;
+        }
+
+        p {
+            margin: 0;
+            font-size: 0.95rem;
+        }
+    }
+}
+
+::ng-deep .new-members-card .new-members-table.mat-mdc-table {
+    min-width: 560px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .header-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+
+        .last-login {
+            text-align: left;
+        }
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .stat-value {
+        font-size: 1.75rem;
+    }
+
+    .stat-icon {
+        width: 56px;
+        height: 56px;
+
+        mat-icon {
+            font-size: 2rem;
+            width: 2rem;
+            height: 2rem;
+        }
+    }
+
+    .reservations-card__head,
+    .new-members-card__head,
+    .activity-card__head {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 1rem 1.25rem;
+    }
+
+    .reservations-card__cta,
+    .new-members-card__cta {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .welcome-banner__inner {
+        position: relative;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 2.5rem 0.75rem 1rem;
+    }
+
+    .welcome-banner__close {
+        position: absolute;
+        top: 0.35rem;
+        right: 0.25rem;
+    }
+
+    .welcome-banner__meta {
+        align-items: flex-start;
+        text-align: left;
+        border-left: none;
+        border-top: 1px solid #e2e8f0;
+        padding: 0.75rem 0 0;
+        margin-left: 0;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+    }
+}

@@ -1,0 +1,637 @@
+.admin-container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background: #f8fafc;
+}
+
+/* Modern Header with Diagonal Split Design */
+::ng-deep .admin-header {
+    background: linear-gradient(70deg, #183641 120px, #4088b3 121px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12) !important;
+    position: sticky !important;
+    top: 0;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    height: auto !important;
+    min-height: 48px !important;
+    padding: 0 !important;
+    width: 100%;
+
+    .mat-toolbar-row,
+    .mat-toolbar-single-row {
+        padding: 0 !important;
+        width: 100%;
+    }
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 1.5rem;
+    width: 100%;
+}
+
+/* Logo Section */
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    margin-right: 1.5rem;
+
+    &:hover {
+        transform: translateY(-1px);
+    }
+
+    .logo-image {
+        height: 32px;
+        width: auto;
+        object-fit: contain;
+        filter: brightness(0) invert(1);
+    }
+
+    i {
+        color: white;
+        font-size: 1.5rem;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* User Section */
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 0.875rem;
+    margin-left: auto;
+}
+
+/*
+ * MatButton (MDC): ikon ve metin farklı ng-content slot’larında — ikon doğrudan <button> altında,
+ * metin .mdc-button__label içinde. Boşluk için gap’i butonun kendisine ve ikona margin veriyoruz.
+ */
+::ng-deep .admin-header .header-left button.mat-mdc-button.control-panel-button,
+::ng-deep .admin-header .header-left button.mat-mdc-button.settings-button {
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    flex-wrap: nowrap !important;
+    color: white !important;
+    font-weight: 400 !important;
+    font-size: 0.875rem !important;
+    background: transparent !important;
+    border: none !important;
+    border-radius: 4px !important;
+    padding: 0.5rem 0.5rem !important;
+    margin: 0 !important;
+    transition: all 0.2s ease !important;
+    height: auto !important;
+    line-height: 1 !important;
+    min-width: auto !important;
+    opacity: 0.7;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        opacity: 0.9;
+    }
+
+    &:active {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    &.active {
+        opacity: 1 !important;
+        color: white !important;
+        font-weight: 500 !important;
+    }
+
+    /* margin:0 kullanma — Material’ın ikon-metin aralığını (margin-right) sıfırlıyordu */
+    & > mat-icon {
+        font-size: 1.125rem !important;
+        width: 1.125rem !important;
+        height: 1.125rem !important;
+        line-height: 1.125rem !important;
+        flex-shrink: 0 !important;
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        margin-left: 0 !important;
+        margin-right: 0.5rem !important;
+    }
+
+    .mdc-button__label {
+        line-height: 1 !important;
+    }
+}
+
+.menu-separator {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 0.75rem;
+    font-weight: 300;
+    padding: 0;
+    margin: 0 0.25rem;
+    user-select: none;
+}
+
+/* Notification and Message Buttons */
+::ng-deep .notification-button,
+::ng-deep .message-button {
+    position: relative !important;
+    color: white !important;
+    margin-right: 0.5rem !important;
+    transition: all 0.2s ease !important;
+
+    mat-icon {
+        color: white !important;
+        opacity: 0.9;
+    }
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+        
+        mat-icon {
+            opacity: 1;
+        }
+    }
+
+    &:active {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+}
+
+.notification-badge,
+.message-badge {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: #ef4444;
+    color: white;
+    font-size: 0.625rem;
+    font-weight: 600;
+    padding: 2px 5px;
+    border-radius: 10px;
+    min-width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+    border: 2px solid #183641;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+::ng-deep .profile-trigger {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.625rem !important;
+    cursor: pointer;
+    padding: 0.375rem 0.75rem !important;
+    border-radius: 4px !important;
+    transition: background-color 0.2s ease !important;
+    background: transparent !important;
+    border: none !important;
+    color: white !important;
+    height: auto !important;
+    line-height: 1 !important;
+    min-width: auto !important;
+
+    &:hover {
+        background: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    &:active {
+        background: rgba(255, 255, 255, 0.15) !important;
+    }
+
+    .mat-button-wrapper,
+    .mdc-button__label {
+        display: flex !important;
+        flex-direction: row !important;
+        align-items: center !important;
+        gap: 0.625rem !important;
+    }
+}
+
+.user-name-text {
+    color: white !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    white-space: nowrap !important;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    line-height: 1 !important;
+    flex-shrink: 0;
+}
+
+.user-initials-avatar {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    min-height: 28px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 0.75rem;
+    line-height: 1;
+    border: none;
+}
+
+.user-name-display {
+    display: flex;
+    align-items: center;
+    padding: 0 0.75rem;
+}
+
+/* Notification and Message Dropdown Menus */
+::ng-deep .notification-dropdown-menu,
+::ng-deep .message-dropdown-menu {
+    margin-top: 0.75rem !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    min-width: 320px !important;
+    max-width: 380px !important;
+    max-height: 500px !important;
+    overflow: hidden;
+
+    .mat-mdc-menu-content {
+        padding: 0 !important;
+    }
+}
+
+.notification-header,
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #e2e8f0;
+    background: #f8fafc;
+
+    .notification-title,
+    .message-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    .mark-all-read {
+        width: 32px !important;
+        height: 32px !important;
+        padding: 0 !important;
+        color: #4088b3 !important;
+
+        mat-icon {
+            font-size: 1.125rem !important;
+            width: 1.125rem !important;
+            height: 1.125rem !important;
+        }
+    }
+}
+
+.notification-list,
+.message-list {
+    max-height: 350px;
+    overflow-y: auto;
+}
+
+.notification-item,
+.message-item {
+    padding: 0 !important;
+    height: auto !important;
+    min-height: auto !important;
+    border-bottom: 1px solid #f1f5f9;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover {
+        background: #f8fafc !important;
+    }
+}
+
+.notification-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    width: 100%;
+
+    .notification-icon {
+        color: #4088b3 !important;
+        font-size: 1.25rem !important;
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .notification-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        flex: 1;
+
+        .notification-message {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #0f172a;
+            line-height: 1.4;
+        }
+
+        .notification-time {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+    }
+}
+
+.message-content {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+    padding: 1rem 1.25rem;
+    width: 100%;
+
+    .message-avatar {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        border-radius: 50%;
+        background: #4088b3;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 500;
+        font-size: 0.75rem;
+        flex-shrink: 0;
+    }
+
+    .message-text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        flex: 1;
+        min-width: 0;
+
+        .message-sender {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #0f172a;
+        }
+
+        .message-preview {
+            font-size: 0.8125rem;
+            color: #64748b;
+            line-height: 1.4;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: #94a3b8;
+        }
+    }
+}
+
+.notification-empty,
+.message-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    gap: 0.75rem;
+    color: #94a3b8;
+
+    mat-icon {
+        font-size: 3rem !important;
+        width: 3rem !important;
+        height: 3rem !important;
+        opacity: 0.5;
+    }
+
+    span {
+        font-size: 0.875rem;
+    }
+}
+
+.notification-footer,
+.message-footer {
+    padding: 0.75rem 1.25rem;
+    border-top: 1px solid #e2e8f0;
+    background: #f8fafc;
+    text-align: center;
+
+    .view-all-btn {
+        color: #4088b3 !important;
+        font-weight: 500;
+        font-size: 0.875rem;
+        text-transform: none;
+        padding: 0.5rem 1.5rem !important;
+    }
+}
+
+/* User Dropdown Menu */
+::ng-deep .user-dropdown-menu {
+    margin-top: 0.75rem;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    /* Uzun Türkçe satırlar (ör. Tamamlanan Rezervasyonlar) tek satırda kalsın */
+    min-width: min(100vw - 2rem, 320px) !important;
+    max-width: min(100vw - 2rem, 420px) !important;
+    overflow: hidden;
+
+    .mat-mdc-menu-content {
+        padding: 0 !important;
+    }
+
+    /*
+     * MatMenuItem DOM: <mat-icon> ve <span.mat-mdc-menu-item-text> kardeş — gap metin kutusunun içinde ikonu kapsamaz.
+     * İkon–yazı aralığı: doğrudan mat-icon’a margin veya butonda row gap.
+     */
+    button.mat-mdc-menu-item {
+        padding: 0.875rem 1.25rem !important;
+        transition: background-color 0.2s ease;
+        font-size: 0.95rem !important;
+        height: auto !important;
+        min-height: 48px;
+        align-items: center !important;
+
+        &:hover {
+            background: #f8fafc !important;
+        }
+
+        .mdc-list-item__content,
+        .mat-mdc-menu-item-content {
+            display: flex !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+            overflow: visible;
+        }
+
+        .mat-mdc-menu-item-text {
+            display: inline-flex !important;
+            align-items: center !important;
+            flex-wrap: nowrap !important;
+            min-width: 0;
+            flex: 1 1 auto;
+        }
+
+        & > mat-icon {
+            color: #4088b3 !important;
+            font-size: 1.125rem !important;
+            width: 1.125rem !important;
+            height: 1.125rem !important;
+            flex-shrink: 0 !important;
+            margin-block: 0 !important;
+            margin-inline: 0 0.5rem !important;
+        }
+
+        span {
+            font-weight: 500;
+            color: #0f172a;
+            white-space: nowrap !important;
+        }
+    }
+}
+
+/* Page Content */
+.page-content {
+    flex: 1;
+    overflow-y: auto;
+    background: #f8fafc;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-content {
+        padding: 0.75rem 1rem;
+    }
+
+    .header-left {
+        gap: 1rem;
+    }
+
+    .user-name-text {
+        display: none !important;
+    }
+
+    ::ng-deep .control-panel-button,
+    ::ng-deep .settings-button {
+        span {
+            display: none;
+        }
+        
+        padding: 0.5rem !important;
+        min-width: 40px;
+    }
+
+    ::ng-deep .profile-trigger {
+        gap: 0 !important;
+    }
+
+    ::ng-deep .notification-button,
+    ::ng-deep .message-button {
+        margin-right: 0.25rem !important;
+    }
+}
+
+/* Scrollbar Styling */
+.page-content::-webkit-scrollbar {
+    width: 10px;
+}
+
+.page-content::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 5px;
+}
+
+.page-content::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 5px;
+
+    &:hover {
+        background: #94a3b8;
+    }
+}
+
+/* Footer */
+.admin-footer {
+    background: transparent;
+    padding: 0.75rem 1.5rem;
+    margin-top: auto;
+    border-top: 1px solid #e2e8f0;
+}
+
+.footer-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.footer-text {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+}
+
+.footer-logo-link {
+    display: block;
+    width: 50px;
+    height: auto;
+    opacity: 0.3;
+    transition: all 0.3s ease;
+    text-decoration: none;
+
+    &:hover {
+        opacity: 0.7;
+    }
+
+    .footer-logo {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .admin-footer {
+        padding: 0.75rem 1rem;
+    }
+
+    .footer-content {
+        flex-direction: column;
+        gap: 0.375rem;
+        text-align: center;
+    }
+
+    .footer-logo-link {
+        width: 45px;
+    }
+
+    .footer-text {
+        font-size: 0.7rem;
+    }
+}

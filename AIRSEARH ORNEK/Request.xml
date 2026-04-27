@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-16"?>
+<IO_AirSearchRequest xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+  <EndUserInfo xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base">
+    <EndUserBrowserAgent>DefaultBrowser</EndUserBrowserAgent>
+    <EndUserIpAddress>127.0.0.1</EndUserIpAddress>
+    <RequestOrigin>DefaultRequestOrigin</RequestOrigin>
+  </EndUserInfo>
+  <AuthenticationHeader xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base">
+    <SessionId>171099</SessionId>
+    <SessionToken>56a64ac7-13fc-4139-93d2-d106c7b67f24</SessionToken>
+  </AuthenticationHeader>
+  <ExtraParamList xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base">
+    <ExtendedData>
+      <Name>BrandedFareVersion</Name>
+      <Type i:nil="true" />
+      <Value>v2</Value>
+    </ExtendedData>
+  </ExtraParamList>
+  <CreateNewShoppingFile>true</CreateNewShoppingFile>
+  <Form xmlns:a="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Air">
+    <a:CorporateFares i:nil="true" />
+    <a:FlightType>RT</a:FlightType>
+    <a:IsStatelessRequest>false</a:IsStatelessRequest>
+    <a:Options>
+      <a:CombinablePrice i:nil="true" />
+      <a:FlightClass>Economy</a:FlightClass>
+      <a:FlightWithBaggage>false</a:FlightWithBaggage>
+      <a:IfDirectFlightsOnly>false</a:IfDirectFlightsOnly>
+      <a:IfRefundablesOnly>false</a:IfRefundablesOnly>
+      <a:PreferedAirlines i:nil="true" xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays" />
+      <a:SearchTimeoutMilliseconds>20000</a:SearchTimeoutMilliseconds>
+    </a:Options>
+    <a:PaxItems>
+      <a:T_AirSearch_PaxItem>
+        <a:PaxCode>ADT</a:PaxCode>
+        <a:PaxCount>1</a:PaxCount>
+      </a:T_AirSearch_PaxItem>
+    </a:PaxItems>
+    <a:Segments>
+      <a:T_AirSearch_SegmentItem>
+        <a:DepartureDay>2026-03-14T00:00:00</a:DepartureDay>
+        <a:Destination>
+          <a:Code>IST</a:Code>
+          <a:CountryCode>TR</a:CountryCode>
+          <a:IsCity>true</a:IsCity>
+          <a:Name />
+        </a:Destination>
+        <a:Origin>
+          <a:Code>ESB</a:Code>
+          <a:CountryCode>TR</a:CountryCode>
+          <a:IsCity>false</a:IsCity>
+          <a:Name />
+        </a:Origin>
+        <a:SequenceNo>1</a:SequenceNo>
+      </a:T_AirSearch_SegmentItem>
+      <a:T_AirSearch_SegmentItem>
+        <a:DepartureDay>2026-03-15T00:00:00</a:DepartureDay>
+        <a:Destination>
+          <a:Code>ESB</a:Code>
+          <a:CountryCode>TR</a:CountryCode>
+          <a:IsCity>false</a:IsCity>
+          <a:Name />
+        </a:Destination>
+        <a:Origin>
+          <a:Code>IST</a:Code>
+          <a:CountryCode>TR</a:CountryCode>
+          <a:IsCity>true</a:IsCity>
+          <a:Name />
+        </a:Origin>
+        <a:SequenceNo>2</a:SequenceNo>
+      </a:T_AirSearch_SegmentItem>
+    </a:Segments>
+  </Form>
+</IO_AirSearchRequest>

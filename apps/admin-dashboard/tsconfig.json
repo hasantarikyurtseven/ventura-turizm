@@ -16,7 +16,15 @@
     "moduleResolution": "bundler",
     "importHelpers": true,
     "target": "ES2022",
-    "module": "ES2022"
+    "module": "ES2022",
+    "paths": {
+      "@ngx-translate/core": [
+        "./node_modules/@ngx-translate/core"
+      ],
+      "@ngx-translate/http-loader": [
+        "./node_modules/@ngx-translate/http-loader"
+      ]
+    }
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,
