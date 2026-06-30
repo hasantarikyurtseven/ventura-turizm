@@ -433,17 +433,32 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private getSelectedBrandedItems() {
-    // BiletBank RT örneği: her segment için ayrı IO_Air_Branded_Form,
-    // hepsi Allocate sonrası dönen TEK allocated productId ile.
+    // BiletBank, Allocate sonrasında bütün round-trip leg'lerini TEK bir productId altında birleştirir.
+    // MakePrebooking'te <Branded><IO_Air_Branded_Form><ProductId> bu allocated productId olmalı;
+    // aksi hâlde BiletBank ürünü sepette bulamaz ve sessizce görmezden gelir.
     const allocatedProductId = this.bookingData?.allocateProductId;
+    const legs = this.packageLegs.filter((leg) => leg.brandedFareItemId?.trim());
 
-    return this.packageLegs
-      .filter((leg) => leg.brandedFareItemId?.trim())
-      .map((leg) => ({
-        productId: allocatedProductId || leg.productId,
-        brandedFareItemId: leg.brandedFareItemId,
-        brandedCode: leg.selectedBrand?.brandCode,
-      }));
+    // RT (gidiş-dönüş) uçuşlarda BiletBank tüm segment'leri TEK bir product olarak tahsis eder.
+    // Aynı productId için birden fazla IO_Air_Branded_Form gönderilmesi ProviderPricingError'a yol açar.
+    // Bu durumda ana Allocate çağrısındaki marka (bookingData.brandedFareItemId) kullanılmalı.
+    const resolvedProductId = allocatedProductId || legs[0]?.productId;
+    const uniqueProductIds = new Set(legs.map(() => resolvedProductId));
+    if (uniqueProductIds.size === 1 && legs.length > 1) {
+      const mainBrandId = this.bookingData?.brandedFareItemId || legs[legs.length - 1].brandedFareItemId;
+      const mainBrandCode = this.bookingData?.selectedBrand?.brandCode || legs[legs.length - 1].selectedBrand?.brandCode;
+      return [{
+        productId: resolvedProductId,
+        brandedFareItemId: mainBrandId,
+        brandedCode: mainBrandCode,
+      }];
+    }
+
+    return legs.map((leg) => ({
+      productId: allocatedProductId || leg.productId,
+      brandedFareItemId: leg.brandedFareItemId,
+      brandedCode: leg.selectedBrand?.brandCode,
+    }));
   }
 
   /**

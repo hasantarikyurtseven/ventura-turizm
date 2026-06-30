@@ -5045,10 +5045,6 @@ ${formsXml}
             </trev:ExtraParamList>
             <trev1:Form>${brandedXml}
                <trev1:CIPRequest/>
-               <trev1:ExtraForm>
-                  <trev1:SelectedServiceFee>0</trev1:SelectedServiceFee>
-               </trev1:ExtraForm>
-               <trev1:CIPRequest/>
                <trev1:ProductIds>${productIdsXml}
                </trev1:ProductIds>
             </trev1:Form>
@@ -5093,6 +5089,7 @@ ${formsXml}
                     this.logger.warn('MakePreBooking: ProviderPricingError — retrying with DoReservation=false', {
                         correlationId, errorMessage, elapsedTime,
                         productIds,
+                        providerId: mapped.details?.ShoppingFile?.AirBookings?.T_AirBooking?.ProviderId,
                     });
                     const retryXml = buildXml(false, false);
                     this.logger.log('[MakePrebooking] RETRY (DoReservation=false) SOAP REQUEST XML:\n' + retryXml);
@@ -5111,7 +5108,7 @@ ${formsXml}
                         const hasRetryShoppingFile = !!retryMapped.shoppingFileId || !!mapped.shoppingFileId;
                         const isStillProviderError = retryLower.includes('unexpected provider error') || retryLower.includes('providerpricing');
                         if (isStillProviderError && hasRetryShoppingFile) {
-                            this.logger.warn('MakePreBooking: ProviderPricingError on retry — continuing with ShoppingFile data', {
+                            this.logger.warn('MakePreBooking: ProviderPricingError on retry — continuing with ShoppingFile data (payment will verify price)', {
                                 correlationId, retryError, elapsedTime,
                                 shoppingFileId: retryMapped.shoppingFileId || mapped.shoppingFileId,
                                 retryTotalFare: retryMapped.airBookings?.[0]?.totalFare,

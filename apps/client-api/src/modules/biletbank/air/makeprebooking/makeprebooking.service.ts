@@ -132,10 +132,6 @@ ${formsXml}
             </trev:ExtraParamList>
             <trev1:Form>${brandedXml}
                <trev1:CIPRequest/>
-               <trev1:ExtraForm>
-                  <trev1:SelectedServiceFee>0</trev1:SelectedServiceFee>
-               </trev1:ExtraForm>
-               <trev1:CIPRequest/>
                <trev1:ProductIds>${productIdsXml}
                </trev1:ProductIds>
             </trev1:Form>
@@ -174,6 +170,8 @@ ${formsXml}
           throw new UnauthorizedException('Oturum süresi dolmuş. Lütfen yeniden arama yapın.');
         }
 
+        // BiletBank iç sistem hatası (UnknownSystemError) + ShoppingFile verisi mevcutsa
+        // uyarı logla ama kısmi veriyle devam et
         const hasPartialData = !!mapped.shoppingFileId;
         if (mapped.isUnknownSystemError && hasPartialData) {
           this.logger.warn('MakePreBooking: BiletBank internal error, continuing with partial ShoppingFile data', {
@@ -182,10 +180,15 @@ ${formsXml}
             isCcPaymentEnabled: mapped.isCcPaymentEnabled,
             isRaPaymentEnabled: mapped.isRaPaymentEnabled,
           });
+          // Devam et — hatayı yut, kısmi veriye warnings ile dön
         } else if (lowerMsg.includes('unexpected provider error') || lowerMsg.includes('providerpricing')) {
+          // Provider (havayolu GDS) fiyat doğrulamasını reddetti.
+          // DoReservation=true, bazı sağlayıcılarda desteklenmiyor.
+          // Önce DoReservation=false ile retry dene.
           this.logger.warn('MakePreBooking: ProviderPricingError — retrying with DoReservation=false', {
             correlationId, errorMessage, elapsedTime,
             productIds,
+            providerId: (mapped.details as any)?.ShoppingFile?.AirBookings?.T_AirBooking?.ProviderId,
           });
           const retryXml = buildXml(false, false);
           this.logger.log('[MakePrebooking] RETRY (DoReservation=false) SOAP REQUEST XML:\n' + retryXml);
@@ -201,15 +204,20 @@ ${formsXml}
           if (retryMapped.hasError) {
             const retryError = retryMapped.errorMessage || errorMessage;
             const retryLower = retryError.toLowerCase();
+            // DoReservation=false de başarısız oldu ama ShoppingFile verisi var
+            // → ProviderPricingError kısmi başarı olarak kabul et (ödeme adımı fiyatı teyit eder)
             const hasRetryShoppingFile = !!retryMapped.shoppingFileId || !!mapped.shoppingFileId;
             const isStillProviderError = retryLower.includes('unexpected provider error') || retryLower.includes('providerpricing');
             if (isStillProviderError && hasRetryShoppingFile) {
-              this.logger.warn('MakePreBooking: ProviderPricingError on retry — continuing with ShoppingFile data', {
+              this.logger.warn('MakePreBooking: ProviderPricingError on retry — continuing with ShoppingFile data (payment will verify price)', {
                 correlationId, retryError, elapsedTime,
                 shoppingFileId: retryMapped.shoppingFileId || mapped.shoppingFileId,
                 retryTotalFare: retryMapped.airBookings?.[0]?.totalFare,
                 originalTotalFare: mapped.airBookings?.[0]?.totalFare,
               });
+              // Retry yanıtı BiletBank'ın en güncel ShoppingFile verisini taşır
+              // (DoReservation=true ek rezervasyon ücreti ekleyebilir; DoReservation=false kaldırır).
+              // Retry'dan gelen ShoppingFile alanlarını seçici olarak güncelle:
               if (retryMapped.shoppingFileId) mapped.shoppingFileId = retryMapped.shoppingFileId;
               if (retryMapped.airBookings?.length) mapped.airBookings = retryMapped.airBookings;
               if (retryMapped.remainingSum !== undefined) mapped.remainingSum = retryMapped.remainingSum;
@@ -225,6 +233,7 @@ ${formsXml}
               throw new BadRequestException(retryError);
             }
           } else {
+            // DoReservation=false başarılı — retryMapped'i kullan
             Object.assign(mapped, retryMapped);
           }
         } else {
@@ -239,6 +248,9 @@ ${formsXml}
 
       const booking = mapped.airBookings?.[0];
 
+      // MakePrebooking başarılı görünse bile BiletBank bazen state'i değiştirmez:
+      // RemainingSum = 0 ve status = SelectedAllocated → productId uyumsuzluğu olabilir.
+      // Bu durumu uyarı olarak logla; frontend totalFare'e döner.
       const prebookingWorked = (mapped.remainingSum ?? 0) > 0 ||
         booking?.status?.toLowerCase().includes('prebooking') ||
         booking?.status?.toLowerCase().includes('reservation');
