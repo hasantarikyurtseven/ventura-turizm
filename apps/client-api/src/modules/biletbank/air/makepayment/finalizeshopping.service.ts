@@ -86,7 +86,7 @@ export class BiletbankFinalizeShoppingService {
         clientKey: c.clientKey,
         soapAction: 'http://tempuri.org/I_Shopping/FinalizeShopping',
         xml,
-        timeoutMs: 30000,
+        timeoutMs: 90000,
       });
 
       const elapsedTime = Date.now() - startTime;

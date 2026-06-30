@@ -230,6 +230,31 @@
   right: 0;
   bottom: 0;
   z-index: 999;
+
+  // Kapalıyken içerik arkasına tıklamaları geçir, arka planı göster
+  pointer-events: none;
+  background: transparent !important;
+
+  // Sidenav çekmecesi ve backdrop aktif kalmalı
+  ::ng-deep .mat-drawer {
+    pointer-events: auto;
+  }
+
+  ::ng-deep .mat-drawer-backdrop {
+    pointer-events: none;
+
+    &.mat-drawer-shown {
+      pointer-events: auto;
+    }
+  }
+
+  // Boş içerik alanı sayfa içeriğini örtmesin
+  ::ng-deep .mat-sidenav-content,
+  ::ng-deep .mat-drawer-content {
+    background: transparent !important;
+    pointer-events: none !important;
+    overflow: hidden !important;
+  }
 }
 
 .mobile-sidenav {

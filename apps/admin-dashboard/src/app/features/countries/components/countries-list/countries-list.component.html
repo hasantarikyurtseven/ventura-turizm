@@ -1,0 +1,176 @@
+<div class="page-container">
+    <div class="page-header">
+        <div class="header-content">
+            <h1>Ülkeler</h1>
+            <p class="subtitle">
+                Havalimanı veritabanındaki ülkeleri görüntüleyin. Bir satıra tıklayarak ülkenin havalimanlarını görebilirsiniz.
+            </p>
+        </div>
+        <div class="header-stats" *ngIf="!loading">
+            <div class="stat-pill">
+                <mat-icon>public</mat-icon>
+                <div class="stat-content">
+                    <span class="stat-value">{{ totalRecords | number }}</span>
+                    <span class="stat-label">Ülke</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <mat-card class="content-card">
+        <div class="search-row">
+            <mat-form-field appearance="outline" class="search-field">
+                <mat-label>Ara (ülke kodu veya adı)</mat-label>
+                <input
+                    matInput
+                    [(ngModel)]="searchTerm"
+                    (keyup.enter)="onSearch()"
+                    placeholder="Örn: TR, Türkiye, Almanya" />
+                <button
+                    *ngIf="searchTerm"
+                    mat-icon-button
+                    matSuffix
+                    aria-label="Temizle"
+                    (click)="clearSearch()">
+                    <mat-icon>close</mat-icon>
+                </button>
+                <button mat-icon-button matSuffix (click)="onSearch()" aria-label="Ara">
+                    <mat-icon>search</mat-icon>
+                </button>
+            </mat-form-field>
+        </div>
+
+        <div class="table-container" *ngIf="!loading">
+            <table mat-table [dataSource]="countries" class="countries-table" multiTemplateDataRows>
+                <!-- Expand Indicator -->
+                <ng-container matColumnDef="expand">
+                    <th mat-header-cell *matHeaderCellDef class="expand-column"></th>
+                    <td mat-cell *matCellDef="let c" class="expand-column">
+                        <button
+                            mat-icon-button
+                            class="expand-btn"
+                            [class.expanded]="isExpanded(c)"
+                            (click)="toggleExpand(c); $event.stopPropagation()"
+                            aria-label="Detayları göster">
+                            <mat-icon>expand_more</mat-icon>
+                        </button>
+                    </td>
+                </ng-container>
+
+                <!-- Flag -->
+                <ng-container matColumnDef="flag">
+                    <th mat-header-cell *matHeaderCellDef class="flag-column">BAYRAK</th>
+                    <td mat-cell *matCellDef="let c" class="flag-column">
+                        <span class="flag-emoji">{{ flagFor(c.countryCode) }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Country Code -->
+                <ng-container matColumnDef="countryCode">
+                    <th mat-header-cell *matHeaderCellDef>KOD</th>
+                    <td mat-cell *matCellDef="let c">
+                        <span class="code-badge">{{ c.countryCode }}</span>
+                    </td>
+                </ng-container>
+
+                <!-- Country Name -->
+                <ng-container matColumnDef="countryName">
+                    <th mat-header-cell *matHeaderCellDef>ÜLKE ADI</th>
+                    <td mat-cell *matCellDef="let c">
+                        <strong>{{ c.countryName }}</strong>
+                    </td>
+                </ng-container>
+
+                <!-- Airport Count -->
+                <ng-container matColumnDef="airportCount">
+                    <th mat-header-cell *matHeaderCellDef class="num-column">HAVALİMANI</th>
+                    <td mat-cell *matCellDef="let c" class="num-column">
+                        <span class="count-pill airport-pill">
+                            <mat-icon>flight</mat-icon>
+                            {{ c.airportCount | number }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- City Count -->
+                <ng-container matColumnDef="cityCount">
+                    <th mat-header-cell *matHeaderCellDef class="num-column">ŞEHİR</th>
+                    <td mat-cell *matCellDef="let c" class="num-column">
+                        <span class="count-pill city-pill">
+                            <mat-icon>location_city</mat-icon>
+                            {{ c.cityCount | number }}
+                        </span>
+                    </td>
+                </ng-container>
+
+                <!-- Expanded Detail Row -->
+                <ng-container matColumnDef="expandedDetail">
+                    <td mat-cell *matCellDef="let c"
+                        [attr.colspan]="displayedColumns.length"
+                        class="detail-cell">
+                        <div class="detail-wrapper"
+                             [@detailExpand]="isExpanded(c) ? 'expanded' : 'collapsed'">
+                            <div class="detail-content" *ngIf="isExpanded(c)">
+                                <div class="detail-header">
+                                    <mat-icon>flight_takeoff</mat-icon>
+                                    <span>{{ c.countryName }} havalimanları</span>
+                                </div>
+
+                                <div class="detail-loading" *ngIf="loadingAirports[c.countryCode]">
+                                    <mat-spinner diameter="28"></mat-spinner>
+                                    <span>Yükleniyor...</span>
+                                </div>
+
+                                <div class="detail-grid"
+                                     *ngIf="!loadingAirports[c.countryCode] && airportsCache[c.countryCode]?.length">
+                                    <div class="airport-card" *ngFor="let a of airportsCache[c.countryCode]">
+                                        <div class="airport-card-head">
+                                            <span class="airport-iata">{{ a.airportCode }}</span>
+                                            <span class="airport-city">{{ a.cityName }}</span>
+                                        </div>
+                                        <div class="airport-name">{{ a.airportName }}</div>
+                                    </div>
+                                </div>
+
+                                <div class="detail-empty"
+                                     *ngIf="!loadingAirports[c.countryCode] && airportsCache[c.countryCode]?.length === 0">
+                                    Bu ülke için havalimanı kaydı bulunamadı.
+                                </div>
+                            </div>
+                        </div>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row
+                    *matRowDef="let row; columns: displayedColumns;"
+                    class="country-row"
+                    [class.expanded-row]="isExpanded(row)"
+                    (click)="toggleExpand(row)"></tr>
+                <tr mat-row
+                    *matRowDef="let row; columns: ['expandedDetail']"
+                    class="detail-row"></tr>
+
+                <tr class="mat-row" *matNoDataRow>
+                    <td class="mat-cell empty-state" [attr.colspan]="displayedColumns.length">
+                        <mat-icon>public</mat-icon>
+                        <p>Sonuç bulunamadı</p>
+                    </td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="loading-container" *ngIf="loading">
+            <mat-spinner diameter="50"></mat-spinner>
+            <p>Ülkeler yükleniyor...</p>
+        </div>
+
+        <mat-paginator
+            [length]="totalRecords"
+            [pageSize]="limit"
+            [pageSizeOptions]="[10, 25, 50, 100]"
+            (page)="onPageChange($event)"
+            showFirstLastButtons>
+        </mat-paginator>
+    </mat-card>
+</div>

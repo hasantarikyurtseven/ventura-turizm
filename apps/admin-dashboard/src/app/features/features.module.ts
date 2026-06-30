@@ -24,6 +24,10 @@ const routes: Routes = [
         loadChildren: () => import('./airlines/airlines.module').then(m => m.AirlinesModule)
     },
     {
+        path: 'countries',
+        loadChildren: () => import('./countries/countries.module').then(m => m.CountriesModule)
+    },
+    {
         path: 'contracts',
         loadChildren: () => import('./contracts/contracts.module').then(m => m.ContractsModule)
     },

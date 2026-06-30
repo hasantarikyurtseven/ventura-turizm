@@ -44,6 +44,24 @@ interface FlightData {
   currency: string;
 }
 
+interface BrandOption {
+  id?: string;
+  brandName?: string;
+  brandCode?: string;
+  totalFare: number;
+  totalTaxes?: number;
+  currency: string;
+  baggageDescription?: string;
+}
+
+interface FlightLegData {
+  direction: 'outbound' | 'return' | 'roundTrip' | 'single';
+  title: string;
+  productId: string;
+  selectedBrand?: BrandOption | null;
+  flight: FlightData;
+}
+
 interface PrebookingData {
   shoppingFileId?: string;
   bookingCode?: string;
@@ -65,19 +83,14 @@ interface PrebookingData {
 
 interface BookingPaymentData {
   flight?: FlightData;
-  selectedBrand?: {
-    brandName?: string;
-    brandCode?: string;
-    totalFare: number;
-    totalTaxes?: number;
-    currency: string;
-    baggageDescription?: string;
-  };
+  selectedBrand?: BrandOption;
+  flightLegs?: FlightLegData[];
   passengers?: PassengerSummary[];
   sessionId?: string;
   sessionToken?: string;
   allocateId?: string;
   productId?: string;
+  productIds?: string[];
   correlationId?: string;
   prebooking?: PrebookingData;
 }
@@ -167,7 +180,7 @@ export class PaymentComponent implements OnDestroy {
     if (pb) {
       if (pb.isPriceChanged) {
         this.snackBar.open(
-          `Fiyat güncellendi: ${this.totalFare} ${this.currency}`,
+          `Fiyat güncellendi: ${this.payableAmount} ${this.currency}`,
           'Tamam',
           { duration: 8000, panelClass: ['warning-snackbar'] },
         );
@@ -226,7 +239,7 @@ export class PaymentComponent implements OnDestroy {
       status: 'PENDING',
       type: 'flight',
       shoppingFileId,
-      totalFare: this.totalFare,
+      totalFare: this.payableAmount,
       currency: this.currency,
       flight: flightDto,
       passengers: passengersDto?.length ? passengersDto : undefined,
@@ -253,20 +266,52 @@ export class PaymentComponent implements OnDestroy {
   }
 
   get totalFare(): number {
-    return this.bookingData?.prebooking?.totalFare
-      ?? this.bookingData?.selectedBrand?.totalFare
+    // Prebooking'ten gelen totalFare varsa her zaman öncelikli (BiletBank'ın onayladığı tutar).
+    const prebookingTotal = this.bookingData?.prebooking?.totalFare;
+    if (prebookingTotal != null && prebookingTotal > 0) return prebookingTotal;
+
+    // Prebooking yoksa ya da 0 ise: leg fiyatlarını topla.
+    if (this.hasMultiLegPriceSummary) {
+      return this.priceSummaryLegs.reduce((sum, leg) => sum + this.getLegTotalFare(leg), 0) + this.serviceFee;
+    }
+    return this.bookingData?.selectedBrand?.totalFare
       ?? this.bookingData?.flight?.price
       ?? 0;
   }
 
+  get payableAmount(): number {
+    // remainingSum = 0: BiletBank henüz ödeme yapılmamış pre-booking için sıfır dönebilir.
+    // ?? operatörü 0'ı geçerli değer sayar — sıfır gelirse yanlış tutarı gösteririz.
+    // Bu yüzden sadece pozitif remainingSum'ı kullan; yoksa totalFare'e dön.
+    const rs = this.bookingData?.prebooking?.remainingSum;
+    if (rs != null && rs > 0) return rs;
+
+    const prebookingTotal = this.bookingData?.prebooking?.totalFare;
+    if (prebookingTotal != null && prebookingTotal > 0) return prebookingTotal;
+
+    return this.totalFare;
+  }
+
   get currency(): string {
-    return this.bookingData?.prebooking?.currency
-      ?? this.bookingData?.selectedBrand?.currency
+    if (this.bookingData?.prebooking?.currency) {
+      return this.bookingData.prebooking.currency;
+    }
+    if (this.priceSummaryLegs.length) {
+      return (
+        this.priceSummaryLegs.find((leg) => leg.selectedBrand?.currency || leg.flight.currency)?.selectedBrand?.currency ||
+        this.priceSummaryLegs.find((leg) => leg.flight.currency)?.flight.currency ||
+        'TRY'
+      );
+    }
+    return this.bookingData?.selectedBrand?.currency
       ?? this.bookingData?.flight?.currency
       ?? 'TRY';
   }
 
   get taxAmount(): number {
+    if (this.hasMultiLegPriceSummary) {
+      return this.priceSummaryLegs.reduce((sum, leg) => sum + (leg.selectedBrand?.totalTaxes || 0), 0);
+    }
     return this.bookingData?.prebooking?.taxes
       ?? this.bookingData?.selectedBrand?.totalTaxes
       ?? 0;
@@ -275,11 +320,63 @@ export class PaymentComponent implements OnDestroy {
   get baseFare(): number {
     const base = this.bookingData?.prebooking?.baseFare;
     if (base != null && base > 0) return base;
-    return this.taxAmount > 0 ? this.totalFare - this.taxAmount : this.totalFare;
+    return this.taxAmount > 0 ? this.payableAmount - this.taxAmount : this.payableAmount;
   }
 
   get serviceFee(): number {
     return this.bookingData?.prebooking?.serviceFee ?? 0;
+  }
+
+  private get hasMultiLegPriceSummary(): boolean {
+    return (this.bookingData?.flightLegs?.length || 0) > 1;
+  }
+
+  get totalPassengerCount(): number {
+    return Math.max(this.bookingData?.passengers?.length || 1, 1);
+  }
+
+  get passengerTypeSummary(): string {
+    const passengers = this.bookingData?.passengers || [];
+    const adults = passengers.filter((p) => p.type === 'ADT').length;
+    const children = passengers.filter((p) => p.type === 'CHD').length;
+    const infants = passengers.filter((p) => p.type === 'INF').length;
+    const parts: string[] = [];
+    if (adults) parts.push(`${adults} Yetişkin`);
+    if (children) parts.push(`${children} Çocuk`);
+    if (infants) parts.push(`${infants} Bebek`);
+    return parts.join(', ') || `${this.totalPassengerCount} Yolcu`;
+  }
+
+  get priceSummaryLegs(): FlightLegData[] {
+    if (this.bookingData?.flightLegs?.length) {
+      return this.bookingData.flightLegs;
+    }
+    if (!this.bookingData?.flight) {
+      return [];
+    }
+    return [{
+      direction: 'single',
+      title: 'Uçuş',
+      productId: this.bookingData.productId || this.bookingData.flight.id,
+      selectedBrand: this.bookingData.selectedBrand || null,
+      flight: this.bookingData.flight,
+    }];
+  }
+
+  get averageFarePerPassenger(): number {
+    return this.payableAmount / this.totalPassengerCount;
+  }
+
+  getLegTotalFare(leg: FlightLegData): number {
+    return leg.selectedBrand?.totalFare || leg.flight.price || 0;
+  }
+
+  getLegPackageName(leg: FlightLegData): string {
+    return leg.selectedBrand?.brandName || leg.selectedBrand?.brandCode || 'Standart';
+  }
+
+  getLegRoute(leg: FlightLegData): string {
+    return `${leg.flight.departure.airportCode} → ${leg.flight.arrival.airportCode}`;
   }
 
   get bookingCode(): string | null {
@@ -402,7 +499,7 @@ export class PaymentComponent implements OnDestroy {
       sessionId: pd.sessionId,
       sessionToken: pd.sessionToken,
       shoppingFileId,
-      amount: this.totalFare,
+      amount: this.payableAmount,
       currency: this.currency,
       isPartialPayment: false,
       cardNumber: cleanCardNumber,
@@ -492,7 +589,7 @@ export class PaymentComponent implements OnDestroy {
       status: 'PENDING',
       type: 'flight',
       shoppingFileId: shoppingFileId || undefined,
-      totalFare: this.totalFare,
+      totalFare: this.payableAmount,
       currency: this.currency,
       flight: flightDto,
       passengers: passengersDto?.length ? passengersDto : undefined,
@@ -525,7 +622,7 @@ export class PaymentComponent implements OnDestroy {
       status: 'PAYMENT_FAILED',
       type: 'flight',
       shoppingFileId: shoppingFileId || undefined,
-      totalFare: this.totalFare,
+      totalFare: this.payableAmount,
       currency: this.currency,
       failureReason: reason.slice(0, 2000),
       flight: flightDto,
@@ -661,7 +758,7 @@ export class PaymentComponent implements OnDestroy {
       paymentId: data.paymentId,
       bookingCode: data.bookingCode || this.bookingCode || undefined,
       status: data.status,
-      totalFare: data.totalFare ?? this.totalFare,
+      totalFare: data.totalFare ?? this.payableAmount,
       currency: data.currency ?? this.currency,
     };
     this.paymentSuccess = true;

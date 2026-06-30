@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tem:MakePayment_FromRunningAccount>
+         <!--Optional:-->
+         <tem:request>
+            <!--Optional:-->
+            <trev:AuthenticationHeader>
+               <!--Optional:-->
+               <trev:SessionId>7208632</trev:SessionId>
+               <trev:SessionToken>e4586ab3-3c3d-4500-969c-4905f0315d2a</trev:SessionToken>
+            </trev:AuthenticationHeader>
+            <!--Optional:-->
+            <trev:ExtraParamList>
+               <!--Zero or more repetitions:-->
+               <trev:ExtendedData>
+                  <!--Optional:-->
+               </trev:ExtendedData>
+            </trev:ExtraParamList>
+            <!--Optional:-->
+            <trev1:DeductLastSellerCommission>false</trev1:DeductLastSellerCommission>
+            <!--Optional:-->
+            <trev1:PaymentForm>
+               <!--Optional:-->
+               <trev1:Amount>9469.56</trev1:Amount>
+               <!--Optional:-->
+               <trev1:Currency>TRY</trev1:Currency>
+               <!--Optional:-->
+               <trev1:IsPartialPayment>false</trev1:IsPartialPayment>
+               <!--Optional:-->
+               <trev1:PaymentType>RA_BALANCE_PAYMENT</trev1:PaymentType>
+               <!--Optional:-->
+               <trev1:ShoppingFileId>f0ae7e4c-9ed1-44cb-a904-22cd88e00323</trev1:ShoppingFileId>
+            </trev1:PaymentForm>
+         </tem:request>
+      </tem:MakePayment_FromRunningAccount>
+   </soapenv:Body>
+</soapenv:Envelope>

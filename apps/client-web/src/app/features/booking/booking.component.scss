@@ -120,6 +120,58 @@
   padding: 0.5rem 0.75rem;
 }
 
+.package-leg-tabs {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.75rem 0.75rem 0;
+  border-bottom: 1px solid var(--ventura-border);
+  overflow-x: auto;
+}
+
+.package-leg-tab {
+  appearance: none;
+  border: 1px solid var(--ventura-border);
+  background: var(--ventura-surface-50);
+  color: var(--ventura-text-secondary);
+  border-radius: var(--ventura-radius-sm) var(--ventura-radius-sm) 0 0;
+  padding: 0.625rem 0.875rem;
+  min-width: 170px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  transition: all 0.15s ease;
+
+  &:hover {
+    border-color: var(--ventura-primary);
+    color: var(--ventura-primary);
+  }
+
+  &.active {
+    background: var(--ventura-surface-0);
+    border-color: var(--ventura-primary);
+    color: var(--ventura-text-primary);
+    box-shadow: 0 -2px 0 var(--ventura-primary) inset;
+  }
+
+  .tab-title {
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+  .tab-route,
+  .tab-package {
+    font-size: 0.75rem;
+    line-height: 1.2;
+  }
+
+  .tab-package {
+    color: var(--ventura-primary);
+    font-weight: 600;
+  }
+}
+
 .carousel-nav-btn {
   flex-shrink: 0;
   width: 32px;
@@ -378,6 +430,10 @@
   min-width: 0; // Grid overflow için
 }
 
+.contact-person-card {
+  margin-bottom: 1rem;
+}
+
 .booking-card {
   box-shadow: var(--ventura-shadow-sm);
   border-radius: var(--ventura-radius-sm);
@@ -428,10 +484,14 @@
 }
 
 .booking-form {
-  padding: 0 0.75rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 0;
 }
 
 .form-section {
+  padding: 0 0.75rem;
   margin-bottom: 1.5rem;
 
   &:last-of-type {
@@ -598,7 +658,7 @@
   justify-content: space-between;
   align-items: center;
   margin-top: 1rem;
-  padding-top: 1rem;
+  padding: 1rem 0.75rem 0.75rem;
   border-top: 1px solid var(--ventura-border);
 
   .back-button {
@@ -802,6 +862,110 @@
     padding: 0.5rem 0.75rem;
   }
 
+  .price-passenger-summary {
+    padding: 0.75rem;
+    margin-bottom: 0.5rem;
+    background: var(--ventura-surface-50);
+    border: 1px solid var(--ventura-border);
+    border-radius: var(--ventura-radius-sm);
+
+    .summary-label {
+      font-size: 0.75rem;
+      color: var(--ventura-text-secondary);
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-value {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--ventura-text-primary);
+    }
+
+    .summary-note {
+      margin-top: 0.25rem;
+      font-size: 0.75rem;
+      color: var(--ventura-text-secondary);
+    }
+  }
+
+  .price-leg-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+  }
+
+  .price-leg-item {
+    padding: 0.75rem;
+    border: 1px solid var(--ventura-border);
+    border-radius: var(--ventura-radius-sm);
+    background: var(--ventura-surface-0);
+
+    .leg-main,
+    .leg-detail {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .leg-main {
+      margin-bottom: 0.375rem;
+    }
+
+    .leg-title {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--ventura-text-primary);
+    }
+
+    .leg-multiplier,
+    .price-multiplier {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 28px;
+      padding: 0.1rem 0.35rem;
+      border-radius: 999px;
+      background: var(--ventura-primary-50);
+      color: var(--ventura-primary);
+      font-size: 0.72rem;
+      font-weight: 700;
+    }
+
+    .leg-route {
+      font-size: 0.75rem;
+      color: var(--ventura-text-secondary);
+      white-space: nowrap;
+    }
+
+    .leg-package {
+      font-size: 0.8125rem;
+      color: var(--ventura-primary);
+      font-weight: 600;
+    }
+
+    .leg-price {
+      font-size: 0.875rem;
+      font-weight: 700;
+      color: var(--ventura-text-primary);
+      white-space: nowrap;
+    }
+  }
+
+  .price-multiplier {
+    margin-left: 0.25rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 999px;
+    background: var(--ventura-primary-50);
+    color: var(--ventura-primary);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
   .price-row {
     display: flex;
     justify-content: space-between;
@@ -809,6 +973,12 @@
     padding: 0.75rem 0;
     font-size: 0.875rem;
     color: var(--ventura-text-secondary);
+
+    &.average {
+      font-size: 0.8125rem;
+      padding-top: 0.5rem;
+      color: var(--ventura-text-primary);
+    }
 
     &.total {
       margin-top: 0.5rem;
@@ -823,6 +993,13 @@
         font-size: 1.375rem;
       }
     }
+  }
+
+  .price-disclaimer {
+    margin: 0.5rem 0 0;
+    font-size: 0.75rem;
+    line-height: 1.35;
+    color: var(--ventura-text-secondary);
   }
 }
 
@@ -922,6 +1099,21 @@
     }
   }
 
+  // Paket leg sekmeleri — kompakt
+  .package-leg-tabs {
+    padding: 0.5rem 0.5rem 0;
+    gap: 0.375rem;
+  }
+
+  .package-leg-tab {
+    min-width: 130px;
+    padding: 0.5rem 0.625rem;
+
+    .tab-title { font-size: 0.8125rem; }
+    .tab-route { font-size: 0.75rem; }
+    .tab-package { font-size: 0.6875rem; }
+  }
+
   .flight-route {
     flex-direction: column;
     gap: 1rem;
@@ -930,5 +1122,40 @@
       transform: rotate(90deg);
       margin: 0.5rem 0;
     }
+  }
+}
+
+// Çok küçük ekran (≤480px)
+@media (max-width: 480px) {
+  .booking-page {
+    padding: 0.75rem 0.375rem;
+  }
+
+  .booking-countdown {
+    padding: 0.5rem;
+    font-size: 0.8125rem;
+    flex-wrap: wrap;
+
+    .countdown-label { font-size: 0.75rem; }
+    .countdown-value { font-size: 1rem; }
+  }
+
+  .package-selection-card-item {
+    flex: 0 0 220px;
+    min-width: 220px;
+    padding: 0.875rem;
+  }
+
+  .package-card-name {
+    font-size: 1rem;
+  }
+
+  .package-card-price {
+    .price-value { font-size: 1.125rem; }
+  }
+
+  .package-leg-tab {
+    min-width: 110px;
+    padding: 0.4rem 0.5rem;
   }
 }

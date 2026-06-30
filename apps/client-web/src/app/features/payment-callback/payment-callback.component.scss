@@ -494,3 +494,27 @@ $shadow-lg:      var(--ventura-shadow-lg, 0 8px 40px rgba(0,0,0,.12));
   .success-header { flex-direction: column; text-align: center; }
   .callback-page { padding: 1.25rem .75rem 3rem; }
 }
+
+/* ── Gidiş+Dönüş: bacak etiketi ve bölücü ──────────────────────────── */
+.bp-leg-label {
+  display: flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--color-primary, #1976d2);
+  padding: .6rem 1.25rem .2rem;
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+}
+
+.bp-leg-divider {
+  border: none;
+  border-top: 2px dashed rgba(0,0,0,.12);
+  margin: .25rem 1.25rem;
+}
+
+.boarding-pass-col .boarding-pass + .boarding-pass {
+  margin-top: .75rem;
+}

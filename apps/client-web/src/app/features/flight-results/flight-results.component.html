@@ -5,9 +5,12 @@
       <div class="header-content">
         <h1>Uçuş Sonuçları</h1>
         <p class="results-count" *ngIf="searchTripType === 'RT' && searchOriginCode && searchDestinationCode">
-          <span class="count-outbound">{{ filteredOutboundFlights.length }} gidiş</span>
-          <span class="count-sep">·</span>
-          <span class="count-return">{{ filteredReturnFlights.length }} dönüş</span>
+          <span *ngIf="filteredRoundTripFlights.length > 0">{{ filteredRoundTripFlights.length }} gidiş-dönüş</span>
+          <span class="count-sep" *ngIf="filteredRoundTripFlights.length > 0 && (filteredOutboundFlights.length > 0 || filteredReturnFlights.length > 0)">·</span>
+          <span class="count-outbound" *ngIf="filteredOutboundFlights.length > 0">{{ filteredOutboundFlights.length }} gidiş</span>
+          <span class="count-sep" *ngIf="filteredOutboundFlights.length > 0 && filteredReturnFlights.length > 0">·</span>
+          <span class="count-return" *ngIf="filteredReturnFlights.length > 0">{{ filteredReturnFlights.length }} dönüş</span>
+          <span *ngIf="filteredRoundTripFlights.length === 0 && filteredOutboundFlights.length === 0 && filteredReturnFlights.length === 0">0</span>
           <span> uçuş</span>
         </p>
         <p class="results-count" *ngIf="searchTripType !== 'RT' || !searchOriginCode || !searchDestinationCode">
@@ -221,6 +224,28 @@
               </div>
             </section>
 
+            <!-- Gidiş-dönüş biletleri (RT, tek ürün içinde gidiş + dönüş segmentleri) -->
+            <section class="flight-section round-trip" *ngIf="searchTripType === 'RT' && filteredRoundTripFlights.length > 0">
+              <div class="section-header">
+                <mat-icon class="section-icon">sync_alt</mat-icon>
+                <div class="section-title-block">
+                  <h2 class="section-title">Gidiş-dönüş biletleri</h2>
+                  <p class="section-route" *ngIf="searchOriginCode && searchDestinationCode">
+                    {{ searchOriginCode }} → {{ searchDestinationCode }} → {{ searchOriginCode }}
+                    <span class="section-date" *ngIf="searchDepartureDate || searchReturnDate">
+                      {{ searchDepartureDate }}<ng-container *ngIf="searchReturnDate"> - {{ searchReturnDate }}</ng-container>
+                    </span>
+                  </p>
+                </div>
+                <span class="section-badge">{{ filteredRoundTripFlights.length }} uçuş</span>
+              </div>
+              <div class="section-cards">
+                <ng-container *ngFor="let flight of filteredRoundTripFlights">
+                  <ng-container *ngTemplateOutlet="flightCardTpl; context: { $implicit: flight }"></ng-container>
+                </ng-container>
+              </div>
+            </section>
+
             <!-- Gidiş biletleri (RT) -->
             <section class="flight-section outbound" *ngIf="searchTripType === 'RT' && filteredOutboundFlights.length > 0">
               <div class="section-header">
@@ -262,7 +287,17 @@
             </section>
 
             <!-- No Results -->
-            <div class="no-results" *ngIf="!isLoading && hasSearchResult && filteredFlights.length === 0">
+            <div
+              class="no-results"
+              *ngIf="
+                !isLoading &&
+                hasSearchResult &&
+                (filteredFlights.length === 0 ||
+                  (searchTripType === 'RT' &&
+                    filteredRoundTripFlights.length === 0 &&
+                    filteredOutboundFlights.length === 0 &&
+                    filteredReturnFlights.length === 0))
+              ">
               <mat-icon>search_off</mat-icon>
               <h3>Uçuş bulunamadı</h3>
               <p>Filtrelerinizi değiştirerek tekrar deneyin.</p>
@@ -281,6 +316,7 @@
   <mat-card
     class="flight-card"
     [class.selected]="selectedFlight?.id === flight.id"
+    [class.compact-outbound]="isCompactOutboundFlight(flight)"
     (click)="selectFlight(flight)">
     <mat-card-content>
       <!-- Airline & Price -->
@@ -303,11 +339,11 @@
 
       <!-- Route -->
       <div class="flight-route">
-        <div class="route-segment departure">
-          <div class="time">{{ flight.departure.time }}</div>
-          <div class="airport-code">{{ flight.departure.airportCode }}</div>
-          <div class="airport-name">{{ flight.departure.airport }}</div>
-          <div class="city">{{ flight.departure.city }}</div>
+        <div class="route-segment departure" *ngIf="getDisplayDeparture(flight) as displayDeparture">
+          <div class="time">{{ displayDeparture.time }}</div>
+          <div class="airport-code">{{ displayDeparture.airportCode }}</div>
+          <div class="airport-name">{{ displayDeparture.airport }}</div>
+          <div class="city">{{ displayDeparture.city }}</div>
         </div>
         <div class="route-connector">
           <div class="duration">
@@ -328,11 +364,11 @@
             <span>Direkt uçuş</span>
           </div>
         </div>
-        <div class="route-segment arrival">
-          <div class="time">{{ flight.arrival.time }}</div>
-          <div class="airport-code">{{ flight.arrival.airportCode }}</div>
-          <div class="airport-name">{{ flight.arrival.airport }}</div>
-          <div class="city">{{ flight.arrival.city }}</div>
+        <div class="route-segment arrival" *ngIf="getDisplayArrival(flight) as displayArrival">
+          <div class="time">{{ displayArrival.time }}</div>
+          <div class="airport-code">{{ displayArrival.airportCode }}</div>
+          <div class="airport-name">{{ displayArrival.airport }}</div>
+          <div class="city">{{ displayArrival.city }}</div>
         </div>
       </div>
 
@@ -432,9 +468,9 @@
           <span *ngIf="!isLoading">Seç</span>
           <span *ngIf="isLoading">İşleniyor...</span>
         </button>
-        <div *ngIf="isLoggedIn && !canProceedToBooking(flight) && flight.brandOptions && flight.brandOptions.length > 0" class="select-hint">
+        <div *ngIf="isLoggedIn && !canProceedToBooking(flight)" class="select-hint">
           <mat-icon>info</mat-icon>
-          <span>Lütfen bir paket seçin</span>
+          <span>{{ getBookingHint(flight) }}</span>
         </div>
       </div>
 

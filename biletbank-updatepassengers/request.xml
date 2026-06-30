@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+	<soap:Header/>
+	<soap:Body>
+		<tem:UpdatePassengers>
+			<tem:request>
+				<trev:AuthenticationHeader>
+					<trev:SessionId>811762</trev:SessionId>
+					<trev:SessionToken>c3028ee7-ccde-481d-a162-9fc15700092e</trev:SessionToken>
+				</trev:AuthenticationHeader>
+				<trev1:Form>
+					<trev1:ModifiedPassengers i:nil="true"/>
+					<trev1:NewPassengers>
+						<trev2:T_Passenger>
+							<trev2:BirthDate>2000-02-18</trev2:BirthDate>
+							<trev2:CitizenNo>25109501968</trev2:CitizenNo>
+							<trev2:Email>hasantarik721@gmail.com</trev2:Email>
+							<trev2:FirstName>HASAN</trev2:FirstName>
+							<trev2:Gender>M</trev2:Gender>
+							<trev2:Id>00000000-0000-0000-0000-000000000000</trev2:Id>
+							<trev2:IfContact>true</trev2:IfContact>
+							<trev2:LastName>YURTSEVEN</trev2:LastName>
+							<trev2:Nationality>TR</trev2:Nationality>
+							<trev2:PassportCountry i:nil="true"/>
+							<trev2:PassportNo i:nil="true"/>
+							<trev2:PassportValidDate i:nil="true"/>
+							<trev2:Phone>+90-5332522257</trev2:Phone>
+							<trev2:SequenceNo>1</trev2:SequenceNo>
+							<trev2:TempTag>5565618c-ea44-422f-9072-d6abd2d383a8</trev2:TempTag>
+							<trev2:Type>ADT</trev2:Type>
+							<trev2:WheelChairServiceType>0</trev2:WheelChairServiceType>
+						</trev2:T_Passenger>
+					</trev1:NewPassengers>
+					<trev1:ProductIds>
+						<arr:guid>8cc2a7a5-39aa-44dd-a4fb-6304ee3dc48f</arr:guid>
+						<arr:guid>5c580866-f950-42a2-acd7-754ea96e168b</arr:guid>
+					</trev1:ProductIds>
+				</trev1:Form>
+			</tem:request>
+		</tem:UpdatePassengers>
+	</soap:Body>
+</soap:Envelope>

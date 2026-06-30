@@ -55,6 +55,7 @@ export class ReservationsController {
         status: r.status,
         type: r.type,
         flight: r.flight,
+        flightLegs: r.flightLegs,
         passengers: r.passengers,
         payment: r.payment,
         totalFare: r.totalFare,

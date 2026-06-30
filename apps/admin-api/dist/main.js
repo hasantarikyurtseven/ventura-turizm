@@ -86,6 +86,7 @@ const permissions_module_1 = __webpack_require__(/*! ./modules/permissions/permi
 const roles_module_1 = __webpack_require__(/*! ./modules/roles/roles.module */ "./src/modules/roles/roles.module.ts");
 const dashboard_module_1 = __webpack_require__(/*! ./modules/dashboard/dashboard.module */ "./src/modules/dashboard/dashboard.module.ts");
 const airlines_module_1 = __webpack_require__(/*! ./modules/airlines/airlines.module */ "./src/modules/airlines/airlines.module.ts");
+const countries_module_1 = __webpack_require__(/*! ./modules/countries/countries.module */ "./src/modules/countries/countries.module.ts");
 const contracts_module_1 = __webpack_require__(/*! ./modules/contracts/contracts.module */ "./src/modules/contracts/contracts.module.ts");
 const members_module_1 = __webpack_require__(/*! ./modules/members/members.module */ "./src/modules/members/members.module.ts");
 const reservations_module_1 = __webpack_require__(/*! ./modules/reservations/reservations.module */ "./src/modules/reservations/reservations.module.ts");
@@ -140,6 +141,7 @@ exports.AppModule = AppModule = AppModule_1 = __decorate([
             roles_module_1.RolesModule,
             dashboard_module_1.DashboardModule,
             airlines_module_1.AirlinesModule,
+            countries_module_1.CountriesModule,
             contracts_module_1.ContractsModule,
             members_module_1.MembersModule,
             reservations_module_1.ReservationsModule,
@@ -1917,6 +1919,306 @@ exports.Contract = Contract = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true, collection: 'contracts' })
 ], Contract);
 exports.ContractSchema = mongoose_1.SchemaFactory.createForClass(Contract);
+
+
+/***/ },
+
+/***/ "./src/modules/countries/countries.controller.ts"
+/*!*******************************************************!*\
+  !*** ./src/modules/countries/countries.controller.ts ***!
+  \*******************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CountriesController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const countries_service_1 = __webpack_require__(/*! ./countries.service */ "./src/modules/countries/countries.service.ts");
+const jwt_auth_guard_1 = __webpack_require__(/*! ../auth/guards/jwt-auth.guard */ "./src/modules/auth/guards/jwt-auth.guard.ts");
+let CountriesController = class CountriesController {
+    countriesService;
+    constructor(countriesService) {
+        this.countriesService = countriesService;
+    }
+    async findAll(page = 1, limit = 50, search) {
+        return this.countriesService.findAll(+page, +limit, search);
+    }
+    async findAirports(code) {
+        return this.countriesService.findAirportsByCountry(code);
+    }
+};
+exports.CountriesController = CountriesController;
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('search')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String]),
+    __metadata("design:returntype", Promise)
+], CountriesController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':code/airports'),
+    __param(0, (0, common_1.Param)('code')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], CountriesController.prototype, "findAirports", null);
+exports.CountriesController = CountriesController = __decorate([
+    (0, common_1.Controller)('admin/countries'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof countries_service_1.CountriesService !== "undefined" && countries_service_1.CountriesService) === "function" ? _a : Object])
+], CountriesController);
+
+
+/***/ },
+
+/***/ "./src/modules/countries/countries.module.ts"
+/*!***************************************************!*\
+  !*** ./src/modules/countries/countries.module.ts ***!
+  \***************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CountriesModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const countries_controller_1 = __webpack_require__(/*! ./countries.controller */ "./src/modules/countries/countries.controller.ts");
+const countries_service_1 = __webpack_require__(/*! ./countries.service */ "./src/modules/countries/countries.service.ts");
+const airport_schema_1 = __webpack_require__(/*! ./schemas/airport.schema */ "./src/modules/countries/schemas/airport.schema.ts");
+let CountriesModule = class CountriesModule {
+};
+exports.CountriesModule = CountriesModule;
+exports.CountriesModule = CountriesModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            mongoose_1.MongooseModule.forFeature([{ name: airport_schema_1.Airport.name, schema: airport_schema_1.AirportSchema }]),
+        ],
+        controllers: [countries_controller_1.CountriesController],
+        providers: [countries_service_1.CountriesService],
+        exports: [countries_service_1.CountriesService],
+    })
+], CountriesModule);
+
+
+/***/ },
+
+/***/ "./src/modules/countries/countries.service.ts"
+/*!****************************************************!*\
+  !*** ./src/modules/countries/countries.service.ts ***!
+  \****************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.CountriesService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+const airport_schema_1 = __webpack_require__(/*! ./schemas/airport.schema */ "./src/modules/countries/schemas/airport.schema.ts");
+let CountriesService = class CountriesService {
+    airportModel;
+    constructor(airportModel) {
+        this.airportModel = airportModel;
+    }
+    async findAll(page = 1, limit = 50, search) {
+        const p = Math.max(1, +page || 1);
+        const l = Math.min(200, Math.max(1, +limit || 50));
+        const skip = (p - 1) * l;
+        const match = {};
+        if (search && search.trim()) {
+            const s = search.trim();
+            match.$or = [
+                { CountryCode: new RegExp(s, 'i') },
+                { CountryName: new RegExp(s, 'i') },
+            ];
+        }
+        const [data, totalResult] = await Promise.all([
+            this.airportModel
+                .aggregate([
+                { $match: match },
+                {
+                    $group: {
+                        _id: '$CountryCode',
+                        countryCode: { $first: '$CountryCode' },
+                        countryName: { $first: '$CountryName' },
+                        airportCount: { $sum: 1 },
+                        cities: { $addToSet: '$CityCode' },
+                    },
+                },
+                {
+                    $project: {
+                        _id: 0,
+                        countryCode: 1,
+                        countryName: 1,
+                        airportCount: 1,
+                        cityCount: { $size: '$cities' },
+                    },
+                },
+                { $sort: { countryName: 1 } },
+                { $skip: skip },
+                { $limit: l },
+            ])
+                .exec(),
+            this.airportModel
+                .aggregate([
+                { $match: match },
+                { $group: { _id: '$CountryCode' } },
+                { $count: 'total' },
+            ])
+                .exec(),
+        ]);
+        return {
+            data,
+            total: totalResult[0]?.total ?? 0,
+        };
+    }
+    async findAirportsByCountry(countryCode) {
+        const code = (countryCode || '').trim().toUpperCase();
+        if (!code)
+            return [];
+        const list = await this.airportModel
+            .aggregate([
+            { $match: { CountryCode: code } },
+            {
+                $project: {
+                    _id: 0,
+                    airportCode: '$AirportCode',
+                    airportName: '$AirportName',
+                    cityCode: '$CityCode',
+                    cityName: '$CityName',
+                },
+            },
+            { $sort: { cityName: 1, airportName: 1 } },
+        ])
+            .exec();
+        return list;
+    }
+    async count() {
+        const r = await this.airportModel
+            .aggregate([
+            { $group: { _id: '$CountryCode' } },
+            { $count: 'total' },
+        ])
+            .exec();
+        return r[0]?.total ?? 0;
+    }
+};
+exports.CountriesService = CountriesService;
+exports.CountriesService = CountriesService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, mongoose_1.InjectModel)(airport_schema_1.Airport.name)),
+    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object])
+], CountriesService);
+
+
+/***/ },
+
+/***/ "./src/modules/countries/schemas/airport.schema.ts"
+/*!*********************************************************!*\
+  !*** ./src/modules/countries/schemas/airport.schema.ts ***!
+  \*********************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.AirportSchema = exports.Airport = void 0;
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+let Airport = class Airport extends mongoose_2.Document {
+    cityCode;
+    cityName;
+    airportCode;
+    airportName;
+    countryCode;
+    countryName;
+    timeZoneId;
+    rating;
+    searchName;
+};
+exports.Airport = Airport;
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Airport.prototype, "cityCode", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Airport.prototype, "cityName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Airport.prototype, "airportCode", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Airport.prototype, "airportName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Airport.prototype, "countryCode", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Airport.prototype, "countryName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Airport.prototype, "timeZoneId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Airport.prototype, "rating", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Airport.prototype, "searchName", void 0);
+exports.Airport = Airport = __decorate([
+    (0, mongoose_1.Schema)({ collection: 'airports', timestamps: true })
+], Airport);
+exports.AirportSchema = mongoose_1.SchemaFactory.createForClass(Airport);
 
 
 /***/ },

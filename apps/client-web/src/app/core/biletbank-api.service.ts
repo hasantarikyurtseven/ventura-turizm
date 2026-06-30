@@ -59,6 +59,7 @@ export interface AirSearchFlightDto {
     totalTaxes: number;
     currency: string;
   }[];
+  optionFlag?: string;
 }
 
 export interface AirSearchResponseDto {
@@ -74,6 +75,10 @@ export interface AirSearchResponseDto {
 
 export interface AllocateRequestDto {
   productId: string;
+  selectedItems?: {
+    productId: string;
+    brandedFareItemId?: string;
+  }[];
   brandedFareItemId?: string;
   sessionId: string;
   sessionToken: string;
@@ -211,9 +216,15 @@ export interface MakePrebookingRequestDto {
   sessionId: string;
   sessionToken: string;
   productId: string;
+  productIds?: string[];
   shoppingFileId: string;
   brandedFareItemId?: string;
   brandedCode?: string;
+  brandedItems?: {
+    productId: string;
+    brandedFareItemId?: string;
+    brandedCode?: string;
+  }[];
 }
 
 export interface MakePrebookingPaxRefDto {
@@ -309,6 +320,8 @@ export interface CreateReservationFlight {
   cabinClass?: string;
   brandName?: string;
   baggageDescription?: string;
+  fare?: number;
+  currency?: string;
 }
 
 export interface CreateReservationPassenger {
@@ -343,6 +356,7 @@ export interface CreateReservationDto {
   status?: string;
   type?: string;
   flight?: CreateReservationFlight;
+  flightLegs?: CreateReservationFlight[];
   passengers?: CreateReservationPassenger[];
   payment?: CreateReservationPayment;
   shoppingFileId?: string;
@@ -365,6 +379,7 @@ export interface MyReservationDto {
   status: string;
   type: string;
   flight?: CreateReservationFlight;
+  flightLegs?: CreateReservationFlight[];
   passengers: CreateReservationPassenger[];
   payment?: CreateReservationPayment;
   totalFare?: number;

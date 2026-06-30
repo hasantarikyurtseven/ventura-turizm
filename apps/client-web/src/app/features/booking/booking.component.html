@@ -19,6 +19,22 @@
         </div>
       </mat-card-header>
       <mat-card-content>
+        <div class="package-leg-tabs" *ngIf="packageLegs.length > 1">
+          <button
+            *ngFor="let leg of packageLegs; let i = index"
+            type="button"
+            class="package-leg-tab"
+            [class.active]="activePackageLegIndex === i"
+            (click)="setActivePackageLeg(i)">
+            <span class="tab-title">{{ leg.title }}</span>
+            <span class="tab-route">
+              {{ leg.flight.departure.airportCode }} → {{ leg.flight.arrival.airportCode }}
+            </span>
+            <span class="tab-package" *ngIf="leg.selectedBrand">
+              {{ getBrandDisplayName(leg.selectedBrand) }}
+            </span>
+          </button>
+        </div>
         <div class="package-carousel-container">
           <button mat-icon-button class="carousel-nav-btn prev-btn" (click)="scrollPackages(-1)" [disabled]="packageScrollLeft <= 0">
             <mat-icon>chevron_left</mat-icon>
@@ -29,13 +45,13 @@
               class="package-selection-card-item"
               [class.selected]="selectedBrand?.id === brand.id"
               [class.loading]="isChangingPackage && selectedBrand?.id !== brand.id">
-              <div class="package-card-flight-info" *ngIf="selectedFlight">
+              <div class="package-card-flight-info" *ngIf="activePackageLeg as packageLeg">
                 <span class="flight-info-route">
-                  <span class="flight-info-code">{{ selectedFlight.departure.airportCode }}</span>
+                  <span class="flight-info-code">{{ packageLeg.flight.departure.airportCode }}</span>
                   <mat-icon class="flight-info-arrow">arrow_forward</mat-icon>
-                  <span class="flight-info-code">{{ selectedFlight.arrival.airportCode }}</span>
+                  <span class="flight-info-code">{{ packageLeg.flight.arrival.airportCode }}</span>
                 </span>
-                <span class="flight-info-badge">{{ selectedFlight.airline }} {{ selectedFlight.flightNumber }}</span>
+                <span class="flight-info-badge">{{ packageLeg.flight.airline }} {{ packageLeg.flight.flightNumber }}</span>
               </div>
               <div class="package-card-name">{{ getBrandDisplayName(brand) }}</div>
               <div class="package-card-features">
@@ -59,7 +75,7 @@
                 [color]="selectedBrand?.id === brand.id ? 'primary' : 'accent'"
                 class="package-select-btn"
                 [disabled]="selectedBrand?.id === brand.id || (isChangingPackage && selectedBrand?.id !== brand.id)"
-                (click)="selectPackage(brand)">
+                (click)="selectPackage(brand, activePackageLeg)">
                 <mat-spinner *ngIf="isChangingPackage && selectedBrand?.id !== brand.id" diameter="20" class="button-spinner"></mat-spinner>
                 <mat-icon *ngIf="selectedBrand?.id === brand.id && !isChangingPackage">check_circle</mat-icon>
                 <span *ngIf="selectedBrand?.id === brand.id && !isChangingPackage">Seçildi</span>
@@ -79,48 +95,86 @@
   <div class="booking-layout">
     <!-- Sol Taraf: Form -->
     <div class="booking-form-section">
-      <mat-card class="booking-card">
-        <mat-card-header>
-          <div class="booking-header">
-            <h1>Yolcu Bilgileri</h1>
-            <p class="booking-subtitle">Rezervasyonunuzu tamamlamak için yolcu bilgilerini doldurun</p>
-          </div>
-        </mat-card-header>
-
-        <mat-card-content>
-          <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="booking-form">
-            <!-- İletişim Bilgileri -->
+      <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="booking-form">
+        <mat-card class="booking-card contact-person-card">
+          <mat-card-header>
+            <div class="booking-header">
+              <h1>İletişim Kişisi</h1>
+              <p class="booking-subtitle">Rezervasyonla ilgili bilgilendirmeler bu kişiye gönderilir.</p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
             <div class="form-section">
               <h2 class="section-title">
                 <mat-icon>contact_mail</mat-icon>
-                İletişim Bilgileri
+                İletişim Kişisi
               </h2>
-              <div formGroupName="contactInfo" class="form-row">
-                <mat-form-field appearance="outline" class="form-field-half">
-                  <mat-label>E-posta</mat-label>
-                  <input matInput type="email" formControlName="email" placeholder="ornek@email.com">
-                  <mat-icon matPrefix>email</mat-icon>
-                  <mat-error *ngIf="contactInfo.get('email')?.hasError('required') && contactInfo.get('email')?.touched">
-                    E-posta gereklidir
-                  </mat-error>
-                  <mat-error *ngIf="contactInfo.get('email')?.hasError('email') && contactInfo.get('email')?.touched">
-                    Geçerli bir e-posta adresi giriniz
-                  </mat-error>
-                </mat-form-field>
+              <div formGroupName="contactInfo">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field-half">
+                    <mat-label>Ad</mat-label>
+                    <input matInput formControlName="firstName" placeholder="Ad">
+                    <mat-icon matPrefix>badge</mat-icon>
+                    <mat-error *ngIf="contactInfo.get('firstName')?.hasError('required') && contactInfo.get('firstName')?.touched">
+                      Ad gereklidir
+                    </mat-error>
+                    <mat-error *ngIf="contactInfo.get('firstName')?.hasError('minlength') && contactInfo.get('firstName')?.touched">
+                      Ad en az 2 karakter olmalıdır
+                    </mat-error>
+                  </mat-form-field>
 
-                <mat-form-field appearance="outline" class="form-field-half">
-                  <mat-label>Telefon</mat-label>
-                  <input matInput type="tel" formControlName="phone" placeholder="0555 123 45 67">
-                  <mat-icon matPrefix>phone</mat-icon>
-                  <mat-error *ngIf="contactInfo.get('phone')?.hasError('required') && contactInfo.get('phone')?.touched">
-                    Telefon gereklidir
-                  </mat-error>
-                  <mat-error *ngIf="contactInfo.get('phone')?.hasError('pattern') && contactInfo.get('phone')?.touched">
-                    Geçerli bir telefon numarası giriniz
-                  </mat-error>
-                </mat-form-field>
+                  <mat-form-field appearance="outline" class="form-field-half">
+                    <mat-label>Soyad</mat-label>
+                    <input matInput formControlName="lastName" placeholder="Soyad">
+                    <mat-icon matPrefix>badge</mat-icon>
+                    <mat-error *ngIf="contactInfo.get('lastName')?.hasError('required') && contactInfo.get('lastName')?.touched">
+                      Soyad gereklidir
+                    </mat-error>
+                    <mat-error *ngIf="contactInfo.get('lastName')?.hasError('minlength') && contactInfo.get('lastName')?.touched">
+                      Soyad en az 2 karakter olmalıdır
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field-half">
+                    <mat-label>Telefon</mat-label>
+                    <input matInput type="tel" formControlName="phone" placeholder="0555 123 45 67">
+                    <mat-icon matPrefix>phone</mat-icon>
+                    <mat-error *ngIf="contactInfo.get('phone')?.hasError('required') && contactInfo.get('phone')?.touched">
+                      Telefon gereklidir
+                    </mat-error>
+                    <mat-error *ngIf="contactInfo.get('phone')?.hasError('pattern') && contactInfo.get('phone')?.touched">
+                      Geçerli bir telefon numarası giriniz
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field-half">
+                    <mat-label>E-posta</mat-label>
+                    <input matInput type="email" formControlName="email" placeholder="ornek@email.com">
+                    <mat-icon matPrefix>email</mat-icon>
+                    <mat-error *ngIf="contactInfo.get('email')?.hasError('required') && contactInfo.get('email')?.touched">
+                      E-posta gereklidir
+                    </mat-error>
+                    <mat-error *ngIf="contactInfo.get('email')?.hasError('email') && contactInfo.get('email')?.touched">
+                      Geçerli bir e-posta adresi giriniz
+                    </mat-error>
+                  </mat-form-field>
+                </div>
               </div>
             </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="booking-card">
+          <mat-card-header>
+            <div class="booking-header">
+              <h1>Yolcu Bilgileri</h1>
+              <p class="booking-subtitle">Rezervasyonunuzu tamamlamak için yolcu bilgilerini doldurun</p>
+            </div>
+          </mat-card-header>
+
+          <mat-card-content>
 
             <!-- Yolcu Bilgileri -->
             <div class="form-section">
@@ -130,7 +184,7 @@
               </h2>
               <div formArrayName="passengers">
                 <div *ngFor="let passenger of passengers.controls; let i = index" [formGroupName]="i" class="passenger-form" [id]="'passenger-' + i">
-                  <h3 class="passenger-title">Yolcu {{ i + 1 }}</h3>
+                  <h3 class="passenger-title">{{ getPassengerTitle(i) }}</h3>
                   <div class="form-row">
                     <mat-form-field appearance="outline" class="form-field-half">
                       <mat-label>Ad</mat-label>
@@ -238,9 +292,9 @@
                 <span *ngIf="isLoading">İşleniyor...</span>
               </button>
             </div>
-          </form>
-        </mat-card-content>
-      </mat-card>
+          </mat-card-content>
+        </mat-card>
+      </form>
     </div>
 
     <!-- Sağ Taraf: Fiyat Kartı ve Paket Bilgileri -->
@@ -290,31 +344,56 @@
           </h2>
         </mat-card-header>
         <mat-card-content>
-          <div class="price-breakdown" *ngIf="selectedBrand">
-            <div class="price-row">
-              <span>Uçuş Fiyatı</span>
-              <span>{{ selectedBrand.totalFare }} {{ selectedBrand.currency }}</span>
+          <div class="price-breakdown">
+            <div class="price-passenger-summary">
+              <div class="summary-label">Yolcu</div>
+              <div class="summary-value">{{ passengerTypeSummary }}</div>
+              <div class="summary-note">{{ totalPassengerCount }} yolcu için toplam fiyat</div>
             </div>
-            <div class="price-row">
-              <span>Paket</span>
-              <span>{{ selectedBrand.brandName || selectedBrand.brandCode || 'Standart' }}</span>
+
+            <div class="price-leg-list" *ngIf="priceSummaryLegs.length > 1; else singlePriceSummary">
+              <div class="price-leg-item" *ngFor="let leg of priceSummaryLegs">
+                <div class="leg-main">
+                  <span class="leg-title">
+                    {{ leg.title }}
+                    <span class="leg-multiplier">{{ totalPassengerCount }}x</span>
+                  </span>
+                  <span class="leg-route">{{ getLegRoute(leg) }}</span>
+                </div>
+                <div class="leg-detail">
+                  <span class="leg-package">{{ getLegPackageName(leg) }}</span>
+                  <span class="leg-price">{{ getLegTotalFare(leg) | number:'1.2-2' }} {{ priceSummaryCurrency }}</span>
+                </div>
+              </div>
             </div>
+
+            <ng-template #singlePriceSummary>
+              <div class="price-row">
+                <span>Uçuş Fiyatı <span class="price-multiplier">{{ totalPassengerCount }}x</span></span>
+                <span>{{ priceSummaryTotal | number:'1.2-2' }} {{ priceSummaryCurrency }}</span>
+              </div>
+              <div class="price-row" *ngIf="selectedBrand">
+                <span>Paket</span>
+                <span>{{ getBrandDisplayName(selectedBrand) }}</span>
+              </div>
+            </ng-template>
+
+            <div class="price-row" *ngIf="priceSummaryTaxes > 0">
+              <span>Vergiler</span>
+              <span>{{ priceSummaryTaxes | number:'1.2-2' }} {{ priceSummaryCurrency }}</span>
+            </div>
+
+            <div class="price-row average" *ngIf="totalPassengerCount > 1">
+              <span>Kişi başı ortalama</span>
+              <span>{{ averageFarePerPassenger | number:'1.2-2' }} {{ priceSummaryCurrency }}</span>
+            </div>
+
             <mat-divider></mat-divider>
             <div class="price-row total">
               <span>Toplam</span>
-              <span class="total-price">{{ selectedBrand.totalFare }} {{ selectedBrand.currency }}</span>
+              <span class="total-price">{{ priceSummaryTotal | number:'1.2-2' }} {{ priceSummaryCurrency }}</span>
             </div>
-          </div>
-          <div class="price-breakdown" *ngIf="!selectedBrand && selectedFlight">
-            <div class="price-row">
-              <span>Uçuş Fiyatı</span>
-              <span>{{ selectedFlight.price }} {{ selectedFlight.currency }}</span>
-            </div>
-            <mat-divider></mat-divider>
-            <div class="price-row total">
-              <span>Toplam</span>
-              <span class="total-price">{{ selectedFlight.price }} {{ selectedFlight.currency }}</span>
-            </div>
+            <p class="price-disclaimer">Fiyatlar aramada seçilen yolcu sayısı için toplam tutardır.</p>
           </div>
         </mat-card-content>
       </mat-card>

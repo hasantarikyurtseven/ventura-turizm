@@ -51,35 +51,12 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {}
 
   openLoginModal(): void {
-    const dialogRef = this.dialog.open(LoginModalComponent, {
+    this.dialog.open(LoginModalComponent, {
       width: '500px',
       maxWidth: '90vw',
       disableClose: false,
       panelClass: 'login-modal-panel',
       autoFocus: false
-    });
-
-    dialogRef.afterOpened().subscribe(() => {
-      setTimeout(() => {
-        if (typeof window !== 'undefined' && window['grecaptcha'] && window['grecaptcha'].ready) {
-          window['grecaptcha'].ready(() => {
-            const recaptchaElements = document.querySelectorAll('.g-recaptcha');
-            recaptchaElements.forEach((el: any) => {
-              if (el && !el.hasAttribute('data-widget-id')) {
-                const sitekey = el.getAttribute('data-sitekey');
-                if (sitekey && window['grecaptcha'].render) {
-                  window['grecaptcha'].render(el, {
-                    sitekey: sitekey,
-                    callback: (token: string) => {
-                      // Token received
-                    }
-                  });
-                }
-              }
-            });
-          });
-        }
-      }, 500);
     });
   }
 

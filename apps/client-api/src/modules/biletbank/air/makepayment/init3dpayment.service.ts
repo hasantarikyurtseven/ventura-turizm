@@ -70,6 +70,10 @@ export class BiletbankInit3DPaymentService {
 
     const amount = Number(dto.amount);
 
+    if (!amount || amount <= 0) {
+      throw new BadRequestException('Ödeme tutarı geçersiz. Lütfen rezervasyon akışını yeniden başlatın.');
+    }
+
     this.logger.log('Init3DPayment started', {
       correlationId,
       sessionId: maskSessionId(dto.sessionId),

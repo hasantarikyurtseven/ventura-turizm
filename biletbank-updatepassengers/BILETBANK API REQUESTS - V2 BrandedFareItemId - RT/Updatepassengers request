@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+	<soap:Header/>
+	<soap:Body>
+		<tem:UpdatePassengers>
+			<tem:request>
+				<trev:AuthenticationHeader>
+					<trev:SessionId>7208632</trev:SessionId>
+					<trev:SessionToken>e4586ab3-3c3d-4500-969c-4905f0315d2a</trev:SessionToken>
+				</trev:AuthenticationHeader>
+				<trev1:Form>
+					<trev1:ModifiedPassengers i:nil="true"/>
+					<trev1:NewPassengers>
+						<trev2:T_Passenger>
+							<trev2:BirthDate>1990-11-17</trev2:BirthDate>
+							<trev2:CitizenNo>00000000000</trev2:CitizenNo>
+							<trev2:Email>BILET@BILETBANK.COM</trev2:Email>
+							<trev2:FirstName>BILET</trev2:FirstName>
+							<trev2:Gender>M</trev2:Gender>
+							<trev2:Id>c6150e81-8079-44a8-827d-41ea07341457</trev2:Id>
+							<trev2:IfContact>true</trev2:IfContact>
+							<trev2:LastName>BANK</trev2:LastName>
+							<trev2:Nationality>TR</trev2:Nationality>
+							<trev2:PassportCountry>TR</trev2:PassportCountry>
+							<trev2:PassportNo>P354675</trev2:PassportNo>
+							<trev2:PassportValidDate>2030-04-06</trev2:PassportValidDate>
+							<trev2:Phone>+90-5357823469</trev2:Phone>
+							<trev2:SequenceNo>1</trev2:SequenceNo>
+							<trev2:TempTag>55695b67-0115-4cf5-bcb0-27cb923467b5</trev2:TempTag>
+							<trev2:Type>ADT</trev2:Type>
+							<trev2:WheelChairServiceType>0</trev2:WheelChairServiceType>
+						</trev2:T_Passenger>
+					</trev1:NewPassengers>
+					<trev1:ProductIds>
+						<arr:guid>f0e4870b-bb61-4930-a7fa-7daf756811ac</arr:guid>
+					</trev1:ProductIds>
+				</trev1:Form>
+			</tem:request>
+		</tem:UpdatePassengers>
+	</soap:Body>
+</soap:Envelope>

@@ -18,6 +18,15 @@ function maskSessionToken(token?: string): string {
   return `TOK-${token.substring(0, 2)}***${token.substring(token.length - 2)}`;
 }
 
+function escapeXml(val: string): string {
+  return String(val)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&apos;');
+}
+
 @Injectable()
 export class BiletbankAllocateService {
   private readonly logger = new Logger(BiletbankAllocateService.name);
@@ -43,8 +52,13 @@ export class BiletbankAllocateService {
       );
     }
 
+    const selectedItems = (dto.selectedItems?.length
+      ? dto.selectedItems
+      : [{ productId: dto.productId, brandedFareItemId: dto.brandedFareItemId }])
+      .filter((item) => item.productId?.trim());
+
     // 5.2 Product kontrolleri
-    if (!dto.productId || typeof dto.productId !== 'string' || dto.productId.trim().length === 0) {
+    if (!selectedItems.length) {
       this.logger.warn('Allocate validation failed: ProductId missing or invalid', {
         correlationId,
         productId: dto.productId,
@@ -69,6 +83,7 @@ export class BiletbankAllocateService {
       sessionId: maskSessionId(dto.sessionId),
       sessionToken: maskSessionToken(dto.sessionToken),
       productId: dto.productId,
+      productIds: selectedItems.map((item) => item.productId),
       brandedFareItemId: dto.brandedFareItemId || '(none)',
       amount,
     });
@@ -76,6 +91,20 @@ export class BiletbankAllocateService {
     // ===== SOAP REQUEST OLUŞTURMA =====
     // Amount format: 2 hane kuralı (decimal string olarak gönderilebilir, ama number da kabul edilir)
     const amountFormatted = Number(amount).toFixed(2);
+
+    const selectedItemsXml = selectedItems
+      .map((item) => {
+        const brandedFareItemId = item.brandedFareItemId?.trim();
+        return `
+            <io:IO_AllocationItem>
+              ${brandedFareItemId ? `<io:BrandedFareItemId>${escapeXml(brandedFareItemId)}</io:BrandedFareItemId>` : ''}
+              <io:ProductId>${escapeXml(item.productId.trim())}</io:ProductId>
+              <io:SelectedServiceFee>
+                <io:Amount>${amountFormatted}</io:Amount>
+              </io:SelectedServiceFee>
+            </io:IO_AllocationItem>`;
+      })
+      .join('');
 
     // BiletBank dokümantasyonundaki örnek yapıya göre XML oluştur
     // Dokümantasyonda EndUserInfo yok, sadece AuthenticationHeader ve Form var
@@ -95,14 +124,7 @@ export class BiletbankAllocateService {
           <base:SessionToken>${dto.sessionToken}</base:SessionToken>
         </base:AuthenticationHeader>
         <io:Form>
-          <io:SelectedItems>
-            <io:IO_AllocationItem>
-              ${dto.brandedFareItemId ? `<io:BrandedFareItemId>${dto.brandedFareItemId.trim()}</io:BrandedFareItemId>` : ''}
-              <io:ProductId>${dto.productId.trim()}</io:ProductId>
-              <io:SelectedServiceFee>
-                <io:Amount>${amountFormatted}</io:Amount>
-              </io:SelectedServiceFee>
-            </io:IO_AllocationItem>
+          <io:SelectedItems>${selectedItemsXml}
           </io:SelectedItems>
         </io:Form>
       </tem:request>
@@ -122,7 +144,12 @@ export class BiletbankAllocateService {
       });
 
       const elapsedTime = Date.now() - startTime;
+
+      // GEÇİCİ DEBUG — Allocate ham XML'ini ve parse sonucunu logla
+      this.logger.warn('[ALLOCATE RAW XML] ' + rawXml.substring(0, 4000));
+
       const mapped = mapAllocateXmlToResponse(rawXml);
+      this.logger.warn('[ALLOCATE MAPPED] productId=' + mapped.productId + ' allocateId=' + mapped.allocateId + ' hasError=' + mapped.hasError);
 
       // ===== 7) HATA YÖNETİMİ (Eksiksiz) =====
       if (mapped.hasError) {

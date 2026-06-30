@@ -54,6 +54,26 @@ export class MyReservationsComponent implements OnInit {
     });
   }
 
+  private static readonly TR_MONTHS = [
+    'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+  ];
+  private static readonly TR_DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+  /** "2026-06-21" → "21 Haz 2026, Cmt" (SSR güvenli, locale gerektirmez) */
+  formatFlightDate(dateStr?: string): string {
+    if (!dateStr) return '';
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr.trim());
+    if (!m) return dateStr;
+    const year = Number(m[1]);
+    const month = Number(m[2]) - 1;
+    const day = Number(m[3]);
+    if (month < 0 || month > 11) return dateStr;
+    const d = new Date(Date.UTC(year, month, day));
+    const weekday = MyReservationsComponent.TR_DAYS[d.getUTCDay()];
+    return `${day} ${MyReservationsComponent.TR_MONTHS[month]} ${year}, ${weekday}`;
+  }
+
   getStatusLabel(status: string): string {
     const map: Record<string, string> = { CONFIRMED: 'Onaylandı', CANCELLED: 'İptal', PENDING: 'Beklemede' };
     return map[status] ?? status;

@@ -73,6 +73,11 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
       command: () => this.router.navigate(['/airlines'])
     },
     {
+      label: 'Ülkeler',
+      icon: 'public',
+      command: () => this.router.navigate(['/countries'])
+    },
+    {
       label: 'Sözleşmeler',
       icon: 'description',
       command: () => this.router.navigate(['/contracts'])
@@ -161,6 +166,7 @@ export class AdminLayoutComponent implements OnInit, OnDestroy {
            this.currentRoute.startsWith('/roles') ||
            this.currentRoute.startsWith('/permissions') ||
            this.currentRoute.startsWith('/airlines') ||
+           this.currentRoute.startsWith('/countries') ||
            this.currentRoute.startsWith('/contracts');
   }
 

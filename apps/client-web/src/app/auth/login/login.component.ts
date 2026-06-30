@@ -32,8 +32,9 @@ export class LoginComponent implements OnInit, AfterViewInit {
   ) {}
 
   ngOnInit(): void {
-    // Giriş sonrası dönülecek URL'yi al
-    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] ?? '/';
+    // Giriş sonrası dönülecek URL'yi al; güvenlik için mutlaka / ile başlamalı
+    const raw = this.route.snapshot.queryParams['returnUrl'] ?? '/';
+    this.returnUrl = typeof raw === 'string' && raw.startsWith('/') ? raw : '/';
 
     // Zaten giriş yapmışsa yönlendir
     if (this.authService.isLoggedIn) {

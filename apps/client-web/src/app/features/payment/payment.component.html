@@ -79,7 +79,7 @@
     <!-- Fiyat Değişikliği Uyarısı -->
     <div class="change-banner warning-banner" *ngIf="isPriceChanged">
       <mat-icon>info</mat-icon>
-      <span>Bilet fiyatı güncellenmiştir. Güncel tutar: <strong>{{ totalFare | number:'1.2-2' }} {{ currency }}</strong></span>
+      <span>Bilet fiyatı güncellenmiştir. Güncel tutar: <strong>{{ payableAmount | number:'1.2-2' }} {{ currency }}</strong></span>
     </div>
 
     <!-- Uçuş Bilgisi Değişikliği Uyarısı -->
@@ -244,7 +244,7 @@
                     {{ isLoading ? '3D Doğrulama Başlatılıyor...' : 'Güvenli Ödeme Yap' }}
                   </span>
                   <span class="pay-btn-amount" *ngIf="!isLoading">
-                    {{ totalFare | number:'1.2-2' }} {{ currency }}
+                    {{ payableAmount | number:'1.2-2' }} {{ currency }}
                   </span>
                 </div>
               </button>
@@ -391,23 +391,53 @@
           </mat-card-header>
           <mat-card-content>
             <div class="price-breakdown">
-              <div class="price-row" *ngIf="taxAmount > 0">
-                <span>Bilet Ücreti</span>
-                <span>{{ baseFare | number:'1.2-2' }} {{ currency }}</span>
+              <div class="price-passenger-summary">
+                <div class="summary-label">Yolcu</div>
+                <div class="summary-value">{{ passengerTypeSummary }}</div>
+                <div class="summary-note">{{ totalPassengerCount }} yolcu için toplam fiyat</div>
               </div>
+
+              <div class="price-leg-list" *ngIf="priceSummaryLegs.length > 1; else singlePaymentPrice">
+                <div class="price-leg-item" *ngFor="let leg of priceSummaryLegs">
+                  <div class="leg-main">
+                    <span class="leg-title">
+                      {{ leg.title }}
+                      <span class="leg-multiplier">{{ totalPassengerCount }}x</span>
+                    </span>
+                    <span class="leg-route">{{ getLegRoute(leg) }}</span>
+                  </div>
+                  <div class="leg-detail">
+                    <span class="leg-package">{{ getLegPackageName(leg) }}</span>
+                    <span class="leg-price">{{ getLegTotalFare(leg) | number:'1.2-2' }} {{ currency }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <ng-template #singlePaymentPrice>
+                <div class="price-row">
+                  <span>Bilet Ücreti <span class="price-multiplier">{{ totalPassengerCount }}x</span></span>
+                  <span>{{ baseFare | number:'1.2-2' }} {{ currency }}</span>
+                </div>
+              </ng-template>
+
               <div class="price-row" *ngIf="taxAmount > 0">
-                <span>Vergiler ve Ücretler</span>
+                <span>Vergiler</span>
                 <span>{{ taxAmount | number:'1.2-2' }} {{ currency }}</span>
               </div>
               <div class="price-row" *ngIf="serviceFee > 0">
                 <span>Hizmet Bedeli</span>
                 <span>{{ serviceFee | number:'1.2-2' }} {{ currency }}</span>
               </div>
+              <div class="price-row average" *ngIf="totalPassengerCount > 1">
+                <span>Kişi başı ortalama</span>
+                <span>{{ averageFarePerPassenger | number:'1.2-2' }} {{ currency }}</span>
+              </div>
               <mat-divider></mat-divider>
               <div class="price-row total">
                 <span>Toplam</span>
-                <span class="total-price">{{ totalFare | number:'1.2-2' }} {{ currency }}</span>
+                <span class="total-price">{{ payableAmount | number:'1.2-2' }} {{ currency }}</span>
               </div>
+              <p class="price-disclaimer">Ödenecek toplam tutar ön rezervasyon sırasında BiletBank tarafından onaylanan güncel tutardır.</p>
             </div>
           </mat-card-content>
         </mat-card>

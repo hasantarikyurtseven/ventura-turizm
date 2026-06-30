@@ -3327,26 +3327,32 @@ function mapAllocateXmlToResponse(rawXml) {
         result?.ServiceError?.DebugMessage ||
         result?.ErrorMessage ||
         undefined;
-    let allocateId = result?.AllocateId || result?.ProductItemId;
-    let productId = result?.ProductItemId;
+    let allocateId = result?.AllocateId
+        ? String(result.AllocateId).trim()
+        : undefined;
     const shoppingFileId = result?.ShoppingFileId;
+    let productId = undefined;
+    const lastAllocRaw = result?.LastAllocatedProductIds?.guid;
+    if (lastAllocRaw) {
+        const first = Array.isArray(lastAllocRaw) ? lastAllocRaw[0] : lastAllocRaw;
+        if (first)
+            productId = String(first).trim();
+    }
     const paxReferences = [];
     if (result?.ShoppingFile) {
         const sf = result.ShoppingFile;
         const bookingNode = sf?.AirBookings?.T_AirBooking;
         const bookings = Array.isArray(bookingNode) ? bookingNode : bookingNode ? [bookingNode] : [];
         for (const booking of bookings) {
+            if (!productId && booking?.ProductId) {
+                productId = String(booking.ProductId).trim();
+            }
             const bi = booking?.BookingItems;
             const items = bi?.T_AirBookingItem ?? bi?.AirBookingItem ?? bi?.T_BookingItem;
             const itemList = Array.isArray(items) ? items : items ? [items] : [];
             for (const item of itemList) {
-                if (!productId) {
-                    const extracted = item?.ProductItemId;
-                    if (extracted) {
-                        productId = String(extracted).trim();
-                        if (!allocateId)
-                            allocateId = productId;
-                    }
+                if (!productId && item?.ProductItemId) {
+                    productId = String(item.ProductItemId).trim();
                 }
                 const refs = item?.PaxReference;
                 const refList = Array.isArray(refs) ? refs : refs ? [refs] : [];
@@ -3359,6 +3365,11 @@ function mapAllocateXmlToResponse(rawXml) {
             }
         }
     }
+    if (!allocateId) {
+        allocateId = productId;
+    }
+    console.warn('[MAPPER DEBUG] lastAllocatedProductId=' + (result?.LastAllocatedProductIds?.guid ?? 'NONE') +
+        ' final productId=' + productId);
     return {
         hasError,
         errorMessage: errorMessage ? String(errorMessage).trim() : undefined,
@@ -3444,6 +3455,14 @@ function maskSessionToken(token) {
         return 'TOK-***';
     return `TOK-${token.substring(0, 2)}***${token.substring(token.length - 2)}`;
 }
+function escapeXml(val) {
+    return String(val)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&apos;');
+}
 let BiletbankAllocateService = BiletbankAllocateService_1 = class BiletbankAllocateService {
     cfg;
     logger = new common_1.Logger(BiletbankAllocateService_1.name);
@@ -3462,7 +3481,11 @@ let BiletbankAllocateService = BiletbankAllocateService_1 = class BiletbankAlloc
             });
             throw new common_1.BadRequestException('Session bilgileri eksik. Lütfen önce uçuş araması yapın.');
         }
-        if (!dto.productId || typeof dto.productId !== 'string' || dto.productId.trim().length === 0) {
+        const selectedItems = (dto.selectedItems?.length
+            ? dto.selectedItems
+            : [{ productId: dto.productId, brandedFareItemId: dto.brandedFareItemId }])
+            .filter((item) => item.productId?.trim());
+        if (!selectedItems.length) {
             this.logger.warn('Allocate validation failed: ProductId missing or invalid', {
                 correlationId,
                 productId: dto.productId,
@@ -3483,10 +3506,24 @@ let BiletbankAllocateService = BiletbankAllocateService_1 = class BiletbankAlloc
             sessionId: maskSessionId(dto.sessionId),
             sessionToken: maskSessionToken(dto.sessionToken),
             productId: dto.productId,
+            productIds: selectedItems.map((item) => item.productId),
             brandedFareItemId: dto.brandedFareItemId || '(none)',
             amount,
         });
         const amountFormatted = Number(amount).toFixed(2);
+        const selectedItemsXml = selectedItems
+            .map((item) => {
+            const brandedFareItemId = item.brandedFareItemId?.trim();
+            return `
+            <io:IO_AllocationItem>
+              ${brandedFareItemId ? `<io:BrandedFareItemId>${escapeXml(brandedFareItemId)}</io:BrandedFareItemId>` : ''}
+              <io:ProductId>${escapeXml(item.productId.trim())}</io:ProductId>
+              <io:SelectedServiceFee>
+                <io:Amount>${amountFormatted}</io:Amount>
+              </io:SelectedServiceFee>
+            </io:IO_AllocationItem>`;
+        })
+            .join('');
         const xml = `<?xml version="1.0" encoding="utf-8"?>
 <soapenv:Envelope
   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
@@ -3503,14 +3540,7 @@ let BiletbankAllocateService = BiletbankAllocateService_1 = class BiletbankAlloc
           <base:SessionToken>${dto.sessionToken}</base:SessionToken>
         </base:AuthenticationHeader>
         <io:Form>
-          <io:SelectedItems>
-            <io:IO_AllocationItem>
-              ${dto.brandedFareItemId ? `<io:BrandedFareItemId>${dto.brandedFareItemId.trim()}</io:BrandedFareItemId>` : ''}
-              <io:ProductId>${dto.productId.trim()}</io:ProductId>
-              <io:SelectedServiceFee>
-                <io:Amount>${amountFormatted}</io:Amount>
-              </io:SelectedServiceFee>
-            </io:IO_AllocationItem>
+          <io:SelectedItems>${selectedItemsXml}
           </io:SelectedItems>
         </io:Form>
       </tem:request>
@@ -3526,7 +3556,9 @@ let BiletbankAllocateService = BiletbankAllocateService_1 = class BiletbankAlloc
                 timeoutMs: 30000,
             });
             const elapsedTime = Date.now() - startTime;
+            this.logger.warn('[ALLOCATE RAW XML] ' + rawXml.substring(0, 4000));
             const mapped = (0, allocate_mapper_1.mapAllocateXmlToResponse)(rawXml);
+            this.logger.warn('[ALLOCATE MAPPED] productId=' + mapped.productId + ' allocateId=' + mapped.allocateId + ' hasError=' + mapped.hasError);
             if (mapped.hasError) {
                 const errorMessage = mapped.errorMessage || 'Koltuk tahsisi yapılamadı.';
                 if (errorMessage.toLowerCase().includes('session') ||
@@ -3860,7 +3892,7 @@ let BiletbankFinalizeShoppingService = BiletbankFinalizeShoppingService_1 = clas
                 clientKey: c.clientKey,
                 soapAction: 'http://tempuri.org/I_Shopping/FinalizeShopping',
                 xml,
-                timeoutMs: 30000,
+                timeoutMs: 90000,
             });
             const elapsedTime = Date.now() - startTime;
             const mapped = (0, finalizeshopping_mapper_1.mapFinalizeShoppingXmlToResponse)(rawXml);
@@ -4127,6 +4159,9 @@ let BiletbankInit3DPaymentService = BiletbankInit3DPaymentService_1 = class Bile
         const rawYear = parseInt(dto.expireYear.trim(), 10);
         const expirationYear = rawYear >= 100 ? rawYear % 100 : rawYear;
         const amount = Number(dto.amount);
+        if (!amount || amount <= 0) {
+            throw new common_1.BadRequestException('Ödeme tutarı geçersiz. Lütfen rezervasyon akışını yeniden başlatın.');
+        }
         this.logger.log('Init3DPayment started', {
             correlationId,
             sessionId: maskSessionId(dto.sessionId),
@@ -4932,7 +4967,10 @@ let BiletbankMakePrebookingService = BiletbankMakePrebookingService_1 = class Bi
         if (!dto.sessionId || !dto.sessionToken) {
             throw new common_1.BadRequestException('Session bilgileri eksik.');
         }
-        if (!dto.productId?.trim()) {
+        const productIds = Array.from(new Set((dto.productIds?.length ? dto.productIds : [dto.productId])
+            .map((productId) => productId?.trim())
+            .filter((productId) => Boolean(productId))));
+        if (!productIds.length) {
             throw new common_1.BadRequestException('ProductId gereklidir.');
         }
         if (!dto.shoppingFileId?.trim()) {
@@ -4942,20 +4980,43 @@ let BiletbankMakePrebookingService = BiletbankMakePrebookingService_1 = class Bi
             correlationId,
             sessionId: maskSessionId(dto.sessionId),
             productId: dto.productId,
+            productIds,
             shoppingFileId: dto.shoppingFileId,
             brandedFareItemId: dto.brandedFareItemId || '(none)',
         });
-        const brandedXml = dto.brandedFareItemId
-            ? `
-            <trev1:Branded>
+        const brandedItems = dto.brandedItems?.length
+            ? dto.brandedItems
+            : dto.brandedFareItemId
+                ? [{
+                        productId: dto.productId,
+                        brandedFareItemId: dto.brandedFareItemId,
+                        brandedCode: dto.brandedCode,
+                    }]
+                : [];
+        const buildBrandedFormsXml = (withBrandedFareItemId) => brandedItems
+            .filter((item) => item.productId?.trim())
+            .map((item) => `
                <trev1:IO_Air_Branded_Form>
-                  ${dto.brandedCode ? `<trev1:BrandedCode>${escapeXml(dto.brandedCode)}</trev1:BrandedCode>` : ''}
-                  <trev1:BrandedFareItemId>${escapeXml(dto.brandedFareItemId.trim())}</trev1:BrandedFareItemId>
-                  <trev1:ProductId>${escapeXml(dto.productId.trim())}</trev1:ProductId>
-               </trev1:IO_Air_Branded_Form>
+                  ${withBrandedFareItemId && item.brandedFareItemId?.trim() ? `<trev1:BrandedFareItemId>${escapeXml(item.brandedFareItemId.trim())}</trev1:BrandedFareItemId>` : ''}
+                  <trev1:ProductId>${escapeXml(item.productId.trim())}</trev1:ProductId>
+               </trev1:IO_Air_Branded_Form>`)
+            .join('');
+        const buildBrandedXml = (withBrandedFareItemId) => {
+            const formsXml = buildBrandedFormsXml(withBrandedFareItemId);
+            return formsXml
+                ? `
+            <trev1:Branded>
+${formsXml}
             </trev1:Branded>`
-            : '';
-        const xml = `<soapenv:Envelope
+                : '';
+        };
+        const productIdsXml = productIds
+            .map((productId) => `
+                  <arr:guid>${escapeXml(productId)}</arr:guid>`)
+            .join('');
+        const buildXml = (withBrandedFareItemId, doReservation = true) => {
+            const brandedXml = buildBrandedXml(withBrandedFareItemId);
+            return `<soapenv:Envelope
   xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
   xmlns:tem="http://tempuri.org/"
   xmlns:i="http://www.w3.org/2001/XMLSchema-instance"
@@ -4973,20 +5034,31 @@ let BiletbankMakePrebookingService = BiletbankMakePrebookingService_1 = class Bi
             <trev:ExtraParamList>
                <trev:ExtendedData>
                   <trev:Name>IntendedShoppingFileId</trev:Name>
-                  <trev:Type i:nil="true"/>
+                  <trev:Type>True</trev:Type>
                   <trev:Value>${escapeXml(dto.shoppingFileId.trim())}</trev:Value>
+               </trev:ExtendedData>
+               <trev:ExtendedData>
+                  <trev:Name>DoReservation</trev:Name>
+                  <trev:Type>true</trev:Type>
+                  <trev:Value>${doReservation ? 'true' : 'false'}</trev:Value>
                </trev:ExtendedData>
             </trev:ExtraParamList>
             <trev1:Form>${brandedXml}
-               <trev1:CIPRequest i:nil="true"/>
-               <trev1:ProductIds>
-                  <arr:guid>${escapeXml(dto.productId.trim())}</arr:guid>
+               <trev1:CIPRequest/>
+               <trev1:ExtraForm>
+                  <trev1:SelectedServiceFee>0</trev1:SelectedServiceFee>
+               </trev1:ExtraForm>
+               <trev1:CIPRequest/>
+               <trev1:ProductIds>${productIdsXml}
                </trev1:ProductIds>
             </trev1:Form>
          </tem:request>
       </tem:MakePrebooking>
    </soapenv:Body>
 </soapenv:Envelope>`;
+        };
+        const xml = buildXml(true, true);
+        this.logger.log('[MakePrebooking] SOAP REQUEST XML:\n' + xml);
         try {
             const { rawXml } = await (0, soap_transport_1.soapPost)({
                 url: c.apiUrl,
@@ -4996,6 +5068,7 @@ let BiletbankMakePrebookingService = BiletbankMakePrebookingService_1 = class Bi
                 timeoutMs: 60000,
             });
             const elapsedTime = Date.now() - startTime;
+            this.logger.log('[MakePrebooking] SOAP RESPONSE XML (first 3000 chars):\n' + rawXml.substring(0, 3000));
             const mapped = (0, makeprebooking_mapper_1.mapMakePrebookingXmlToResponse)(rawXml);
             if (mapped.hasError) {
                 const errorMessage = mapped.errorMessage || 'Ön rezervasyon oluşturulamadı.';
@@ -5016,6 +5089,61 @@ let BiletbankMakePrebookingService = BiletbankMakePrebookingService_1 = class Bi
                         isRaPaymentEnabled: mapped.isRaPaymentEnabled,
                     });
                 }
+                else if (lowerMsg.includes('unexpected provider error') || lowerMsg.includes('providerpricing')) {
+                    this.logger.warn('MakePreBooking: ProviderPricingError — retrying with DoReservation=false', {
+                        correlationId, errorMessage, elapsedTime,
+                        productIds,
+                    });
+                    const retryXml = buildXml(false, false);
+                    this.logger.log('[MakePrebooking] RETRY (DoReservation=false) SOAP REQUEST XML:\n' + retryXml);
+                    const retryResult = await (0, soap_transport_1.soapPost)({
+                        url: c.apiUrl,
+                        clientKey: c.clientKey,
+                        soapAction: 'http://tempuri.org/I_Shopping/MakePrebooking',
+                        xml: retryXml,
+                        timeoutMs: 60000,
+                    });
+                    this.logger.log('[MakePrebooking] RETRY SOAP RESPONSE XML (first 3000 chars):\n' + retryResult.rawXml.substring(0, 3000));
+                    const retryMapped = (0, makeprebooking_mapper_1.mapMakePrebookingXmlToResponse)(retryResult.rawXml);
+                    if (retryMapped.hasError) {
+                        const retryError = retryMapped.errorMessage || errorMessage;
+                        const retryLower = retryError.toLowerCase();
+                        const hasRetryShoppingFile = !!retryMapped.shoppingFileId || !!mapped.shoppingFileId;
+                        const isStillProviderError = retryLower.includes('unexpected provider error') || retryLower.includes('providerpricing');
+                        if (isStillProviderError && hasRetryShoppingFile) {
+                            this.logger.warn('MakePreBooking: ProviderPricingError on retry — continuing with ShoppingFile data', {
+                                correlationId, retryError, elapsedTime,
+                                shoppingFileId: retryMapped.shoppingFileId || mapped.shoppingFileId,
+                                retryTotalFare: retryMapped.airBookings?.[0]?.totalFare,
+                                originalTotalFare: mapped.airBookings?.[0]?.totalFare,
+                            });
+                            if (retryMapped.shoppingFileId)
+                                mapped.shoppingFileId = retryMapped.shoppingFileId;
+                            if (retryMapped.airBookings?.length)
+                                mapped.airBookings = retryMapped.airBookings;
+                            if (retryMapped.remainingSum !== undefined)
+                                mapped.remainingSum = retryMapped.remainingSum;
+                            if (retryMapped.isPriceChanged !== undefined)
+                                mapped.isPriceChanged = retryMapped.isPriceChanged;
+                            if (retryMapped.isFlightInfoChanged !== undefined)
+                                mapped.isFlightInfoChanged = retryMapped.isFlightInfoChanged;
+                            if (retryMapped.isCcPaymentEnabled !== undefined)
+                                mapped.isCcPaymentEnabled = retryMapped.isCcPaymentEnabled;
+                            if (retryMapped.isRaPaymentEnabled !== undefined)
+                                mapped.isRaPaymentEnabled = retryMapped.isRaPaymentEnabled;
+                        }
+                        else {
+                            this.logger.error('MakePreBooking retry failed', {
+                                correlationId, retryError, elapsedTime,
+                                sessionId: maskSessionId(dto.sessionId),
+                            });
+                            throw new common_1.BadRequestException(retryError);
+                        }
+                    }
+                    else {
+                        Object.assign(mapped, retryMapped);
+                    }
+                }
                 else {
                     this.logger.error('MakePreBooking failed', {
                         correlationId, errorMessage, elapsedTime,
@@ -5026,6 +5154,20 @@ let BiletbankMakePrebookingService = BiletbankMakePrebookingService_1 = class Bi
                 }
             }
             const booking = mapped.airBookings?.[0];
+            const prebookingWorked = (mapped.remainingSum ?? 0) > 0 ||
+                booking?.status?.toLowerCase().includes('prebooking') ||
+                booking?.status?.toLowerCase().includes('reservation');
+            if (!prebookingWorked) {
+                this.logger.warn('MakePreBooking: BiletBank accepted request but did NOT transition state (RemainingSum=0, status unchanged)', {
+                    correlationId,
+                    shoppingFileId: mapped.shoppingFileId,
+                    status: booking?.status,
+                    remainingSum: mapped.remainingSum,
+                    totalFare: booking?.totalFare,
+                    productIds,
+                    elapsedTime,
+                });
+            }
             this.logger.log('MakePreBooking success', {
                 correlationId,
                 shoppingFileId: mapped.shoppingFileId,
@@ -5297,16 +5439,16 @@ function buildPassengerXml(p, useMinimalDomesticShape) {
             ? ''
             : `
               <trev2:Nationality>${escapeXml(p.nationality)}</trev2:Nationality>
-              <trev2:PassportCountry/>
-              <trev2:PassportNo/>
-              <trev2:PassportValidDate/>`)
+              <trev2:PassportCountry i:nil="true"/>
+              <trev2:PassportNo i:nil="true"/>
+              <trev2:PassportValidDate i:nil="true"/>`)
         : `
               <trev2:Nationality>${escapeXml(p.nationality)}</trev2:Nationality>
               <trev2:PassportCountry>${escapeXml(p.passportCountry)}</trev2:PassportCountry>
               <trev2:PassportNo>${escapeXml(p.passportNo)}</trev2:PassportNo>
               ${p.passportValidDate
             ? `<trev2:PassportValidDate>${escapeXml(p.passportValidDate)}</trev2:PassportValidDate>`
-            : ''}`;
+            : '<trev2:PassportValidDate i:nil="true"/>'}`;
     return `
             <trev2:T_Passenger>
               <trev2:BirthDate>${escapeXml(p.birthDate)}</trev2:BirthDate>
@@ -5378,58 +5520,51 @@ let BiletbankUpdatePassengerService = BiletbankUpdatePassengerService_1 = class 
                 .map((p) => buildPassengerXml(p, useMinimalDomesticShape))
                 .join('');
             if (useMinimalDomesticShape) {
-                return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <tem:UpdatePassengers>
-         <tem:request>
-            <trev:AuthenticationHeader>
-               <trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
-               <trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
-            </trev:AuthenticationHeader>
-            <trev1:Form>
-               <trev1:ModifiedPassengers/>
-               <trev1:NewPassengers>${passengersXml}
-               </trev1:NewPassengers>
-               <trev1:ProductIds>
-                  ${productIdsXml}
-               </trev1:ProductIds>
-            </trev1:Form>
-         </tem:request>
-      </tem:UpdatePassengers>
-   </soapenv:Body>
-</soapenv:Envelope>`;
+                return `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+	<soap:Header/>
+	<soap:Body>
+		<tem:UpdatePassengers>
+			<tem:request>
+				<trev:AuthenticationHeader>
+					<trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
+					<trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
+				</trev:AuthenticationHeader>
+				<trev1:Form>
+					<trev1:ModifiedPassengers i:nil="true"/>
+					<trev1:NewPassengers>${passengersXml}
+					</trev1:NewPassengers>
+					<trev1:ProductIds>
+						${productIdsXml}
+					</trev1:ProductIds>
+				</trev1:Form>
+			</tem:request>
+		</tem:UpdatePassengers>
+	</soap:Body>
+</soap:Envelope>`;
             }
-            return `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope
-  xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:tem="http://tempuri.org/"
-  xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base"
-  xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping"
-  xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping"
-  xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays"
-  xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-  <soapenv:Header/>
-  <soapenv:Body>
-    <tem:UpdatePassengers>
-      <tem:request>
-        <trev:AuthenticationHeader>
-          <trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
-          <trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
-        </trev:AuthenticationHeader>
-        <trev1:Form>
-          <trev1:ModifiedPassengers i:nil="true"/>
-          <trev1:NewPassengers>
-            ${passengersXml}
-          </trev1:NewPassengers>
-          <trev1:ProductIds>
-            ${productIdsXml}
-          </trev1:ProductIds>
-        </trev1:Form>
-      </tem:request>
-    </tem:UpdatePassengers>
-  </soapenv:Body>
-</soapenv:Envelope>`;
+            return `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+	<soap:Header/>
+	<soap:Body>
+		<tem:UpdatePassengers>
+			<tem:request>
+				<trev:AuthenticationHeader>
+					<trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
+					<trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
+				</trev:AuthenticationHeader>
+				<trev1:Form>
+					<trev1:ModifiedPassengers i:nil="true"/>
+					<trev1:NewPassengers>
+						${passengersXml}
+					</trev1:NewPassengers>
+					<trev1:ProductIds>
+						${productIdsXml}
+					</trev1:ProductIds>
+				</trev1:Form>
+			</tem:request>
+		</tem:UpdatePassengers>
+	</soap:Body>
+</soap:Envelope>`;
         };
         const xml = buildRequestXml(dto.newPassengers);
         try {
@@ -5542,7 +5677,8 @@ let BiletbankUpdatePassengerService = BiletbankUpdatePassengerService_1 = class 
                     errorMessage,
                     elapsedTime,
                     sessionId: maskSessionId(dto.sessionId),
-                    sessionToken: maskSessionToken(dto.sessionToken),
+                    productIds: dto.productIds,
+                    passengerIds: dto.newPassengers.map((p) => ({ seq: p.sequenceNo, id: p.id, tempTag: p.tempTag })),
                 });
                 throw new common_1.BadRequestException(errorMessage);
             }
@@ -6034,10 +6170,27 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.AllocateRequestDto = void 0;
+exports.AllocateRequestDto = exports.AllocateRequestItemDto = void 0;
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
+class AllocateRequestItemDto {
+    productId;
+    brandedFareItemId;
+}
+exports.AllocateRequestItemDto = AllocateRequestItemDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], AllocateRequestItemDto.prototype, "productId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], AllocateRequestItemDto.prototype, "brandedFareItemId", void 0);
 class AllocateRequestDto {
     productId;
+    selectedItems;
     brandedFareItemId;
     sessionId;
     sessionToken;
@@ -6051,6 +6204,13 @@ __decorate([
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], AllocateRequestDto.prototype, "productId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => AllocateRequestItemDto),
+    __metadata("design:type", Array)
+], AllocateRequestDto.prototype, "selectedItems", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsString)(),
@@ -6377,15 +6537,39 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.MakePrebookingRequestDto = void 0;
+exports.MakePrebookingRequestDto = exports.MakePrebookingBrandedItemDto = void 0;
+const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-transformer");
 const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class MakePrebookingBrandedItemDto {
+    productId;
+    brandedFareItemId;
+    brandedCode;
+}
+exports.MakePrebookingBrandedItemDto = MakePrebookingBrandedItemDto;
+__decorate([
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    __metadata("design:type", String)
+], MakePrebookingBrandedItemDto.prototype, "productId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], MakePrebookingBrandedItemDto.prototype, "brandedFareItemId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], MakePrebookingBrandedItemDto.prototype, "brandedCode", void 0);
 class MakePrebookingRequestDto {
     sessionId;
     sessionToken;
     productId;
+    productIds;
     shoppingFileId;
     brandedFareItemId;
     brandedCode;
+    brandedItems;
 }
 exports.MakePrebookingRequestDto = MakePrebookingRequestDto;
 __decorate([
@@ -6404,6 +6588,12 @@ __decorate([
     __metadata("design:type", String)
 ], MakePrebookingRequestDto.prototype, "productId", void 0);
 __decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], MakePrebookingRequestDto.prototype, "productIds", void 0);
+__decorate([
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
@@ -6418,6 +6608,13 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], MakePrebookingRequestDto.prototype, "brandedCode", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => MakePrebookingBrandedItemDto),
+    __metadata("design:type", Array)
+], MakePrebookingRequestDto.prototype, "brandedItems", void 0);
 
 
 /***/ },
@@ -7086,6 +7283,8 @@ class FlightDto {
     cabinClass;
     brandName;
     baggageDescription;
+    fare;
+    currency;
 }
 exports.FlightDto = FlightDto;
 __decorate([
@@ -7133,6 +7332,16 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], FlightDto.prototype, "baggageDescription", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], FlightDto.prototype, "fare", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    __metadata("design:type", String)
+], FlightDto.prototype, "currency", void 0);
 class PaymentDto {
     amount;
     currency;
@@ -7189,6 +7398,7 @@ class CreateReservationDto {
     status;
     type;
     flight;
+    flightLegs;
     passengers;
     payment;
     shoppingFileId;
@@ -7221,6 +7431,13 @@ __decorate([
     (0, class_transformer_1.Type)(() => FlightDto),
     __metadata("design:type", FlightDto)
 ], CreateReservationDto.prototype, "flight", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.ValidateNested)({ each: true }),
+    (0, class_transformer_1.Type)(() => FlightDto),
+    __metadata("design:type", Array)
+], CreateReservationDto.prototype, "flightLegs", void 0);
 __decorate([
     (0, class_validator_1.IsOptional)(),
     (0, class_validator_1.IsArray)(),
@@ -7408,6 +7625,8 @@ let ReservationFlight = class ReservationFlight {
     cabinClass;
     brandName;
     baggageDescription;
+    fare;
+    currency;
 };
 exports.ReservationFlight = ReservationFlight;
 __decorate([
@@ -7446,6 +7665,14 @@ __decorate([
     (0, mongoose_1.Prop)(),
     __metadata("design:type", String)
 ], ReservationFlight.prototype, "baggageDescription", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Number)
+], ReservationFlight.prototype, "fare", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], ReservationFlight.prototype, "currency", void 0);
 exports.ReservationFlight = ReservationFlight = __decorate([
     (0, mongoose_1.Schema)({ _id: false })
 ], ReservationFlight);
@@ -7504,6 +7731,7 @@ let Reservation = class Reservation extends mongoose_2.Document {
     status;
     type;
     flight;
+    flightLegs;
     passengers;
     payment;
     shoppingFileId;
@@ -7537,6 +7765,10 @@ __decorate([
     (0, mongoose_1.Prop)({ type: exports.ReservationFlightSchema }),
     __metadata("design:type", ReservationFlight)
 ], Reservation.prototype, "flight", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [exports.ReservationFlightSchema], default: undefined }),
+    __metadata("design:type", Array)
+], Reservation.prototype, "flightLegs", void 0);
 __decorate([
     (0, mongoose_1.Prop)({ type: [exports.ReservationPassengerSchema], default: [] }),
     __metadata("design:type", Array)
@@ -7625,6 +7857,7 @@ let ReservationsController = class ReservationsController {
                 status: r.status,
                 type: r.type,
                 flight: r.flight,
+                flightLegs: r.flightLegs,
                 passengers: r.passengers,
                 payment: r.payment,
                 totalFare: r.totalFare,
@@ -7901,6 +8134,8 @@ let ReservationsService = ReservationsService_1 = class ReservationsService {
         }
         if (dto.flight !== undefined)
             $set.flight = dto.flight;
+        if (dto.flightLegs !== undefined)
+            $set.flightLegs = dto.flightLegs;
         if (dto.passengers !== undefined)
             $set.passengers = dto.passengers;
         const mergedPay = this.mergePayment(existing.payment, dto.payment);
@@ -7961,6 +8196,8 @@ let ReservationsService = ReservationsService_1 = class ReservationsService {
         };
         if (dto.flight !== undefined)
             doc.flight = dto.flight;
+        if (dto.flightLegs !== undefined)
+            doc.flightLegs = dto.flightLegs;
         if (dto.passengers !== undefined)
             doc.passengers = dto.passengers;
         if (dto.payment !== undefined)
@@ -7990,6 +8227,8 @@ let ReservationsService = ReservationsService_1 = class ReservationsService {
         }
         if (dto.flight !== undefined)
             $set.flight = dto.flight;
+        if (dto.flightLegs !== undefined)
+            $set.flightLegs = dto.flightLegs;
         if (dto.passengers !== undefined)
             $set.passengers = dto.passengers;
         const mergedPay = this.mergePayment(existing.payment, dto.payment);

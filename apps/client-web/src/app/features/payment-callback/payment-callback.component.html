@@ -42,12 +42,112 @@
 
       <!-- SOL: Boarding Pass -->
       <div class="boarding-pass-col">
+
+        <!-- Gidiş+Dönüş: her bacak için ayrı boarding pass -->
+        <ng-container *ngIf="flightLegs.length > 0; else singleFlight">
+          <div class="boarding-pass" *ngFor="let leg of flightLegs; let i = index">
+            <div class="bp-stripe"></div>
+
+            <!-- Bacak etiketi (Gidiş / Dönüş) -->
+            <div class="bp-leg-label">
+              <mat-icon>{{ i === 0 ? 'flight_takeoff' : 'flight_land' }}</mat-icon>
+              <span>{{ i === 0 ? 'Gidiş' : 'Dönüş' }}</span>
+            </div>
+
+            <!-- Bilet başlığı -->
+            <div class="bp-header">
+              <div class="bp-airline-info">
+                <img
+                  *ngIf="leg.flight.resolvedLogoUrl"
+                  [src]="leg.flight.resolvedLogoUrl"
+                  [alt]="leg.flight.airline"
+                  class="bp-airline-logo"
+                />
+                <div class="bp-airline-fallback" *ngIf="!leg.flight.resolvedLogoUrl">
+                  {{ (leg.flight.airline || leg.flight.flightNumber || '').substring(0, 2).toUpperCase() }}
+                </div>
+                <div class="bp-airline-texts">
+                  <span class="bp-airline-name">{{ leg.flight.airline }}</span>
+                  <span class="bp-flight-code">{{ leg.flight.flightNumber }}</span>
+                </div>
+              </div>
+              <div class="bp-cabin-badge" *ngIf="leg.selectedBrand?.brandName">
+                {{ leg.selectedBrand?.brandName }}
+              </div>
+            </div>
+
+            <!-- Uçuş Rotası -->
+            <div class="bp-route">
+              <div class="bp-endpoint">
+                <span class="bp-iata">{{ leg.flight.departure.airportCode }}</span>
+                <span class="bp-city">{{ leg.flight.departure.city || leg.flight.departure.airportCode }}</span>
+                <span class="bp-time">{{ leg.flight.departure.time }}</span>
+                <span class="bp-date">{{ formatFlightDate(leg.flight.departure.date) }}</span>
+              </div>
+              <div class="bp-arrow-block">
+                <div class="bp-track">
+                  <span class="bp-circle"></span>
+                  <div class="bp-track-line"></div>
+                  <mat-icon class="bp-plane">flight</mat-icon>
+                  <div class="bp-track-line"></div>
+                  <span class="bp-circle"></span>
+                </div>
+                <span class="bp-duration">{{ leg.flight.duration }}</span>
+              </div>
+              <div class="bp-endpoint right">
+                <span class="bp-iata">{{ leg.flight.arrival.airportCode }}</span>
+                <span class="bp-city">{{ leg.flight.arrival.city || leg.flight.arrival.airportCode }}</span>
+                <span class="bp-time">{{ leg.flight.arrival.time }}</span>
+                <span class="bp-date">{{ formatFlightDate(leg.flight.arrival.date) }}</span>
+              </div>
+            </div>
+
+            <!-- Bagaj -->
+            <div class="bp-baggage" *ngIf="leg.selectedBrand?.baggageDescription">
+              <mat-icon>luggage</mat-icon>
+              {{ leg.selectedBrand?.baggageDescription }}
+            </div>
+
+            <!-- Kesim çizgisi + stub sadece son bacakta -->
+            <ng-container *ngIf="i === flightLegs.length - 1">
+              <div class="bp-tear">
+                <span class="tear-notch left"></span>
+                <div class="tear-dots"></div>
+                <span class="tear-notch right"></span>
+              </div>
+              <div class="bp-stub">
+                <div class="bp-pnr-cell">
+                  <span class="bp-stub-label">PNR / Rezervasyon Kodu</span>
+                  <span class="bp-pnr-code">{{ bookingCode }}</span>
+                </div>
+                <div class="bp-pax-cell" *ngIf="passengers.length > 0">
+                  <span class="bp-stub-label">Yolcular</span>
+                  <div class="bp-pax-list">
+                    <div class="bp-pax-row" *ngFor="let p of passengers">
+                      <mat-icon>person</mat-icon>
+                      <span class="pax-name">{{ p.firstName }} {{ p.lastName }}</span>
+                      <span class="pax-badge">
+                        {{ p.type === 'ADT' ? 'Yetişkin' : p.type === 'CHD' ? 'Çocuk' : 'Bebek' }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+
+            <!-- Bacaklar arası bölücü -->
+            <div class="bp-leg-divider" *ngIf="i < flightLegs.length - 1"></div>
+
+          </div><!-- /boarding-pass (loop) -->
+        </ng-container>
+
+        <!-- Tek yön fallback -->
+        <ng-template #singleFlight>
         <div class="boarding-pass">
 
-          <!-- Üst şerit: havayolu renk çubuğu -->
           <div class="bp-stripe"></div>
 
-          <!-- Bilet başlığı: Havayolu + Uçuş No + Kabin -->
+          <!-- Bilet başlığı -->
           <div class="bp-header" *ngIf="flight">
             <div class="bp-airline-info">
               <img
@@ -75,9 +175,8 @@
               <span class="bp-iata">{{ flight.departure.airportCode }}</span>
               <span class="bp-city">{{ flight.departure.city || flight.departure.airportCode }}</span>
               <span class="bp-time">{{ flight.departure.time }}</span>
-              <span class="bp-date">{{ flight.departure.date }}</span>
+              <span class="bp-date">{{ formatFlightDate(flight.departure.date) }}</span>
             </div>
-
             <div class="bp-arrow-block">
               <div class="bp-track">
                 <span class="bp-circle"></span>
@@ -88,12 +187,11 @@
               </div>
               <span class="bp-duration">{{ flight.duration }}</span>
             </div>
-
             <div class="bp-endpoint right">
               <span class="bp-iata">{{ flight.arrival.airportCode }}</span>
               <span class="bp-city">{{ flight.arrival.city || flight.arrival.airportCode }}</span>
               <span class="bp-time">{{ flight.arrival.time }}</span>
-              <span class="bp-date">{{ flight.arrival.date }}</span>
+              <span class="bp-date">{{ formatFlightDate(flight.arrival.date) }}</span>
             </div>
           </div>
 
@@ -103,7 +201,7 @@
             {{ selectedBrand?.baggageDescription }}
           </div>
 
-          <!-- Delikli kesim çizgisi -->
+          <!-- Kesim çizgisi -->
           <div class="bp-tear">
             <span class="tear-notch left"></span>
             <div class="tear-dots"></div>
@@ -130,7 +228,8 @@
             </div>
           </div>
 
-        </div><!-- /boarding-pass -->
+        </div><!-- /boarding-pass (single) -->
+        </ng-template>
 
         <!-- Koltuk Seçimi bilgi çipi -->
         <div class="seat-chip">

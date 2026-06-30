@@ -13,9 +13,19 @@
     <mat-icon class="chevron-icon">expand_more</mat-icon>
   </div>
 
-  <div class="location-panel" *ngIf="panelOpen" [ngStyle]="panelStyle">
+  <div #panelRef class="location-panel" *ngIf="panelOpen" [ngStyle]="panelStyle">
+
+    <!-- Mobil başlık: panel-content DIŞINDA, location-panel flex üst öğesi -->
+    <div class="panel-mobile-header">
+      <span class="panel-mobile-title">{{ label }} Seç</span>
+      <button type="button" class="panel-close-btn" (click)="closePanel()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
     <div class="panel-overlay" (click)="closePanel()" aria-hidden="true"></div>
     <div class="panel-content">
+
       <div class="airports-column">
         <div class="search-row">
           <mat-icon>search</mat-icon>
@@ -67,6 +77,19 @@
           />
         </div>
         <div class="countries-list">
+          <!-- Tümü chip'i (mobil odaklı, desktop'ta da kullanılabilir) -->
+          <div
+            role="button"
+            tabindex="0"
+            class="country-item all-countries-item"
+            [class.active]="!selectedCountry"
+            (click)="selectAllCountries()"
+            (keydown.enter)="selectAllCountries()"
+            (keydown.space)="selectAllCountries(); $event.preventDefault()"
+          >
+            <span class="country-item-label">Tümü</span>
+          </div>
+
           <div
             role="button"
             tabindex="0"

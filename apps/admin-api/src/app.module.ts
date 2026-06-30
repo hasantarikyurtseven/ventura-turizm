@@ -25,6 +25,7 @@ import { PermissionsModule } from './modules/permissions/permissions.module';
 import { RolesModule } from './modules/roles/roles.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { AirlinesModule } from './modules/airlines/airlines.module';
+import { CountriesModule } from './modules/countries/countries.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { MembersModule } from './modules/members/members.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
@@ -64,6 +65,7 @@ import { AuditLogExceptionFilter } from './modules/audit-logs/filters/audit-log-
     RolesModule,
     DashboardModule,
     AirlinesModule,
+    CountriesModule,
     ContractsModule,
     MembersModule,
     ReservationsModule,

@@ -5,7 +5,20 @@ import {
   ValidateIf,
   IsNumber,
   Min,
+  IsArray,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class AllocateRequestItemDto {
+  @IsString()
+  @IsNotEmpty()
+  productId!: string;
+
+  @IsOptional()
+  @IsString()
+  brandedFareItemId?: string;
+}
 
 /**
  * Allocate (Koltuk Tahsisi) istek DTO'su
@@ -19,6 +32,15 @@ export class AllocateRequestDto {
   @IsString()
   @IsNotEmpty()
   productId!: string;
+
+  /**
+   * Gidiş-dönüş ayrı ürün seçildiğinde aynı Allocate isteğinde gönderilecek ürünler
+   */
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => AllocateRequestItemDto)
+  selectedItems?: AllocateRequestItemDto[];
 
   /**
    * Seçilen branded fare paket ID'si (opsiyonel)

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+	<soapenv:Header/>
+	<soapenv:Body xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+		<tem:Allocate>
+			<tem:request>
+				<trev:AuthenticationHeader>
+					<trev:SessionId>7434204</trev:SessionId>
+					<trev:SessionToken>db14f99c-897e-4c51-8599-115813e40836</trev:SessionToken>
+				</trev:AuthenticationHeader>
+				<trev1:Form>
+					<trev1:SelectedItems>
+						<trev1:IO_AllocationItem>
+							<trev1:ProductId>e5cba2e2-bff7-406f-bffb-29b721e9471c</trev1:ProductId>
+							<trev1:SelectedServiceFee>
+								<trev1:Amount>0</trev1:Amount>
+							</trev1:SelectedServiceFee>
+							<trev1:SubOptions>
+								<arr:guid>9ac6675c-a14e-4d17-99ab-e50826360aa3</arr:guid>
+								<arr:guid>12eae715-4ec8-4fdc-91cb-e57c880abb71</arr:guid>
+							</trev1:SubOptions>
+						</trev1:IO_AllocationItem>
+					</trev1:SelectedItems>
+				</trev1:Form>
+			</tem:request>
+		</tem:Allocate>
+	</soapenv:Body>
+</soapenv:Envelope>

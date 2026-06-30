@@ -45,6 +45,8 @@ export class FlightDto {
   @IsOptional() @IsString() cabinClass?: string;
   @IsOptional() @IsString() brandName?: string;
   @IsOptional() @IsString() baggageDescription?: string;
+  @IsOptional() @IsNumber() fare?: number;
+  @IsOptional() @IsString() currency?: string;
 }
 
 export class PaymentDto {
@@ -71,6 +73,9 @@ export class CreateReservationDto {
 
   @IsOptional() @ValidateNested() @Type(() => FlightDto)
   flight?: FlightDto;
+
+  @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => FlightDto)
+  flightLegs?: FlightDto[];
 
   @IsOptional() @IsArray() @ValidateNested({ each: true }) @Type(() => PassengerDto)
   passengers?: PassengerDto[];

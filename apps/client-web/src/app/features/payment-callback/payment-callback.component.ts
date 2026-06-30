@@ -43,13 +43,31 @@ export class PaymentCallbackComponent {
   flight: {
     airline: string;
     airlineLogo?: string;
-    resolvedLogoUrl?: string; // Admin panel'den çözümlenen logo URL'si
+    resolvedLogoUrl?: string;
     flightNumber: string;
     departure: { airportCode: string; airportName?: string; city?: string; time: string; date: string };
     arrival: { airportCode: string; airportName?: string; city?: string; time: string; date: string };
     duration: string;
     cabinClass?: string;
   } | null = null;
+
+  // Gidiş+dönüş için tüm bacaklar (flightLegs varsa flight'tan öncelikli)
+  flightLegs: {
+    flight: {
+      airline: string;
+      airlineLogo?: string;
+      resolvedLogoUrl?: string;
+      flightNumber: string;
+      departure: { airportCode: string; airportName?: string; city?: string; time: string; date: string };
+      arrival: { airportCode: string; airportName?: string; city?: string; time: string; date: string };
+      duration: string;
+      cabinClass?: string;
+    };
+    selectedBrand?: { brandName: string; baggageDescription?: string } | null;
+    fare?: number;
+    currency?: string;
+  }[] = [];
+
   selectedBrand: { brandName: string; baggageDescription?: string } | null = null;
   passengers: {
     firstName: string;
@@ -147,6 +165,9 @@ export class PaymentCallbackComponent {
         if (this.flight) {
           this.flight.resolvedLogoUrl = this.resolveAirlineLogo(this.flight.airlineLogo, this.flight.airline);
         }
+        this.flightLegs.forEach(leg => {
+          leg.flight.resolvedLogoUrl = this.resolveAirlineLogo(leg.flight.airlineLogo, leg.flight.airline);
+        });
       },
       error: () => { /* Logo yoksa devam et */ },
     });
@@ -296,14 +317,40 @@ export class PaymentCallbackComponent {
   }
 
   private applyPayloadToView(pd: any): void {
-    if (pd.flight) {
+    // Gidiş+dönüş: flightLegs varsa her bacağı ayrı göster
+    if (Array.isArray(pd.flightLegs) && pd.flightLegs.length > 0) {
+      this.flightLegs = pd.flightLegs.map((leg: any) => ({
+        flight: {
+          ...leg.flight,
+          resolvedLogoUrl: this.resolveAirlineLogo(leg.flight?.airlineLogo, leg.flight?.airline),
+        },
+        selectedBrand: leg.selectedBrand ?? null,
+        fare:
+          typeof leg.selectedBrand?.totalFare === 'number'
+            ? leg.selectedBrand.totalFare
+            : typeof leg.flight?.price === 'number'
+              ? leg.flight.price
+              : undefined,
+        currency: leg.selectedBrand?.currency ?? leg.flight?.currency,
+      }));
+      // Eski tekil flight alanını da doldur (fallback / koltuk chip vs)
+      const first = pd.flightLegs[0];
+      if (first?.flight) {
+        this.flight = {
+          ...first.flight,
+          resolvedLogoUrl: this.resolveAirlineLogo(first.flight.airlineLogo, first.flight.airline),
+        };
+        this.selectedBrand = first.selectedBrand ?? pd.selectedBrand ?? null;
+      }
+    } else if (pd.flight) {
+      // Tek yön
       this.flight = pd.flight;
       if (this.flight) {
         this.flight.resolvedLogoUrl = this.resolveAirlineLogo(pd.flight.airlineLogo, pd.flight.airline);
       }
-    }
-    if (pd.selectedBrand) {
-      this.selectedBrand = pd.selectedBrand;
+      if (pd.selectedBrand) {
+        this.selectedBrand = pd.selectedBrand;
+      }
     }
     if (pd.passengers?.length) {
       this.passengers = pd.passengers;
@@ -502,6 +549,21 @@ export class PaymentCallbackComponent {
               baggageDescription: this.selectedBrand?.baggageDescription,
             }
           : undefined,
+        flightLegs: this.flightLegs.length > 0
+          ? this.flightLegs.map((leg) => ({
+              airline: leg.flight.airline,
+              airlineLogo: leg.flight.airlineLogo,
+              flightNumber: leg.flight.flightNumber,
+              departure: leg.flight.departure,
+              arrival: leg.flight.arrival,
+              duration: leg.flight.duration,
+              cabinClass: leg.flight.cabinClass,
+              brandName: leg.selectedBrand?.brandName,
+              baggageDescription: leg.selectedBrand?.baggageDescription,
+              fare: leg.fare,
+              currency: leg.currency ?? res.currency ?? 'TRY',
+            }))
+          : undefined,
         passengers: this.passengers.map((p) => ({
           firstName: p.firstName,
           lastName: p.lastName,
@@ -563,5 +625,25 @@ export class PaymentCallbackComponent {
 
   goMyReservations(): void {
     this.router.navigate(['/my-reservations']);
+  }
+
+  private static readonly TR_MONTHS = [
+    'Oca', 'Şub', 'Mar', 'Nis', 'May', 'Haz',
+    'Tem', 'Ağu', 'Eyl', 'Eki', 'Kas', 'Ara',
+  ];
+  private static readonly TR_DAYS = ['Paz', 'Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt'];
+
+  /** "2026-06-21" → "21 Haz 2026, Cmt" (SSR güvenli, locale gerektirmez) */
+  formatFlightDate(dateStr?: string): string {
+    if (!dateStr) return '';
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr.trim());
+    if (!m) return dateStr;
+    const year = Number(m[1]);
+    const month = Number(m[2]) - 1;
+    const day = Number(m[3]);
+    if (month < 0 || month > 11) return dateStr;
+    const d = new Date(Date.UTC(year, month, day));
+    const weekday = PaymentCallbackComponent.TR_DAYS[d.getUTCDay()];
+    return `${day} ${PaymentCallbackComponent.TR_MONTHS[month]} ${year}, ${weekday}`;
   }
 }

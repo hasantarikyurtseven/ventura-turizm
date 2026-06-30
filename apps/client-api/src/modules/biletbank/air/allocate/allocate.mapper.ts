@@ -17,7 +17,12 @@ export interface AllocateResponse {
 }
 
 /**
- * Allocate SOAP response'unu parse eder
+ * Allocate SOAP response'unu parse eder.
+ *
+ * UpdatePassengers için doğru ProductId zinciri:
+ *   1) AllocateResult.LastAllocatedProductIds.guid  ← BiletBank'ın "sonraki adımda bunu kullan" işareti
+ *   2) ShoppingFile.AirBookings.T_AirBooking.ProductId   ← booking seviyesi (her zaman #1'e eşit)
+ *   3) T_AirBookingItem.ProductItemId                    ← item seviyesi (farklı olabilir, fallback)
  */
 export function mapAllocateXmlToResponse(rawXml: string): AllocateResponse {
   const parser = new XMLParser({
@@ -49,29 +54,43 @@ export function mapAllocateXmlToResponse(rawXml: string): AllocateResponse {
     result?.ErrorMessage ||
     undefined;
 
-  let allocateId = result?.AllocateId || result?.ProductItemId;
-  let productId = result?.ProductItemId;
+  let allocateId: string | undefined = result?.AllocateId
+    ? String(result.AllocateId).trim()
+    : undefined;
+
   const shoppingFileId = result?.ShoppingFileId;
 
-  // BiletBank: ShoppingFile.AirBookings.T_AirBooking.BookingItems.T_AirBookingItem
+  // 1) LastAllocatedProductIds — AllocateResult üst seviyesinde, BiletBank tarafından
+  //    "bu ID'leri UpdatePassengers'da kullan" şeklinde açıkça sağlanır.
+  let productId: string | undefined = undefined;
+  const lastAllocRaw = result?.LastAllocatedProductIds?.guid;
+  if (lastAllocRaw) {
+    const first = Array.isArray(lastAllocRaw) ? lastAllocRaw[0] : lastAllocRaw;
+    if (first) productId = String(first).trim();
+  }
+
   const paxReferences: AllocatePaxRef[] = [];
+
   if (result?.ShoppingFile) {
     const sf = result.ShoppingFile;
     const bookingNode = sf?.AirBookings?.T_AirBooking;
     const bookings = Array.isArray(bookingNode) ? bookingNode : bookingNode ? [bookingNode] : [];
     for (const booking of bookings) {
+      // 2) T_AirBooking.ProductId — booking seviyesi (LastAllocatedProductIds ile aynı değer)
+      if (!productId && booking?.ProductId) {
+        productId = String(booking.ProductId).trim();
+      }
+
       const bi = booking?.BookingItems;
       const items = bi?.T_AirBookingItem ?? bi?.AirBookingItem ?? bi?.T_BookingItem;
       const itemList = Array.isArray(items) ? items : items ? [items] : [];
       for (const item of itemList) {
-        if (!productId) {
-          const extracted = item?.ProductItemId;
-          if (extracted) {
-            productId = String(extracted).trim();
-            if (!allocateId) allocateId = productId;
-          }
+        // 3) T_AirBookingItem.ProductItemId — fallback (item seviyesi)
+        // NOT: Bu değer booking seviyesinden farklı olabilir; UpdatePassengers için kullanılmaz.
+        if (!productId && item?.ProductItemId) {
+          productId = String(item.ProductItemId).trim();
         }
-        // PaxReference bilgilerini çıkar (UpdatePassenger'da TempTag olarak kullanılacak)
+        // PaxReference bilgileri — UpdatePassengers'da TempTag = PaxReferenceId
         const refs = item?.PaxReference;
         const refList = Array.isArray(refs) ? refs : refs ? [refs] : [];
         for (const r of refList) {
@@ -83,6 +102,15 @@ export function mapAllocateXmlToResponse(rawXml: string): AllocateResponse {
       }
     }
   }
+
+  if (!allocateId) {
+    allocateId = productId;
+  }
+
+  console.warn(
+    '[MAPPER DEBUG] lastAllocatedProductId=' + (result?.LastAllocatedProductIds?.guid ?? 'NONE') +
+    ' final productId=' + productId,
+  );
 
   return {
     hasError,

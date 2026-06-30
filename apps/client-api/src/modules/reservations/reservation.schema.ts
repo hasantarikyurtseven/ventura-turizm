@@ -46,6 +46,9 @@ export class ReservationFlight {
   @Prop() cabinClass?: string;
   @Prop() brandName?: string;
   @Prop() baggageDescription?: string;
+  /** Bu bacağın (gidiş/dönüş) seçilen paket dahil toplam ücreti */
+  @Prop() fare?: number;
+  @Prop() currency?: string;
 }
 export const ReservationFlightSchema = SchemaFactory.createForClass(ReservationFlight);
 
@@ -85,6 +88,9 @@ export class Reservation extends Document {
 
   @Prop({ type: ReservationFlightSchema })
   flight?: ReservationFlight;
+
+  @Prop({ type: [ReservationFlightSchema], default: undefined })
+  flightLegs?: ReservationFlight[];
 
   @Prop({ type: [ReservationPassengerSchema], default: [] })
   passengers: ReservationPassenger[];

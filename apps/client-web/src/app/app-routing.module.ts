@@ -31,7 +31,12 @@ const routes: Routes = [
   { path: 'my-reservations', component: MyReservationsComponent, canActivate: [AuthGuard] },
   { path: 'rezervasyonlarim', component: MyReservationsComponent, canActivate: [AuthGuard] },
   { path: 'airsearch-test', component: AirsearchTestComponent },
-  { path: 'biletbank/airsearch-test', component: AirsearchTestComponent }
+  { path: 'biletbank/airsearch-test', component: AirsearchTestComponent },
+  // Eski /auth/login URL'lerini /login'e yönlendir
+  { path: 'auth/login', redirectTo: '/login' },
+  { path: 'auth/register', redirectTo: '/register' },
+  { path: 'auth/verify-email', redirectTo: '/verify-email' },
+  { path: '**', redirectTo: '/' }
 ];
 
 @NgModule({

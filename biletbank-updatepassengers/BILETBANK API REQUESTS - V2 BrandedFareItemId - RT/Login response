@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+   <s:Body>
+      <LoginResponse xmlns="http://tempuri.org/">
+         <LoginResult xmlns:a="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Authentication.IO" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+            <HasError xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base">false</HasError>
+            <ServiceError i:nil="true" xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base"/>
+            <SystemLogs xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+               <b:string>Host:http://dev-ws.biletbank.local/TrevooWS.svc</b:string>
+               <b:string>Env:BBWEB2</b:string>
+               <b:string>ReqId:460dc92b-5b92-4848-96d7-eb4e4df121d9</b:string>
+            </SystemLogs>
+            <a:AuthenticationHeader xmlns:b="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base">
+               <b:SessionId>7208632</b:SessionId>
+               <b:SessionToken>e4586ab3-3c3d-4500-969c-4905f0315d2a</b:SessionToken>
+            </a:AuthenticationHeader>
+            <a:Permissions xmlns:b="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Authentication"/>
+            <a:UserInfo xmlns:b="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Authentication">
+               <b:BusinessId>15967</b:BusinessId>
+               <b:BusinessName>EASY BOOKING XML</b:BusinessName>
+               <b:CountryCode>UZ</b:CountryCode>
+               <b:IfRootOfBusiness>true</b:IfRootOfBusiness>
+               <b:UserEmail>N.MAHMUDOV@EASYBOOKING.UZ</b:UserEmail>
+               <b:UserId>61463</b:UserId>
+               <b:Username>EASYXML</b:Username>
+            </a:UserInfo>
+         </LoginResult>
+      </LoginResponse>
+   </s:Body>
+</s:Envelope>

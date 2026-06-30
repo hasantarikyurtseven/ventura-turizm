@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -31,10 +31,44 @@ interface BrandOption {
   currency: string;
 }
 
+interface BookingFlight {
+  id: string;
+  airline: string;
+  airlineLogo?: string;
+  flightNumber: string;
+  departure: {
+    airportCode: string;
+    time: string;
+    date: string;
+  };
+  arrival: {
+    airportCode: string;
+    time: string;
+    date: string;
+  };
+  duration: string;
+  price: number;
+  currency: string;
+}
+
+interface BookingLeg {
+  direction: 'outbound' | 'return' | 'roundTrip' | 'single';
+  title: string;
+  productId: string;
+  brandedFareItemId?: string;
+  selectedBrand?: BrandOption | null;
+  flight: BookingFlight;
+  allBrandOptions: BrandOption[];
+  allocateId?: string;
+  allocateProductId?: string;
+  paxReferences?: AllocatePaxRefDto[];
+}
+
 interface BookingData {
   allocateId?: string;
   allocateProductId?: string;
   productId?: string;
+  productIds?: string[];
   sessionId?: string;
   sessionToken?: string;
   shoppingFileId?: string;
@@ -45,27 +79,16 @@ interface BookingData {
     brandName?: string;
     brandCode?: string;
     totalFare: number;
-    totalTaxes?: number;
+    totalTaxes: number;
     currency: string;
     baggageDescription?: string;
   };
-  flight?: {
-    id: string;
-    airline: string;
-    flightNumber: string;
-    departure: {
-      airportCode: string;
-      time: string;
-      date: string;
-    };
-    arrival: {
-      airportCode: string;
-      time: string;
-      date: string;
-    };
-    duration: string;
-    price: number;
-    currency: string;
+  flight?: BookingFlight;
+  flightLegs?: BookingLeg[];
+  passengerCounts?: {
+    adults?: number;
+    children?: number;
+    infants?: number;
   };
   allBrandOptions?: BrandOption[]; // Tüm paket seçenekleri
   correlationId?: string;
@@ -92,6 +115,8 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   packageScrollLeft = 0;
   packageMaxScroll = 0;
   packageScrollRight = 0;
+  activePackageLegIndex = 0;
+  passengerTypes: Array<'ADT' | 'CHD' | 'INF'> = ['ADT'];
 
   /** Rezervasyon geri sayımı (örn: "14:32") */
   countdownDisplay = '';
@@ -103,6 +128,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     private snackBar: MatSnackBar,
     private authService: AuthService,
     private api: BiletbankApiService,
+    private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: object,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -112,12 +138,12 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     // Form'u her zaman oluştur (SSR için gerekli)
     this.bookingForm = this.fb.group({
       contactInfo: this.fb.group({
+        firstName: ['', [Validators.required, Validators.minLength(2)]],
+        lastName: ['', [Validators.required, Validators.minLength(2)]],
         email: ['', [Validators.required, Validators.email]],
         phone: ['', [Validators.required, Validators.pattern(/^[0-9+\-\s()]+$/)]],
       }),
-      passengers: this.fb.array([
-        this.createPassengerForm(),
-      ]),
+      passengers: this.fb.array([this.createPassengerForm()]),
     });
 
     // SSR kontrolü - sadece browser'da sessionStorage ve navigation işlemleri yap
@@ -147,6 +173,8 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    this.syncPassengerFormsFromBookingData();
+
     // Oturum süresi kontrolü: 15 dakikadan eski veri varsa temizle
     if (this.bookingData?.timestamp) {
       const savedAt = new Date(this.bookingData.timestamp).getTime();
@@ -164,22 +192,13 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    // Giriş kontrolü
-    if (!this.authService.isLoggedIn) {
-      this.snackBar.open('Rezervasyon yapmak için giriş yapmalısınız.', 'Giriş Yap', {
-        duration: 5000,
-        panelClass: ['warning-snackbar'],
-      }).onAction().subscribe(() => {
-        this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
-      });
-      return;
-    }
-
     // Kullanıcı bilgilerini doldur (varsa)
     const user = this.authService.currentUser;
     if (user) {
       this.bookingForm.patchValue({
         contactInfo: {
+          firstName: (user as any).firstName || '',
+          lastName: (user as any).lastName || '',
           email: user.email || '',
           phone: '',
         },
@@ -187,6 +206,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     }
 
     // Rezervasyon sayacını başlat
+    this.activePackageLegIndex = this.packageLegs.length > 1 ? 1 : 0;
     this.startCountdown();
   }
 
@@ -259,6 +279,90 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     return this.bookingForm.get('passengers') as FormArray;
   }
 
+  private syncPassengerFormsFromBookingData(): void {
+    const adults = this.clampPassengerCount(this.bookingData?.passengerCounts?.adults, 1);
+    const children = this.clampPassengerCount(this.bookingData?.passengerCounts?.children, 0);
+    const infants = this.clampPassengerCount(this.bookingData?.passengerCounts?.infants, 0);
+
+    this.passengerTypes = [
+      ...Array(adults).fill('ADT'),
+      ...Array(children).fill('CHD'),
+      ...Array(infants).fill('INF'),
+    ] as Array<'ADT' | 'CHD' | 'INF'>;
+
+    const passengerForms = this.passengers;
+    passengerForms.clear();
+    this.passengerTypes.forEach(() => passengerForms.push(this.createPassengerForm()));
+  }
+
+  private clampPassengerCount(value: unknown, fallback: number): number {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) return fallback;
+    return Math.max(0, Math.floor(parsed));
+  }
+
+  getPassengerTitle(index: number): string {
+    const type = this.passengerTypes[index] || 'ADT';
+    const label = type === 'ADT' ? 'Yetişkin' : type === 'CHD' ? 'Çocuk' : 'Bebek';
+    return `Yolcu ${index + 1} - ${label}`;
+  }
+
+  get totalPassengerCount(): number {
+    return Math.max(this.passengerTypes.length, 1);
+  }
+
+  get passengerTypeSummary(): string {
+    const adults = this.passengerTypes.filter((type) => type === 'ADT').length;
+    const children = this.passengerTypes.filter((type) => type === 'CHD').length;
+    const infants = this.passengerTypes.filter((type) => type === 'INF').length;
+    const parts: string[] = [];
+    if (adults) parts.push(`${adults} Yetişkin`);
+    if (children) parts.push(`${children} Çocuk`);
+    if (infants) parts.push(`${infants} Bebek`);
+    return parts.join(', ') || '1 Yetişkin';
+  }
+
+  get priceSummaryLegs(): BookingLeg[] {
+    return this.packageLegs.length ? this.packageLegs : [];
+  }
+
+  get priceSummaryTotal(): number {
+    if (this.priceSummaryLegs.length) {
+      return this.priceSummaryLegs.reduce((sum, leg) => sum + this.getLegTotalFare(leg), 0);
+    }
+    return this.selectedBrand?.totalFare || this.selectedFlight?.price || 0;
+  }
+
+  get priceSummaryTaxes(): number {
+    return this.priceSummaryLegs.reduce((sum, leg) => sum + (leg.selectedBrand?.totalTaxes || 0), 0);
+  }
+
+  get priceSummaryCurrency(): string {
+    return (
+      this.priceSummaryLegs.find((leg) => leg.selectedBrand?.currency || leg.flight.currency)?.selectedBrand?.currency ||
+      this.priceSummaryLegs.find((leg) => leg.flight.currency)?.flight.currency ||
+      this.selectedBrand?.currency ||
+      this.selectedFlight?.currency ||
+      ''
+    );
+  }
+
+  get averageFarePerPassenger(): number {
+    return this.priceSummaryTotal / this.totalPassengerCount;
+  }
+
+  getLegTotalFare(leg: BookingLeg): number {
+    return leg.selectedBrand?.totalFare || leg.flight.price || 0;
+  }
+
+  getLegPackageName(leg: BookingLeg): string {
+    return leg.selectedBrand ? this.getBrandDisplayName(leg.selectedBrand) : 'Standart';
+  }
+
+  getLegRoute(leg: BookingLeg): string {
+    return `${leg.flight.departure.airportCode} → ${leg.flight.arrival.airportCode}`;
+  }
+
   get contactInfo(): FormGroup {
     return this.bookingForm.get('contactInfo') as FormGroup;
   }
@@ -268,11 +372,101 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   get selectedBrand() {
-    return this.bookingData?.selectedBrand || null;
+    return this.activePackageLeg?.selectedBrand || this.bookingData?.selectedBrand || null;
   }
 
   get allBrandOptions(): BrandOption[] {
-    return this.bookingData?.allBrandOptions || [];
+    return this.activePackageLeg?.allBrandOptions || this.bookingData?.allBrandOptions || [];
+  }
+
+  get packageLegs(): BookingLeg[] {
+    if (this.bookingData?.flightLegs?.length) {
+      return this.bookingData.flightLegs;
+    }
+
+    if (!this.bookingData?.flight) {
+      return [];
+    }
+
+    return [{
+      direction: 'single',
+      title: 'Uçuş',
+      productId: this.bookingData.productId || this.bookingData.flight.id,
+      brandedFareItemId: this.bookingData.brandedFareItemId,
+      selectedBrand: this.bookingData.selectedBrand || null,
+      flight: this.bookingData.flight,
+      allBrandOptions: this.bookingData.allBrandOptions || [],
+      allocateId: this.bookingData.allocateId,
+      allocateProductId: this.bookingData.allocateProductId,
+      paxReferences: this.bookingData.paxReferences,
+    }];
+  }
+
+  get activePackageLeg(): BookingLeg | null {
+    return this.packageLegs[this.activePackageLegIndex] || this.packageLegs[0] || null;
+  }
+
+  setActivePackageLeg(index: number): void {
+    this.activePackageLegIndex = index;
+    setTimeout(() => this.updatePackageScroll(), 0);
+  }
+
+  private getSelectedProductIds(): string[] {
+    // BiletBank, UpdatePassengers'da arama sonucundaki flight.id değil,
+    // Allocate yanıtındaki ProductItemId'yi bekliyor.
+    // Gidiş+dönüşte bile BiletBank tek bir BookingItem (tek ProductItemId) oluşturuyor.
+    if (this.bookingData?.allocateProductId) {
+      return [this.bookingData.allocateProductId];
+    }
+
+    // allocateProductId yoksa leg'lerin arama ID'lerine düş (tek yön fallback)
+    const legProductIds = this.packageLegs
+      .map((leg) => leg.productId?.trim())
+      .filter((productId): productId is string => Boolean(productId));
+
+    if (legProductIds.length) {
+      return Array.from(new Set(legProductIds));
+    }
+
+    const fallbackProductId = this.bookingData?.productId || this.bookingData?.flight?.id;
+    return fallbackProductId ? [fallbackProductId] : [];
+  }
+
+  private getSelectedBrandedItems() {
+    // BiletBank RT örneği: her segment için ayrı IO_Air_Branded_Form,
+    // hepsi Allocate sonrası dönen TEK allocated productId ile.
+    const allocatedProductId = this.bookingData?.allocateProductId;
+
+    return this.packageLegs
+      .filter((leg) => leg.brandedFareItemId?.trim())
+      .map((leg) => ({
+        productId: allocatedProductId || leg.productId,
+        brandedFareItemId: leg.brandedFareItemId,
+        brandedCode: leg.selectedBrand?.brandCode,
+      }));
+  }
+
+  /**
+   * MakePrebooking için productId listesini döndürür.
+   * UpdatePassengers gibi, allocated productId kullanılmalı; AirSearch leg ID'leri değil.
+   * Tutarsızlık (ProductIds ≠ Branded productIds) BiletBank'ta sessiz başarısızlığa yol açar.
+   */
+  private getPrebookingProductIds(): string[] {
+    // Allocate sonucu ID her zaman öncelikli (UpdatePassengers ile aynı mantık)
+    if (this.bookingData?.allocateProductId) {
+      return [this.bookingData.allocateProductId];
+    }
+
+    const legIds = this.packageLegs
+      .map((leg) => leg.productId?.trim())
+      .filter((id): id is string => Boolean(id));
+
+    if (legIds.length) {
+      return Array.from(new Set(legIds));
+    }
+
+    const fallback = this.bookingData?.productId || this.bookingData?.flight?.id;
+    return fallback ? [fallback] : [];
   }
 
   /** Sayaç 5 dakikanın altına indiğinde uyarı stili */
@@ -395,33 +589,30 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   /** Paket seçildiğinde */
-  async selectPackage(brand: BrandOption): Promise<void> {
-    if (!this.bookingData || !this.selectedFlight) {
-      return;
-    }
-
-    // Giriş kontrolü
-    if (!this.authService.isLoggedIn) {
-      this.snackBar.open('Paket değiştirmek için lütfen giriş yapın.', 'Giriş Yap', {
-        duration: 5000,
-        panelClass: ['warning-snackbar'],
-      }).onAction().subscribe(() => {
-        this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
-      });
+  async selectPackage(brand: BrandOption, leg: BookingLeg | null = this.activePackageLeg): Promise<void> {
+    if (!this.bookingData || !leg) {
       return;
     }
 
     // Aynı paket seçiliyse işlem yapma
-    if (this.selectedBrand?.id === brand.id) {
+    if (leg.selectedBrand?.id === brand.id) {
       return;
     }
 
     this.isChangingPackage = true;
 
     try {
+      const selectedItems = this.packageLegs
+        .filter((currentLeg) => currentLeg.productId?.trim())
+        .map((currentLeg) => ({
+          productId: currentLeg.productId,
+          brandedFareItemId: currentLeg.productId === leg.productId ? brand.id : currentLeg.brandedFareItemId,
+        }));
+
       // Yeni paketle Allocate işlemi yap
       const allocateResult = await firstValueFrom(this.api.allocate({
-        productId: this.selectedFlight.id,
+        productId: leg.productId,
+        selectedItems,
         brandedFareItemId: brand.id,
         sessionId: this.bookingData.sessionId!,
         sessionToken: this.bookingData.sessionToken!,
@@ -430,13 +621,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       }));
 
       if (allocateResult?.success) {
-        // Booking data'yı güncelle
-        this.bookingData.allocateId = allocateResult.allocateId;
-        this.bookingData.allocateProductId = allocateResult.productId;
-        this.bookingData.paxReferences = allocateResult.paxReferences || [];
-        this.bookingData.brandedFareItemId = brand.id;
-        // selectedBrand için sadece gerekli alanları kaydet (BrandOption değil, daha basit bir yapı)
-        this.bookingData.selectedBrand = {
+        const selectedBrand = {
           id: brand.id,
           brandName: brand.brandName,
           brandCode: brand.brandCode,
@@ -445,7 +630,31 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
           currency: brand.currency,
           baggageDescription: brand.baggageDescription,
         };
+
+        leg.allocateId = allocateResult.allocateId;
+        leg.allocateProductId = allocateResult.productId;
+        leg.paxReferences = allocateResult.paxReferences || [];
+        leg.brandedFareItemId = brand.id;
+        leg.selectedBrand = selectedBrand;
+
+        if (this.packageLegs.length === 1 || leg.direction !== 'outbound') {
+          // Mevcut tek ürünlü booking akışını korumak için ana kayıt aktif/son ürünle güncellenir.
+          this.bookingData.allocateId = allocateResult.allocateId;
+          this.bookingData.allocateProductId = allocateResult.productId;
+          this.bookingData.paxReferences = allocateResult.paxReferences || [];
+          this.bookingData.brandedFareItemId = brand.id;
+          this.bookingData.selectedBrand = selectedBrand;
+          this.bookingData.productId = leg.productId;
+          this.bookingData.flight = leg.flight;
+        } else {
+          // Gidiş+dönüşte outbound paket değiştiğinde paxReferences'ı güncelle
+          if (allocateResult.paxReferences?.length) {
+            this.bookingData.paxReferences = allocateResult.paxReferences;
+          }
+          this.bookingData.allocateId = allocateResult.allocateId;
+        }
         this.bookingData.correlationId = allocateResult.correlationId;
+        this.bookingData.productIds = Array.from(new Set(selectedItems.map((item) => item.productId)));
         this.bookingData.timestamp = new Date().toISOString();
 
         // SessionStorage'ı güncelle
@@ -498,7 +707,11 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (this.isBrowser && this.packageCardsWrapper) {
-      this.updatePackageScroll();
+      // setTimeout: ngAfterViewInit sonrası DOM ölçümü change detection döngüsünü etkilemesin (NG0100)
+      setTimeout(() => {
+        this.updatePackageScroll();
+        this.cdr.detectChanges();
+      });
     }
   }
 
@@ -549,6 +762,12 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.isLoading = true;
 
     const contactInfo = this.bookingForm.get('contactInfo')?.value;
+    const contactPerson = {
+      firstName: (contactInfo?.firstName || '').trim(),
+      lastName: (contactInfo?.lastName || '').trim(),
+      email: (contactInfo?.email || '').trim(),
+      phone: (contactInfo?.phone || '').trim(),
+    };
     const passengersArray = this.bookingForm.get('passengers')?.value || [];
 
     // Pasaport kullanıyorsa geçerlilik tarihi zorunlu
@@ -567,10 +786,11 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // Allocate response'undan gelen PaxReference haritası (sequenceNo → paxRef)
+    // Allocate response'undan gelen PaxReference haritası (sequenceNo → ilk paxRef).
+    // Gidiş+dönüşte her iki leg de aynı sequenceNo'yu dönebilir; ilk (outbound) kaydını koruyoruz.
     const paxRefMap = new Map<number, AllocatePaxRefDto>();
     for (const ref of (this.bookingData.paxReferences || [])) {
-      if (ref.localSequenceNo != null) {
+      if (ref.localSequenceNo != null && !paxRefMap.has(ref.localSequenceNo)) {
         paxRefMap.set(ref.localSequenceNo, ref);
       }
     }
@@ -579,10 +799,17 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       (p: any, index: number) => {
         const sequenceNo = index + 1;
         const isTc = p.idType === 'TC';
-        // Allocate response'undan PaxReferenceId al (varsa TempTag olarak kullan)
+        // Allocate response'undan PaxReferenceId ve PassengerId al.
+        // Minimal şablon (tek yönlü TC): backend id'yi productId ile geçersiz kılar.
+        // Tam şablon (gidiş+dönüş): id = Allocate'ten gelen passengerId olmalı; rastgele UUID BiletBank tarafından reddedilir.
         const paxRef = paxRefMap.get(sequenceNo);
-        const tempTagId = paxRef?.paxReferenceId || crypto.randomUUID();
-        const passengerId = crypto.randomUUID();
+        const tempTagId = paxRef?.paxReferenceId
+          || paxRef?.passengerId
+          || this.bookingData!.allocateId
+          || crypto.randomUUID();
+        const passengerId = paxRef?.passengerId
+          || this.bookingData!.allocateId
+          || crypto.randomUUID();
         const birthDate = this.formatDateForApi(p.birthDate);
         const citizenNo = isTc
           ? String(p.idNumber || '').replace(/\D/g, '').slice(0, 11).padStart(11, '0')
@@ -592,7 +819,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
         const pax: UpdatePassengerItemDto = {
           birthDate: birthDate || '1990-01-01',
           citizenNo: citizenNo || '00000000000',
-          email: (contactInfo?.email || '').trim(),
+          email: contactPerson.email,
           firstName: (p.firstName || '').trim(),
           gender: p.gender === 'M' || p.gender === 'F' ? p.gender : 'M',
           id: passengerId,
@@ -601,10 +828,10 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
           nationality: 'TR',
           passportCountry: (p.passportCountry || 'TR').toUpperCase().slice(0, 2) || 'TR',
           passportNo: passportNo || 'P00000000',
-          phone: this.formatPhoneForApi(contactInfo?.phone || ''),
+          phone: this.formatPhoneForApi(contactPerson.phone),
           sequenceNo,
           tempTag: tempTagId,
-          type: 'ADT',
+          type: this.passengerTypes[index] || 'ADT',
           wheelChairServiceType: 0,
         };
         const pvd = !isTc && p.passportValidDate ? this.formatDateForApi(p.passportValidDate) : null;
@@ -625,10 +852,8 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    // BiletBank destek: ProductIds = AirSearch ProductId = Allocate Request ProductId (flight.id)
-    const productIds = this.bookingData.productId
-      ? [this.bookingData.productId]
-      : (this.bookingData.flight?.id ? [this.bookingData.flight.id] : []);
+    const productIds = this.getSelectedProductIds();
+    this.bookingData.productIds = productIds;
 
     if (!productIds.length) {
       this.isLoading = false;
@@ -639,9 +864,22 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
+    if (!this.bookingData.sessionId || !this.bookingData.sessionToken) {
+      this.isLoading = false;
+      this.snackBar.open(
+        'Rezervasyon oturumu bilgileri eksik. Lütfen yeni bir uçuş araması yapın.',
+        'Tamam',
+        { duration: 6000, panelClass: ['error-snackbar'] },
+      );
+      this.router.navigate(['/']);
+      return;
+    }
+
+    console.warn('[DEBUG] allocateProductId:', this.bookingData.allocateProductId, '| productIds:', productIds);
+
     const request: UpdatePassengerRequestDto = {
-      sessionId: this.bookingData.sessionId!,
-      sessionToken: this.bookingData.sessionToken!,
+      sessionId: this.bookingData.sessionId,
+      sessionToken: this.bookingData.sessionToken,
       productIds,
       newPassengers,
     };
@@ -658,14 +896,21 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
           panelClass: ['info-snackbar'],
         });
 
-        const productId = this.bookingData!.productId || this.bookingData!.flight?.id || '';
+        // MakePrebooking için:
+        // - ProductIds: allocated productId (UpdatePassengers ile aynı)
+        // - Branded: her leg'in brandedFareItemId'si, hepsi allocated productId ile
+        //   (BiletBank V2 BrandedFareItemId dokümanı; DoReservation backend'den gönderilir)
+        const prebookingProductIds = this.getPrebookingProductIds();
+        const prebookingProductId = prebookingProductIds[0] || this.bookingData!.productId || this.bookingData!.flight?.id || '';
         const prebookingRequest: MakePrebookingRequestDto = {
           sessionId: this.bookingData!.sessionId!,
           sessionToken: this.bookingData!.sessionToken!,
-          productId,
+          productId: prebookingProductId,
+          productIds: prebookingProductIds,
           shoppingFileId: this.bookingData!.shoppingFileId!,
           brandedFareItemId: this.bookingData!.brandedFareItemId,
           brandedCode: this.bookingData!.selectedBrand?.brandCode,
+          brandedItems: this.getSelectedBrandedItems(),
         };
 
         const prebookingRes = await firstValueFrom(this.api.makePrebooking(prebookingRequest));
@@ -700,6 +945,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
           });
           const paymentData = {
             ...this.bookingData,
+            contactPerson,
             passengers: passengerSummary,
             prebooking: {
               shoppingFileId: prebookingRes.shoppingFileId,
@@ -759,21 +1005,32 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
             this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
           });
         } else {
-          const rawMsg = error?.error?.message;
-          let msg: string =
-            Array.isArray(rawMsg)
-              ? rawMsg.join('. ')
-              : typeof rawMsg === 'string'
-                ? rawMsg
-                : (rawMsg && typeof rawMsg === 'object' && typeof (rawMsg as any).message === 'string')
-                  ? (rawMsg as any).message
-                  : error?.error?.error || error?.message || 'Yolcu bilgileri kaydedilirken bir hata oluştu.';
+          // error.error yapısı: { statusCode, path, message: { message, debugRequestXml, debugResponseXml } }
+          const errBody = error?.error;
+          const msgField = errBody?.message;
+
+          // Hata mesajını çıkar
+          let msg: string;
+          if (Array.isArray(msgField)) {
+            msg = msgField.join('. ');
+          } else if (typeof msgField === 'string') {
+            msg = msgField;
+          } else if (msgField && typeof msgField === 'object' && typeof msgField.message === 'string') {
+            msg = msgField.message;
+          } else {
+            msg = errBody?.error || error?.message || 'Yolcu bilgileri kaydedilirken bir hata oluştu.';
+          }
+
           const msgLower = String(msg || '').toLowerCase();
 
           const isBasketInvalid =
             msgLower.includes('basket code') ||
             msgLower.includes('same basket') ||
-            msgLower.includes('rezervasyon oturumu');
+            msgLower.includes('rezervasyon oturumu') ||
+            msgLower.includes('session bilgileri eksik') ||
+            msgLower.includes('oturum süresi dolmuş') ||
+            msgLower.includes('yeniden arama') ||
+            msgLower.includes('invalid session');
 
           const isServerError =
             error?.status === 500 ||
@@ -843,6 +1100,8 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   private getInvalidFieldLabels(): string[] {
     const labels: string[] = [];
     const contactInfo = this.bookingForm.get('contactInfo') as FormGroup;
+    if (contactInfo?.get('firstName')?.invalid) labels.push('İletişim kişisi adı');
+    if (contactInfo?.get('lastName')?.invalid) labels.push('İletişim kişisi soyadı');
     if (contactInfo?.get('email')?.invalid) labels.push('E-posta');
     if (contactInfo?.get('phone')?.invalid) labels.push('Telefon');
     const passengers = this.bookingForm.get('passengers') as FormArray;

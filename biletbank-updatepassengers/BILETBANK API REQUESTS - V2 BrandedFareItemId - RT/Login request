@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Authentication.IO">
+	<soapenv:Header/>
+	<soapenv:Body>
+		<tem:Login>
+			<!--Optional:-->
+			<tem:request>
+				<!--Optional:-->
+				<trev1:Form>
+					<trev1:ChannelCode>2</trev1:ChannelCode>
+					<!--Optional:-->
+					<trev1:ClientIP/>
+					<!--Optional:-->
+					<trev1:ClientName>EASYXML</trev1:ClientName>
+					<!--Optional:-->
+					<trev1:IsTestMode>true</trev1:IsTestMode>
+					<!--Optional:-->
+					<trev1:Password>YOUR_PASSWORD</trev1:Password>
+					<!--Optional:-->
+					<trev1:Username>EASYXML</trev1:Username>
+				</trev1:Form>
+			</tem:request>
+		</tem:Login>
+	</soapenv:Body>
+</soapenv:Envelope>

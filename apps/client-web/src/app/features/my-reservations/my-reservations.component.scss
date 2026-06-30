@@ -234,6 +234,68 @@ $shadow:        var(--ventura-shadow-lg, 0 4px 24px rgba(0,0,0,.09));
   }
 }
 
+// ── Multi-leg (gidiş+dönüş) ───────────────────────────────────────────
+.rc-col-flight--multi {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.rc-leg {
+  display: flex;
+  flex-direction: column;
+  gap: .875rem;
+  padding: .5rem 0;
+}
+
+.rc-leg-label {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+
+  .rc-leg-label-left {
+    display: flex;
+    align-items: center;
+    gap: .375rem;
+    font-size: .75rem;
+    font-weight: 700;
+    color: $primary;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+
+  mat-icon {
+    font-size: 1rem;
+    width: 1rem;
+    height: 1rem;
+    color: $primary;
+  }
+}
+
+.rc-leg-fare {
+  font-size: .8125rem;
+  font-weight: 800;
+  color: $text;
+  background: $primary-light;
+  border: 1px solid rgba(63, 81, 181, .18);
+  border-radius: 8px;
+  padding: .2rem .55rem;
+  white-space: nowrap;
+}
+
+.rc-leg-divider {
+  height: 1px;
+  background: repeating-linear-gradient(
+    90deg,
+    $border 0,
+    $border 6px,
+    transparent 6px,
+    transparent 12px
+  );
+  margin: .5rem 0;
+}
+
 // ── Uçuş rotası ──────────────────────────────────────────────────────
 .rc-route {
   display: flex;
@@ -392,27 +454,84 @@ $shadow:        var(--ventura-shadow-lg, 0 4px 24px rgba(0,0,0,.09));
   margin-left: .2rem;
 }
 
+// ── Fiyat dökümü (gidiş-dönüş) ────────────────────────────────────────
+.rc-fare-breakdown {
+  display: flex;
+  flex-direction: column;
+  gap: .4rem;
+  background: $surface-100;
+  border: 1px solid $border;
+  border-radius: 10px;
+  padding: .6rem .75rem;
+}
+.rc-fare-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+.rc-fare-leg-label {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .75rem;
+  font-weight: 600;
+  color: $text-sec;
+
+  mat-icon { font-size: .9rem; width: .9rem; height: .9rem; color: $primary; }
+  em {
+    font-style: normal;
+    font-family: 'Roboto Mono', monospace;
+    font-size: .7rem;
+    color: $text;
+    margin-left: .15rem;
+  }
+}
+.rc-fare-leg-amount {
+  font-size: .8125rem;
+  font-weight: 700;
+  color: $text;
+  white-space: nowrap;
+  &.muted { color: $text-sec; font-weight: 500; }
+}
+
 // ── Alt satır ─────────────────────────────────────────────────────────
 .rc-footer {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 1rem;
   padding-top: .75rem;
   border-top: 1px solid $border;
 }
-.rc-amount, .rc-created {
+.rc-amount {
+  display: flex;
+  flex-direction: column;
+  gap: .15rem;
+
+  .rc-amount-label {
+    font-size: .625rem;
+    text-transform: uppercase;
+    letter-spacing: .1em;
+    color: $text-sec;
+  }
+  .rc-amount-value {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: 1.125rem;
+    font-weight: 800;
+    color: $text;
+    mat-icon { font-size: 1.125rem; width: 1.125rem; height: 1.125rem; color: #4caf50; }
+  }
+}
+.rc-created {
   display: flex;
   align-items: center;
   gap: .375rem;
-  font-size: .875rem;
+  font-size: .8125rem;
   color: $text-sec;
   mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
-}
-.rc-amount {
-  font-weight: 700;
-  color: $text;
-  mat-icon { color: #4caf50; }
 }
 
 // ── Responsive ────────────────────────────────────────────────────────

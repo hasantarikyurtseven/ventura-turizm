@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+   <s:Body>
+      <FinalizeShoppingResponse xmlns="http://tempuri.org/">
+         <FinalizeShoppingResult xmlns:a="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+            <HasError xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base">false</HasError>
+            <ServiceError i:nil="true" xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base"/>
+            <SystemLogs xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+               <b:string>Host:http://dev-ws.biletbank.local/TrevooWS.svc</b:string>
+               <b:string>Env:BBWEB2</b:string>
+               <b:string>ReqId:cd7c6fd2-65df-44da-9950-2ccbf9a78b9a</b:string>
+            </SystemLogs>
+            <ShoppingFile xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:b="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+               <b:AirBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Air">
+                  <c:T_AirBooking>
+                     <b:BaseFare>5210.0000</b:BaseFare>
+                     <b:BaseFare_Discount>0</b:BaseFare_Discount>
+                     <b:BaseFare_Refund>0</b:BaseFare_Refund>
+                     <b:BookingCode>JYS7WY</b:BookingCode>
+                     <b:Currency>TRY</b:Currency>
+                     <b:ExchangeCurrencyCode>TRY</b:ExchangeCurrencyCode>
+                     <b:ExchangeCurrencyRate>1.0000</b:ExchangeCurrencyRate>
+                     <b:Ext_FreeData_Detail i:nil="true"/>
+                     <b:Ext_FreeData_RefundPolicy i:nil="true"/>
+                     <b:Ext_FreeField i:nil="true"/>
+                     <b:IsRefundable>false</b:IsRefundable>
+                     <b:LastPriceChange_SessionId i:nil="true"/>
+                     <b:LastPriceChange_TransactionId i:nil="true"/>
+                     <b:LastSellerCommission>0</b:LastSellerCommission>
+                     <b:NetFare>15195.9900</b:NetFare>
+                     <b:ProductId>e5cba2e2-bff7-406f-bffb-29b721e9471c</b:ProductId>
+                     <b:ProviderBookingCode>JYS7WY</b:ProviderBookingCode>
+                     <b:ProviderId>151</b:ProviderId>
+                     <b:Refund_Charge i:nil="true"/>
+                     <b:ServiceFee>12.0000</b:ServiceFee>
+                     <b:ServiceFeeType i:nil="true"/>
+                     <b:ServiceFee_Discount>0</b:ServiceFee_Discount>
+                     <b:ServiceFee_Original>12.0000</b:ServiceFee_Original>
+                     <b:ServiceFee_Refund i:nil="true"/>
+                     <b:Status>Booking</b:Status>
+                     <b:StatusTable xmlns:d="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping.Views">
+                        <d:IsBooking>true</d:IsBooking>
+                        <d:IsCancelled>false</d:IsCancelled>
+                        <d:IsExpired>false</d:IsExpired>
+                        <d:IsExpiryDateChanged>false</d:IsExpiryDateChanged>
+                        <d:IsImported>false</d:IsImported>
+                        <d:IsManualRefund>false</d:IsManualRefund>
+                        <d:IsPartialRefunded>false</d:IsPartialRefunded>
+                        <d:IsPartialRefunding>false</d:IsPartialRefunding>
+                        <d:IsPrebooking>false</d:IsPrebooking>
+                        <d:IsRefunded>false</d:IsRefunded>
+                        <d:IsRefunding>false</d:IsRefunding>
+                        <d:IsReservation>true</d:IsReservation>
+                     </b:StatusTable>
+                     <b:Taxes>9973.9900</b:Taxes>
+                     <b:Taxes_Discount>0</b:Taxes_Discount>
+                     <b:Taxes_Refund i:nil="true"/>
+                     <b:TimeTable xmlns:d="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping.Views">
+                        <d:BookingDate>2025-05-05T11:19:53</d:BookingDate>
+                        <d:CancellationDate i:nil="true"/>
+                        <d:CreationDate>2025-05-05T11:18:19</d:CreationDate>
+                        <d:ImportedDate i:nil="true"/>
+                        <d:PrebookingDate i:nil="true"/>
+                        <d:Prebooking_ExpiresAt>2025-05-08T08:00:00</d:Prebooking_ExpiresAt>
+                        <d:ReservationDate>2025-05-05T11:19:10</d:ReservationDate>
+                        <d:Reservation_ExpiresAt>2025-05-08T08:00:00</d:Reservation_ExpiresAt>
+                     </b:TimeTable>
+                     <b:TotalFare>15195.9900</b:TotalFare>
+                     <b:Type>Flight</b:Type>
+                     <c:AlternativePrices i:nil="true"/>
+                     <c:BookingItems>
+                        <c:T_AirBookingItem>
+                           <b:BaseFare>5210.0000</b:BaseFare>
+                           <b:BaseFare_Discount>0</b:BaseFare_Discount>
+                           <b:BaseFare_Refund i:nil="true"/>
+                           <b:Currency>TRY</b:Currency>
+                           <b:CustomerCommission i:nil="true"/>
+                           <b:Ext_FreeData_Detail i:nil="true"/>
+                           <b:Ext_FreeData_RefundPolicy i:nil="true"/>
+                           <b:IsRefundDraft>false</b:IsRefundDraft>
+                           <b:IsRefundPerformed>false</b:IsRefundPerformed>
+                           <b:IsRefundWaitingFinalization>false</b:IsRefundWaitingFinalization>
+                           <b:IsRefundWaitingOffer>false</b:IsRefundWaitingOffer>
+                           <b:IsReissue>false</b:IsReissue>
+                           <b:LastSellerCommission>0</b:LastSellerCommission>
+                           <b:NetFare>15195.9900</b:NetFare>
+                           <b:ProductItemId>1603859d-4063-4420-a422-40db407ce0b4</b:ProductItemId>
+                           <b:RefundRequestId i:nil="true"/>
+                           <b:Refund_AgencyDffAmount i:nil="true"/>
+                           <b:Refund_Charge i:nil="true"/>
+                           <b:ServiceFee>12.0000</b:ServiceFee>
+                           <b:ServiceFeeOnRefund i:nil="true"/>
+                           <b:ServiceFeeType i:nil="true"/>
+                           <b:ServiceFee_Discount>0</b:ServiceFee_Discount>
+                           <b:ServiceFee_Original>12.0000</b:ServiceFee_Original>
+                           <b:ServiceFee_Refund i:nil="true"/>
+                           <b:SystemServiceFee>0</b:SystemServiceFee>
+                           <b:Taxes>9973.9900</b:Taxes>
+                           <b:Taxes_Discount>0</b:Taxes_Discount>
+                           <b:Taxes_Refund i:nil="true"/>
+                           <b:TotalFare>15195.9900</b:TotalFare>
+                           <c:Baggage>0 K/0 K</c:Baggage>
+                           <c:ETicketLink i:nil="true"/>
+                           <c:ExternalCampaignAppliedAmount i:nil="true"/>
+                           <c:InvoiceLink>http://invoice.biletbank.com/InvoiceDocument.ashx?0809585983998</c:InvoiceLink>
+                           <c:PaxReference>
+                              <b:Age>0</b:Age>
+                              <b:LocalPaxType>ADT</b:LocalPaxType>
+                              <b:LocalSequenceNo>1</b:LocalSequenceNo>
+                              <b:PassengerId>219bf67c-5fc3-428f-aba5-0b56e3fb6866</b:PassengerId>
+                              <b:PaxReferenceId>0c5d366e-c2fd-416c-88af-c62478d2d7b5</b:PaxReferenceId>
+                           </c:PaxReference>
+                           <c:ReissueOldTicketNumber i:nil="true"/>
+                           <c:TicketNumber>0809585983998</c:TicketNumber>
+                           <c:VQ i:nil="true"/>
+                           <c:YR i:nil="true"/>
+                        </c:T_AirBookingItem>
+                     </c:BookingItems>
+                     <c:BrandedFares>
+                        <c:BrandedFareItems/>
+                        <c:BrandedItems/>
+                        <c:FreeBaggageAllowances/>
+                        <c:IsPackagedPrice>false</c:IsPackagedPrice>
+                     </c:BrandedFares>
+                     <c:CanBeReserved>false</c:CanBeReserved>
+                     <c:ETicketLink i:nil="true"/>
+                     <c:Segments>
+                        <c:T_Segment>
+                           <c:ArrivalDay>2025-08-07T00:00:00</c:ArrivalDay>
+                           <c:ArrivalTime>PT15H25M</c:ArrivalTime>
+                           <c:BookingClass>W</c:BookingClass>
+                           <c:Cabin>Economy</c:Cabin>
+                           <c:DepartureDay>2025-08-07T00:00:00</c:DepartureDay>
+                           <c:DepartureTime>PT13H55M</c:DepartureTime>
+                           <c:DestinationCode>WAW</c:DestinationCode>
+                           <c:Duration>02:30</c:Duration>
+                           <c:Equipment i:nil="true"/>
+                           <c:FareBasis>WSAVK0</c:FareBasis>
+                           <c:FareType xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+                              <d:string>RP</d:string>
+                           </c:FareType>
+                           <c:FlightNumber>LO134</c:FlightNumber>
+                           <c:Id>dfbe40ed-4f3c-4295-8503-470883e4a6b4</c:Id>
+                           <c:MarketingAirline>LO</c:MarketingAirline>
+                           <c:OD_DestinationCode>AMS</c:OD_DestinationCode>
+                           <c:OD_OriginCode>IST</c:OD_OriginCode>
+                           <c:OperatingAirline>LO</c:OperatingAirline>
+                           <c:OriginCode>IST</c:OriginCode>
+                           <c:SelectedBrandedFareItemId i:nil="true"/>
+                           <c:SequenceNo>1</c:SequenceNo>
+                        </c:T_Segment>
+                        <c:T_Segment>
+                           <c:ArrivalDay>2025-08-07T00:00:00</c:ArrivalDay>
+                           <c:ArrivalTime>PT18H50M</c:ArrivalTime>
+                           <c:BookingClass>W</c:BookingClass>
+                           <c:Cabin>Economy</c:Cabin>
+                           <c:DepartureDay>2025-08-07T00:00:00</c:DepartureDay>
+                           <c:DepartureTime>PT16H45M</c:DepartureTime>
+                           <c:DestinationCode>AMS</c:DestinationCode>
+                           <c:Duration>02:05</c:Duration>
+                           <c:Equipment i:nil="true"/>
+                           <c:FareBasis>WSAVK0</c:FareBasis>
+                           <c:FareType xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+                              <d:string>RP</d:string>
+                           </c:FareType>
+                           <c:FlightNumber>LO267</c:FlightNumber>
+                           <c:Id>66606d9e-d152-4ac8-b3d8-b17fd2700b19</c:Id>
+                           <c:MarketingAirline>LO</c:MarketingAirline>
+                           <c:OD_DestinationCode>AMS</c:OD_DestinationCode>
+                           <c:OD_OriginCode>IST</c:OD_OriginCode>
+                           <c:OperatingAirline>LO</c:OperatingAirline>
+                           <c:OriginCode>WAW</c:OriginCode>
+                           <c:SelectedBrandedFareItemId i:nil="true"/>
+                           <c:SequenceNo>2</c:SequenceNo>
+                        </c:T_Segment>
+                        <c:T_Segment>
+                           <c:ArrivalDay>2025-08-10T00:00:00</c:ArrivalDay>
+                           <c:ArrivalTime>PT8H55M</c:ArrivalTime>
+                           <c:BookingClass>W</c:BookingClass>
+                           <c:Cabin>Economy</c:Cabin>
+                           <c:DepartureDay>2025-08-10T00:00:00</c:DepartureDay>
+                           <c:DepartureTime>PT7H</c:DepartureTime>
+                           <c:DestinationCode>WAW</c:DestinationCode>
+                           <c:Duration>01:55</c:Duration>
+                           <c:Equipment i:nil="true"/>
+                           <c:FareBasis>WSAVK0</c:FareBasis>
+                           <c:FareType xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+                              <d:string>RP</d:string>
+                           </c:FareType>
+                           <c:FlightNumber>LO270</c:FlightNumber>
+                           <c:Id>62916834-4965-41d6-849b-2e24343f2b1c</c:Id>
+                           <c:MarketingAirline>LO</c:MarketingAirline>
+                           <c:OD_DestinationCode>IST</c:OD_DestinationCode>
+                           <c:OD_OriginCode>AMS</c:OD_OriginCode>
+                           <c:OperatingAirline>LO</c:OperatingAirline>
+                           <c:OriginCode>AMS</c:OriginCode>
+                           <c:SelectedBrandedFareItemId i:nil="true"/>
+                           <c:SequenceNo>1</c:SequenceNo>
+                        </c:T_Segment>
+                        <c:T_Segment>
+                           <c:ArrivalDay>2025-08-10T00:00:00</c:ArrivalDay>
+                           <c:ArrivalTime>PT16H40M</c:ArrivalTime>
+                           <c:BookingClass>W</c:BookingClass>
+                           <c:Cabin>Economy</c:Cabin>
+                           <c:DepartureDay>2025-08-10T00:00:00</c:DepartureDay>
+                           <c:DepartureTime>PT12H50M</c:DepartureTime>
+                           <c:DestinationCode>IST</c:DestinationCode>
+                           <c:Duration>02:50</c:Duration>
+                           <c:Equipment i:nil="true"/>
+                           <c:FareBasis>WSAVK0</c:FareBasis>
+                           <c:FareType xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+                              <d:string>RP</d:string>
+                           </c:FareType>
+                           <c:FlightNumber>LO135</c:FlightNumber>
+                           <c:Id>77d9cf32-02c7-4f5e-a77a-27cadc5b28eb</c:Id>
+                           <c:MarketingAirline>LO</c:MarketingAirline>
+                           <c:OD_DestinationCode>IST</c:OD_DestinationCode>
+                           <c:OD_OriginCode>AMS</c:OD_OriginCode>
+                           <c:OperatingAirline>LO</c:OperatingAirline>
+                           <c:OriginCode>WAW</c:OriginCode>
+                           <c:SelectedBrandedFareItemId i:nil="true"/>
+                           <c:SequenceNo>2</c:SequenceNo>
+                        </c:T_Segment>
+                     </c:Segments>
+                     <c:VQ i:nil="true"/>
+                     <c:YR i:nil="true"/>
+                  </c:T_AirBooking>
+               </b:AirBookings>
+               <b:BillingInformation>
+                  <b:Address_City>ISTANBUL</b:Address_City>
+                  <b:Address_Detail>COBANCESME SAN. CD. NO.44 NISH ISTANBUL C BLOK K:17 D:200</b:Address_Detail>
+                  <b:Address_District>BAHCELIEVLER</b:Address_District>
+                  <b:Address_ZipCode>0000</b:Address_ZipCode>
+                  <b:BillingName>TEST</b:BillingName>
+                  <b:CountryCode>TR</b:CountryCode>
+                  <b:IfCompany>true</b:IfCompany>
+                  <b:TaxNo>1111111111</b:TaxNo>
+                  <b:TaxOffice>TEST</b:TaxOffice>
+               </b:BillingInformation>
+               <b:CarBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Car"/>
+               <b:CreationDate>2025-05-05T11:12:13</b:CreationDate>
+               <b:Currency>TRY</b:Currency>
+               <b:CustomerInfo>
+                  <b:BusinessId>16040</b:BusinessId>
+                  <b:BusinessName>TUGSAN</b:BusinessName>
+                  <b:Email>TUGSAN.TORUNOGLU@PETOUR.COM</b:Email>
+                  <b:Key i:nil="true"/>
+                  <b:Phone>
+                     <b:HomePhone>+90-5382392398</b:HomePhone>
+                     <b:MobilePhone>+90-5382392398</b:MobilePhone>
+                  </b:Phone>
+                  <b:Username>TESTTUGSAN</b:Username>
+               </b:CustomerInfo>
+               <b:HotelBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Hotel"/>
+               <b:Id>87264cf8-dcf1-4a4d-b303-05ab97ff26b7</b:Id>
+               <b:IfFinalized>true</b:IfFinalized>
+               <b:InsuranceBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Insurance"/>
+               <b:IsCompanyPriceDiscountApplied>false</b:IsCompanyPriceDiscountApplied>
+               <b:IsFlightInfoChanged>false</b:IsFlightInfoChanged>
+               <b:IsPriceChanged>false</b:IsPriceChanged>
+               <b:IsReservationCancelled>false</b:IsReservationCancelled>
+               <b:Is_CC_Payment_Enabled>true</b:Is_CC_Payment_Enabled>
+               <b:Is_RA_Payment_Enabled>true</b:Is_RA_Payment_Enabled>
+               <b:LastTransactionDate>2025-05-05T11:19:53.093364Z</b:LastTransactionDate>
+               <b:LastTransactionId>cd7c6fd2-65df-44da-9950-2ccbf9a78b9a</b:LastTransactionId>
+               <b:MaxSc>0</b:MaxSc>
+               <b:MinSc>0</b:MinSc>
+               <b:Passengers>
+                  <b:T_Passenger>
+                     <b:BirthDate>2000-11-17</b:BirthDate>
+                     <b:CitizenNo>00000000000</b:CitizenNo>
+                     <b:DestinationAddress i:nil="true"/>
+                     <b:Email>SUPPORT@BILET.COM</b:Email>
+                     <b:FirstName>TUG</b:FirstName>
+                     <b:FrequentFlayerNo i:nil="true"/>
+                     <b:Gender>F</b:Gender>
+                     <b:HesCode i:nil="true"/>
+                     <b:Id>219bf67c-5fc3-428f-aba5-0b56e3fb6866</b:Id>
+                     <b:IfContact>true</b:IfContact>
+                     <b:LastName>TOR</b:LastName>
+                     <b:Nationality>TR</b:Nationality>
+                     <b:PassportCountry>TR</b:PassportCountry>
+                     <b:PassportNo>P3567732</b:PassportNo>
+                     <b:PassportValidDate>2030-04-13</b:PassportValidDate>
+                     <b:PaxReferences>
+                        <b:T_ForwardPaxReference>
+                           <b:ProductId>e5cba2e2-bff7-406f-bffb-29b721e9471c</b:ProductId>
+                           <b:ProductItemId>1603859d-4063-4420-a422-40db407ce0b4</b:ProductItemId>
+                        </b:T_ForwardPaxReference>
+                     </b:PaxReferences>
+                     <b:Phone>+90-5357823469</b:Phone>
+                     <b:SecondaryPhoneNumber i:nil="true"/>
+                     <b:SequenceNo>1</b:SequenceNo>
+                     <b:TempTag i:nil="true"/>
+                     <b:Type>ADT</b:Type>
+                     <b:WheelChairServiceType>0</b:WheelChairServiceType>
+                  </b:T_Passenger>
+               </b:Passengers>
+               <b:PaymentOptions i:nil="true" xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping.Views"/>
+               <b:Payments>
+                  <b:T_Payment>
+                     <b:CC_BankName i:nil="true"/>
+                     <b:CC_BonusInstallmentCount>0</b:CC_BonusInstallmentCount>
+                     <b:CC_CardHolder i:nil="true"/>
+                     <b:CC_CardNumber i:nil="true"/>
+                     <b:CC_InstallmentCount>0</b:CC_InstallmentCount>
+                     <b:CC_MonthlyPayment>0</b:CC_MonthlyPayment>
+                     <b:CurrentHandling_FinalizedDate i:nil="true"/>
+                     <b:Ext_FreeData i:nil="true"/>
+                     <b:Id>f543ea3b-59ee-410d-8d44-43f6780e8ef9</b:Id>
+                     <b:InterestAmount>0</b:InterestAmount>
+                     <b:LastApprovedCommand>PSTH</b:LastApprovedCommand>
+                     <b:LastCommand>PSTH</b:LastCommand>
+                     <b:OriginalAmount>15195.9900</b:OriginalAmount>
+                     <b:PaymentAmount>15195.9900</b:PaymentAmount>
+                     <b:PaymentConfirmedAmount>0</b:PaymentConfirmedAmount>
+                     <b:PaymentCurrency>TRY</b:PaymentCurrency>
+                     <b:PaymentType>DS</b:PaymentType>
+                     <b:SellingCurrency>TRY</b:SellingCurrency>
+                     <b:T_Credit_TransactionDate i:nil="true"/>
+                     <b:T_PostAuth_TransactionDate i:nil="true"/>
+                     <b:T_PreAuth_TransactionDate>2025-05-05T11:19:52</b:T_PreAuth_TransactionDate>
+                     <b:TotalAmount>15195.9900</b:TotalAmount>
+                  </b:T_Payment>
+               </b:Payments>
+               <b:PriceSummary>
+                  <b:GrandTotal>15195.9900</b:GrandTotal>
+                  <b:PriceItems>
+                     <b:T_PriceItem>
+                        <b:InCart>true</b:InCart>
+                        <b:ProductId>e5cba2e2-bff7-406f-bffb-29b721e9471c</b:ProductId>
+                        <b:ProductType>Flight</b:ProductType>
+                        <b:Total>15195.9900</b:Total>
+                     </b:T_PriceItem>
+                  </b:PriceItems>
+               </b:PriceSummary>
+               <b:RefundRequests i:nil="true"/>
+               <b:RemainingSum>0</b:RemainingSum>
+               <b:TimeZone>3</b:TimeZone>
+               <b:TransferBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Transfer"/>
+            </ShoppingFile>
+         </FinalizeShoppingResult>
+      </FinalizeShoppingResponse>
+   </s:Body>
+</s:Envelope>

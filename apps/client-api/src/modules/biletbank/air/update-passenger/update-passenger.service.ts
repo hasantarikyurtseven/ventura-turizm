@@ -58,16 +58,16 @@ function buildPassengerXml(p: UpdatePassengerItemDto, useMinimalDomesticShape: b
         ? ''
         : `
               <trev2:Nationality>${escapeXml(p.nationality)}</trev2:Nationality>
-              <trev2:PassportCountry/>
-              <trev2:PassportNo/>
-              <trev2:PassportValidDate/>`)
+              <trev2:PassportCountry i:nil="true"/>
+              <trev2:PassportNo i:nil="true"/>
+              <trev2:PassportValidDate i:nil="true"/>`)
     : `
               <trev2:Nationality>${escapeXml(p.nationality)}</trev2:Nationality>
               <trev2:PassportCountry>${escapeXml(p.passportCountry)}</trev2:PassportCountry>
               <trev2:PassportNo>${escapeXml(p.passportNo)}</trev2:PassportNo>
               ${p.passportValidDate
                 ? `<trev2:PassportValidDate>${escapeXml(p.passportValidDate)}</trev2:PassportValidDate>`
-                : ''}`;
+                : '<trev2:PassportValidDate i:nil="true"/>'}`;
 
   return `
             <trev2:T_Passenger>
@@ -155,62 +155,56 @@ export class BiletbankUpdatePassengerService {
         .join('');
 
       if (useMinimalDomesticShape) {
-        return `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <tem:UpdatePassengers>
-         <tem:request>
-            <trev:AuthenticationHeader>
-               <trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
-               <trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
-            </trev:AuthenticationHeader>
-            <trev1:Form>
-               <trev1:ModifiedPassengers/>
-               <trev1:NewPassengers>${passengersXml}
-               </trev1:NewPassengers>
-               <trev1:ProductIds>
-                  ${productIdsXml}
-               </trev1:ProductIds>
-            </trev1:Form>
-         </tem:request>
-      </tem:UpdatePassengers>
-   </soapenv:Body>
-</soapenv:Envelope>`;
+        return `<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+	<soap:Header/>
+	<soap:Body>
+		<tem:UpdatePassengers>
+			<tem:request>
+				<trev:AuthenticationHeader>
+					<trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
+					<trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
+				</trev:AuthenticationHeader>
+				<trev1:Form>
+					<trev1:ModifiedPassengers i:nil="true"/>
+					<trev1:NewPassengers>${passengersXml}
+					</trev1:NewPassengers>
+					<trev1:ProductIds>
+						${productIdsXml}
+					</trev1:ProductIds>
+				</trev1:Form>
+			</tem:request>
+		</tem:UpdatePassengers>
+	</soap:Body>
+</soap:Envelope>`;
       }
 
-      return `<?xml version="1.0" encoding="utf-8"?>
-<soapenv:Envelope
-  xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:tem="http://tempuri.org/"
-  xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base"
-  xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping"
-  xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping"
-  xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays"
-  xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-  <soapenv:Header/>
-  <soapenv:Body>
-    <tem:UpdatePassengers>
-      <tem:request>
-        <trev:AuthenticationHeader>
-          <trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
-          <trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
-        </trev:AuthenticationHeader>
-        <trev1:Form>
-          <trev1:ModifiedPassengers i:nil="true"/>
-          <trev1:NewPassengers>
-            ${passengersXml}
-          </trev1:NewPassengers>
-          <trev1:ProductIds>
-            ${productIdsXml}
-          </trev1:ProductIds>
-        </trev1:Form>
-      </tem:request>
-    </tem:UpdatePassengers>
-  </soapenv:Body>
-</soapenv:Envelope>`;
+      return `<?xml version="1.0" encoding="UTF-8"?>
+<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/" xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays" xmlns:i="http://www.w3.org/2001/XMLSchema-instance" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+	<soap:Header/>
+	<soap:Body>
+		<tem:UpdatePassengers>
+			<tem:request>
+				<trev:AuthenticationHeader>
+					<trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
+					<trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
+				</trev:AuthenticationHeader>
+				<trev1:Form>
+					<trev1:ModifiedPassengers i:nil="true"/>
+					<trev1:NewPassengers>
+						${passengersXml}
+					</trev1:NewPassengers>
+					<trev1:ProductIds>
+						${productIdsXml}
+					</trev1:ProductIds>
+				</trev1:Form>
+			</tem:request>
+		</tem:UpdatePassengers>
+	</soap:Body>
+</soap:Envelope>`;
     };
 
     const xml = buildRequestXml(dto.newPassengers);
+
 
     try {
       const { rawXml } = await soapPost({
@@ -222,6 +216,8 @@ export class BiletbankUpdatePassengerService {
       });
 
       const elapsedTime = Date.now() - startTime;
+
+
       const mapped = mapUpdatePassengerXmlToResponse(rawXml);
       const sf = mapped.details?.ShoppingFile as any;
       const airBookingsNode = sf?.AirBookings;
@@ -338,7 +334,8 @@ export class BiletbankUpdatePassengerService {
           errorMessage,
           elapsedTime,
           sessionId: maskSessionId(dto.sessionId),
-          sessionToken: maskSessionToken(dto.sessionToken),
+          productIds: dto.productIds,
+          passengerIds: dto.newPassengers.map((p) => ({ seq: p.sequenceNo, id: p.id, tempTag: p.tempTag })),
         });
         throw new BadRequestException(errorMessage);
       }

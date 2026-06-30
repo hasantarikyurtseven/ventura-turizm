@@ -36,24 +36,28 @@
 
           <!-- Search Fields - Tek satır -->
           <div class="search-fields">
-            <div class="airport-field">
-              <app-location-selector
-                label="Nereden"
-                [control]="fromAirportControl"
-                (locationSelected)="onFromLocationSelected($event)">
-              </app-location-selector>
-            </div>
 
-            <button mat-icon-button class="swap-button" type="button" (click)="swapAirports()">
-              <mat-icon>swap_horiz</mat-icon>
-            </button>
+            <!-- Nereden / Nereye — mobilde özel kart tasarımı -->
+            <div class="airport-pair">
+              <div class="airport-field from-field">
+                <app-location-selector
+                  label="Nereden"
+                  [control]="fromAirportControl"
+                  (locationSelected)="onFromLocationSelected($event)">
+                </app-location-selector>
+              </div>
 
-            <div class="airport-field">
-              <app-location-selector
-                label="Nereye"
-                [control]="toAirportControl"
-                (locationSelected)="onToLocationSelected($event)">
-              </app-location-selector>
+              <button mat-icon-button class="swap-button" type="button" (click)="swapAirports()">
+                <mat-icon>swap_horiz</mat-icon>
+              </button>
+
+              <div class="airport-field to-field">
+                <app-location-selector
+                  label="Nereye"
+                  [control]="toAirportControl"
+                  (locationSelected)="onToLocationSelected($event)">
+                </app-location-selector>
+              </div>
             </div>
 
             <!-- Gidiş Tarihi -->

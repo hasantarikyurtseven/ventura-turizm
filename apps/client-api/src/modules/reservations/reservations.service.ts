@@ -233,6 +233,7 @@ export class ReservationsService {
       $set.memberId = this.safeMemberObjectId(memberId);
     }
     if (dto.flight !== undefined) $set.flight = dto.flight;
+    if (dto.flightLegs !== undefined) $set.flightLegs = dto.flightLegs;
     if (dto.passengers !== undefined) $set.passengers = dto.passengers;
     const mergedPay = this.mergePayment(existing.payment, dto.payment);
     if (mergedPay !== undefined) $set.payment = mergedPay;
@@ -297,6 +298,7 @@ export class ReservationsService {
           : this.safeMemberObjectId(memberId),
     };
     if (dto.flight !== undefined) doc.flight = dto.flight;
+    if (dto.flightLegs !== undefined) doc.flightLegs = dto.flightLegs;
     if (dto.passengers !== undefined) doc.passengers = dto.passengers;
     if (dto.payment !== undefined) doc.payment = dto.payment;
     if (dto.shoppingFileId !== undefined) doc.shoppingFileId = dto.shoppingFileId;
@@ -323,6 +325,7 @@ export class ReservationsService {
       $set.memberId = this.safeMemberObjectId(memberId);
     }
     if (dto.flight !== undefined) $set.flight = dto.flight;
+    if (dto.flightLegs !== undefined) $set.flightLegs = dto.flightLegs;
     if (dto.passengers !== undefined) $set.passengers = dto.passengers;
     const mergedPay = this.mergePayment(existing.payment, dto.payment);
     if (mergedPay !== undefined) $set.payment = mergedPay;
