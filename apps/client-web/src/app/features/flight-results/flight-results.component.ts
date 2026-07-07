@@ -3,7 +3,7 @@ import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BiletbankApiService, AirSearchFlightDto } from '../../core/biletbank-api.service';
 import { AuthService } from '../../core/auth.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/toast.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
 import { FlightSearchLoadingDialogComponent } from '../../shared/flight-search-loading-dialog/flight-search-loading-dialog.component';
@@ -305,7 +305,7 @@ export class FlightResultsComponent implements OnInit {
     private authService: AuthService,
     @Inject(PLATFORM_ID) platformId: object,
     private cdr: ChangeDetectorRef,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private dialog: MatDialog,
   ) {
     this.isBrowser = isPlatformBrowser(platformId);
@@ -456,10 +456,7 @@ export class FlightResultsComponent implements OnInit {
         if (!dtoFlights.length) {
           this.filteredFlights = [];
           this.updateOutboundReturnLists();
-          this.snackBar.open('Arama kriterlerinize uygun uçuş bulunamadı.', 'Tamam', {
-            duration: 5000,
-            panelClass: ['warning-snackbar'],
-          });
+          this.toast.warning('Arama kriterlerinize uygun uçuş bulunamadı.');
         } else {
           this.flights = dtoFlights.map(f => this.mapDtoToFlight(f));
           this.recalcPriceBounds();
@@ -475,10 +472,7 @@ export class FlightResultsComponent implements OnInit {
         if (error?.status === 401) {
           if (body.searchReason === 'SearchAndBook') {
             // Token geçersiz veya süresi dolmuş, SearchOnly ile tekrar dene
-            this.snackBar.open('Oturum süreniz dolmuş veya giriş yapmanız gerekiyor. Sadece arama yapılıyor...', 'Tamam', {
-              duration: 5000,
-              panelClass: ['warning-snackbar'],
-            });
+            this.toast.warning('Oturum süreniz dolmuş veya giriş yapmanız gerekiyor. Sadece arama yapılıyor...');
             const fallbackBody = { ...body, searchReason: 'SearchOnly' as const };
             this.loadFromApi(fallbackBody);
             return;
@@ -496,10 +490,7 @@ export class FlightResultsComponent implements OnInit {
         
         // Hata mesajı göster
         const errorMessage = error?.error?.message || error?.message || 'Uçuş arama sırasında bir hata oluştu.';
-        this.snackBar.open(errorMessage, 'Kapat', {
-          duration: 5000,
-          panelClass: ['error-snackbar'],
-        });
+        this.toast.error(errorMessage);
       },
     });
   }
@@ -1400,31 +1391,19 @@ export class FlightResultsComponent implements OnInit {
 
     // Session bilgileri kontrolü
     if (!this.currentSessionId || !this.currentSessionToken || !this.currentShoppingFileId) {
-      this.snackBar.open('Oturum bilgileri bulunamadı. Lütfen tekrar arama yapın.', 'Kapat', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Oturum bilgileri bulunamadı. Lütfen tekrar arama yapın.');
       return;
     }
 
     const bookingBlockMessage = this.getBookingBlockMessage(flight);
     if (bookingBlockMessage) {
-      this.snackBar.open(bookingBlockMessage, 'Tamam', {
-        duration: 4000,
-        panelClass: ['warning-snackbar'],
-      });
+      this.toast.warning(bookingBlockMessage);
       return;
     }
 
-    // Seçili paket kontrolü
     const selectedBrandId = this.selectedBrandByFlight.get(flight.id);
-    
-    // Paket seçimi kontrolü (eğer paket seçenekleri varsa)
     if (flight.brandOptions && flight.brandOptions.length > 0 && !selectedBrandId) {
-      this.snackBar.open('Lütfen bir paket seçin', 'Tamam', {
-        duration: 3000,
-        panelClass: ['warning-snackbar'],
-      });
+      this.toast.warning('Lütfen bir paket seçin.');
       return;
     }
 
@@ -1436,10 +1415,7 @@ export class FlightResultsComponent implements OnInit {
     const productIds = Array.from(new Set(selectedItems.map((item) => item.productId)));
     const missingPackageLeg = bookingLegs.find((leg) => leg.allBrandOptions.length > 0 && !leg.brandedFareItemId);
     if (missingPackageLeg) {
-      this.snackBar.open(`${missingPackageLeg.title} için lütfen bir paket seçin.`, 'Tamam', {
-        duration: 3000,
-        panelClass: ['warning-snackbar'],
-      });
+      this.toast.warning(`${missingPackageLeg.title} için lütfen bir paket seçin.`);
       return;
     }
 
@@ -1513,16 +1489,7 @@ export class FlightResultsComponent implements OnInit {
 
         // Başarı bildirimi
         const brandName = selectedBrand?.brandName || selectedBrand?.brandCode || 'Seçili paket';
-        this.snackBar.open(
-          `✓ ${brandName} paketi seçildi. Yolcu bilgileri sayfasına yönlendiriliyorsunuz...`,
-          'Tamam',
-          {
-            duration: 3000,
-            panelClass: ['success-snackbar'],
-            verticalPosition: 'top',
-            horizontalPosition: 'center',
-          }
-        );
+        this.toast.success(`${brandName} paketi seçildi. Yolcu bilgileri sayfasına yönlendiriliyorsunuz...`);
 
         // Kısa bir gecikme sonrası yönlendir (kullanıcı mesajı görebilsin)
         setTimeout(() => {
@@ -1534,26 +1501,13 @@ export class FlightResultsComponent implements OnInit {
     } catch (error: any) {
       // 401 Unauthorized hatası - token geçersiz veya süresi dolmuş
       if (error?.status === 401 || error?.error?.statusCode === 401) {
-        this.snackBar.open(
-          'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.',
-          'Giriş Yap',
-          {
-            duration: 5000,
-            panelClass: ['error-snackbar'],
-          }
-        ).onAction().subscribe(() => {
-          this.authService.logout();
-          this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
-        });
+        this.toast.error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.', { action: 'Giriş Yap' })
+          .onAction().subscribe(() => {
+            this.authService.logout();
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+          });
       } else {
-        this.snackBar.open(
-          error?.error?.message || error?.message || 'Koltuk tahsisi sırasında bir hata oluştu. Lütfen tekrar deneyin.',
-          'Kapat',
-          {
-            duration: 5000,
-            panelClass: ['error-snackbar'],
-          },
-        );
+        this.toast.error(error?.error?.message || error?.message || 'Koltuk tahsisi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
       }
     } finally {
       this.isLoading = false;

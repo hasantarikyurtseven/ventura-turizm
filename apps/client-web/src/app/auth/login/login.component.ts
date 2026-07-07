@@ -1,8 +1,8 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/auth.service';
+import { ToastService } from '../../core/toast.service';
 
 declare global {
   interface Window {
@@ -27,7 +27,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
     private fb: FormBuilder,
     private router: Router,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private authService: AuthService,
   ) {}
 
@@ -152,23 +152,14 @@ export class LoginComponent implements OnInit, AfterViewInit {
         next: (res) => {
           this.isLoading = false;
           if (res.success) {
-            this.snackBar.open(
-              `Hoş geldiniz, ${res.user.firstName}!`,
-              'Kapat',
-              { duration: 3000, horizontalPosition: 'end', verticalPosition: 'top' },
-            );
+            this.toast.success(`Hoş geldiniz, ${res.user.firstName}!`);
             this.router.navigateByUrl(this.returnUrl);
           }
         },
         error: (err) => {
           this.isLoading = false;
           const message = err?.error?.message || 'Giriş yapılamadı. Lütfen tekrar deneyin.';
-          this.snackBar.open(message, 'Kapat', {
-            duration: 5000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-            panelClass: ['error-snackbar'],
-          });
+          this.toast.error(message);
 
           // reCAPTCHA'yı sıfırla
           if (typeof window !== 'undefined' && window['grecaptcha']) {
@@ -187,11 +178,7 @@ export class LoginComponent implements OnInit, AfterViewInit {
       });
 
       if (!this.recaptchaToken) {
-        this.snackBar.open('Lütfen reCAPTCHA\'yı tamamlayın', 'Kapat', {
-          duration: 3000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top',
-        });
+        this.toast.warning('Lütfen reCAPTCHA\'yı tamamlayın');
       }
     }
   }

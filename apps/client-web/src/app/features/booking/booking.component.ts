@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy, Inject, PLATFORM_ID, ViewChild, ElementRe
 import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/auth.service';
+import { ToastService } from '../../core/toast.service';
 import {
   BiletbankApiService,
   UpdatePassengerItemDto,
@@ -125,7 +125,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private authService: AuthService,
     private api: BiletbankApiService,
     private cdr: ChangeDetectorRef,
@@ -154,10 +154,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     // SessionStorage'dan booking bilgilerini al
     const stored = sessionStorage.getItem('booking_allocate_data');
     if (!stored) {
-      this.snackBar.open('Rezervasyon bilgileri bulunamadı. Lütfen tekrar uçuş seçin.', 'Tamam', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Rezervasyon bilgileri bulunamadı. Lütfen tekrar uçuş seçin.');
       this.router.navigate(['/flight-results']);
       return;
     }
@@ -165,10 +162,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     try {
       this.bookingData = JSON.parse(stored);
     } catch (e) {
-      this.snackBar.open('Rezervasyon bilgileri geçersiz. Lütfen tekrar uçuş seçin.', 'Tamam', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Rezervasyon bilgileri geçersiz. Lütfen tekrar uçuş seçin.');
       this.router.navigate(['/flight-results']);
       return;
     }
@@ -182,11 +176,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       if (ageMinutes > BOOKING_SESSION_MINUTES) {
         sessionStorage.removeItem('booking_allocate_data');
         sessionStorage.removeItem('booking_payment_data');
-        this.snackBar.open(
-          'Rezervasyon oturumu süresi dolmuş. Lütfen yeni bir uçuş araması yapın.',
-          'Tamam',
-          { duration: 6000, panelClass: ['warning-snackbar'] },
-        );
+        this.toast.warning('Rezervasyon oturumu süresi dolmuş. Lütfen yeni bir uçuş araması yapın.');
         this.router.navigate(['/']);
         return;
       }
@@ -247,10 +237,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     this.countdownDisplay = '00:00';
     if (this.isBrowser) {
       sessionStorage.removeItem('booking_allocate_data');
-      this.snackBar.open('Rezervasyon süreniz doldu. Lütfen tekrar uçuş arayıp seçin.', 'Tamam', {
-        duration: 6000,
-        panelClass: ['warning-snackbar'],
-      });
+      this.toast.warning('Rezervasyon süreniz doldu. Lütfen tekrar uçuş arayıp seçin.');
       this.router.navigate(['/']);
     }
   }
@@ -680,40 +667,19 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
         // Paket değişince sayacı yeniden başlat
         this.startCountdown();
 
-        this.snackBar.open(
-          `✓ ${this.getBrandDisplayName(brand)} paketi seçildi.`,
-          'Tamam',
-          {
-            duration: 3000,
-            panelClass: ['success-snackbar'],
-          }
-        );
+        this.toast.success(`${this.getBrandDisplayName(brand)} paketi seçildi.`);
       } else {
         throw new Error(allocateResult?.message || 'Paket değiştirilemedi');
       }
     } catch (error: any) {
-      // 401 Unauthorized hatası - token geçersiz veya süresi dolmuş
       if (error?.status === 401 || error?.error?.statusCode === 401) {
-        this.snackBar.open(
-          'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.',
-          'Giriş Yap',
-          {
-            duration: 5000,
-            panelClass: ['error-snackbar'],
-          }
-        ).onAction().subscribe(() => {
-          this.authService.logout();
-          this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
-        });
+        this.toast.error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.', { action: 'Giriş Yap' })
+          .onAction().subscribe(() => {
+            this.authService.logout();
+            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+          });
       } else {
-        this.snackBar.open(
-          error?.error?.message || error?.message || 'Paket değiştirilirken bir hata oluştu. Lütfen tekrar deneyin.',
-          'Kapat',
-          {
-            duration: 5000,
-            panelClass: ['error-snackbar'],
-          }
-        );
+        this.toast.error(error?.error?.message || error?.message || 'Paket değiştirilirken bir hata oluştu.');
       }
     } finally {
       this.isChangingPackage = false;
@@ -758,19 +724,13 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       const msg = invalidLabels.length
         ? `Eksik veya hatalı alanlar: ${invalidLabels.join(', ')}`
         : 'Lütfen tüm alanları doğru şekilde doldurun.';
-      this.snackBar.open(msg, 'Tamam', {
-        duration: 6000,
-        panelClass: ['error-snackbar'],
-      });
+      this.toast.error(msg);
       this.scrollToFirstInvalidControl();
       return;
     }
 
     if (!this.bookingData) {
-      this.snackBar.open('Rezervasyon bilgileri bulunamadı.', 'Tamam', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Rezervasyon bilgileri bulunamadı.');
       return;
     }
 
@@ -791,11 +751,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
     if (invalidPassportIdx >= 0) {
       this.markFormGroupTouched(this.bookingForm);
-      this.snackBar.open(
-        `Yolcu ${invalidPassportIdx + 1}: Pasaport geçerlilik tarihi gereklidir.`,
-        'Tamam',
-        { duration: 5000, panelClass: ['error-snackbar'] },
-      );
+      this.toast.error(`Yolcu ${invalidPassportIdx + 1}: Pasaport geçerlilik tarihi gereklidir.`);
       this.scrollToFirstInvalidControl(invalidPassportIdx);
       this.isLoading = false;
       return;
@@ -860,10 +816,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
     );
     if (invalidPassenger) {
       this.isLoading = false;
-      this.snackBar.open('Lütfen tüm yolcu bilgilerini doldurun (ad, soyad, doğum tarihi, e-posta, telefon).', 'Tamam', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Lütfen tüm yolcu bilgilerini doldurun (ad, soyad, doğum tarihi, e-posta, telefon).');
       return;
     }
 
@@ -872,20 +825,13 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
 
     if (!productIds.length) {
       this.isLoading = false;
-      this.snackBar.open('Rezervasyon bilgisi eksik. Lütfen tekrar uçuş seçin.', 'Tamam', {
-        duration: 5000,
-        panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Rezervasyon bilgisi eksik. Lütfen tekrar uçuş seçin.');
       return;
     }
 
     if (!this.bookingData.sessionId || !this.bookingData.sessionToken) {
       this.isLoading = false;
-      this.snackBar.open(
-        'Rezervasyon oturumu bilgileri eksik. Lütfen yeni bir uçuş araması yapın.',
-        'Tamam',
-        { duration: 6000, panelClass: ['error-snackbar'] },
-      );
+      this.toast.error('Rezervasyon oturumu bilgileri eksik. Lütfen yeni bir uçuş araması yapın.');
       this.router.navigate(['/']);
       return;
     }
@@ -906,10 +852,7 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
         }
 
         // UpdatePassenger başarılı → MakePreBooking çağır
-        this.snackBar.open('Yolcu bilgileri kaydedildi. Ön rezervasyon oluşturuluyor...', '', {
-          duration: 3000,
-          panelClass: ['info-snackbar'],
-        });
+        this.toast.info('Yolcu bilgileri kaydedildi. Ön rezervasyon oluşturuluyor...');
 
         // MakePrebooking için:
         // - ProductIds: allocated productId (UpdatePassengers ile aynı)
@@ -986,45 +929,27 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
 
         // Fiyat/uçuş değişikliği uyarısı
         if (prebookingRes.isPriceChanged) {
-          this.snackBar.open(
-            `Dikkat: Bilet fiyatı değişmiştir. Güncel fiyat: ${prebookingRes.totalFare} ${prebookingRes.currency || ''}`,
-            'Tamam',
-            { duration: 6000, panelClass: ['warning-snackbar'] },
-          );
+          this.toast.warning(`Dikkat: Bilet fiyatı değişmiştir. Güncel fiyat: ${prebookingRes.totalFare} ${prebookingRes.currency || ''}`);
           setTimeout(() => this.router.navigate(['/payment']), 2000);
         } else if (prebookingRes.isFlightInfoChanged) {
-          this.snackBar.open(
-            'Dikkat: Uçuş bilgileri değişmiştir. Lütfen ödeme sayfasında kontrol edin.',
-            'Tamam',
-            { duration: 6000, panelClass: ['warning-snackbar'] },
-          );
+          this.toast.warning('Dikkat: Uçuş bilgileri değişmiştir. Lütfen ödeme sayfasında kontrol edin.');
           setTimeout(() => this.router.navigate(['/payment']), 2000);
         } else {
-          this.snackBar.open('Ön rezervasyon oluşturuldu. Ödeme sayfasına yönlendiriliyorsunuz...', 'Tamam', {
-            duration: 2500,
-            panelClass: ['success-snackbar'],
-          });
+          this.toast.success('Ön rezervasyon oluşturuldu. Ödeme sayfasına yönlendiriliyorsunuz...');
           setTimeout(() => this.router.navigate(['/payment']), 1000);
         }
       })
       .catch((error: any) => {
         this.isLoading = false;
-        // MakePreBooking hatalarını da yakala
         if (error?.status === 401 || error?.error?.statusCode === 401) {
-          this.snackBar.open(
-            'Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.',
-            'Giriş Yap',
-            { duration: 5000, panelClass: ['error-snackbar'] },
-          ).onAction().subscribe(() => {
-            this.authService.logout();
-            this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
-          });
+          this.toast.error('Oturum süreniz dolmuş. Lütfen tekrar giriş yapın.', { action: 'Giriş Yap' })
+            .onAction().subscribe(() => {
+              this.authService.logout();
+              this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+            });
         } else {
-          // error.error yapısı: { statusCode, path, message: { message, debugRequestXml, debugResponseXml } }
           const errBody = error?.error;
           const msgField = errBody?.message;
-
-          // Hata mesajını çıkar
           let msg: string;
           if (Array.isArray(msgField)) {
             msg = msgField.join('. ');
@@ -1037,20 +962,12 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
           }
 
           const msgLower = String(msg || '').toLowerCase();
-
           const isBasketInvalid =
-            msgLower.includes('basket code') ||
-            msgLower.includes('same basket') ||
-            msgLower.includes('rezervasyon oturumu') ||
-            msgLower.includes('session bilgileri eksik') ||
-            msgLower.includes('oturum süresi dolmuş') ||
-            msgLower.includes('yeniden arama') ||
+            msgLower.includes('basket code') || msgLower.includes('same basket') ||
+            msgLower.includes('rezervasyon oturumu') || msgLower.includes('session bilgileri eksik') ||
+            msgLower.includes('oturum süresi dolmuş') || msgLower.includes('yeniden arama') ||
             msgLower.includes('invalid session');
-
-          const isServerError =
-            error?.status === 500 ||
-            error?.status === 503 ||
-            error?.status === 0;
+          const isServerError = error?.status === 500 || error?.status === 503 || error?.status === 0;
 
           if (isBasketInvalid || isServerError) {
             const clearMsg = isBasketInvalid
@@ -1060,17 +977,11 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
               sessionStorage.removeItem('booking_allocate_data');
               sessionStorage.removeItem('booking_payment_data');
             }
-            this.snackBar.open(clearMsg, 'Tamam', {
-              duration: 8000,
-              panelClass: ['warning-snackbar'],
-            }).afterDismissed().subscribe(() => {
+            this.toast.warning(clearMsg, { duration: 8000 }).afterDismissed().subscribe(() => {
               this.router.navigate(['/']);
             });
           } else {
-            this.snackBar.open(msg, 'Kapat', {
-              duration: 7000,
-              panelClass: ['error-snackbar'],
-            });
+            this.toast.error(msg, { duration: 7000 });
           }
         }
       });

@@ -1,8 +1,8 @@
 import { Component, OnInit, AfterViewInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { AuthService } from '../../core/auth.service';
+import { ToastService } from '../../core/toast.service';
 
 declare global {
   interface Window {
@@ -31,7 +31,7 @@ export class LoginModalComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private fb: FormBuilder,
     private dialogRef: MatDialogRef<LoginModalComponent>,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private authService: AuthService,
   ) {}
 
@@ -156,23 +156,14 @@ export class LoginModalComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (res) => {
           this.isLoading = false;
           if (res.success) {
-            this.snackBar.open(
-              `Hoş geldiniz, ${res.user.firstName}!`,
-              'Kapat',
-              { duration: 3000, horizontalPosition: 'end', verticalPosition: 'top' },
-            );
+            this.toast.success(`Hoş geldiniz, ${res.user.firstName}!`);
             this.dialogRef.close(true);
           }
         },
         error: (err) => {
           this.isLoading = false;
           const message = err?.error?.message || 'Giriş yapılamadı. Lütfen tekrar deneyin.';
-          this.snackBar.open(message, 'Kapat', {
-            duration: 5000,
-            horizontalPosition: 'end',
-            verticalPosition: 'top',
-            panelClass: ['error-snackbar'],
-          });
+          this.toast.error(message);
 
           // Hata sonrası reCAPTCHA sıfırla
           this.resetRecaptcha();
@@ -183,11 +174,7 @@ export class LoginModalComponent implements OnInit, AfterViewInit, OnDestroy {
         this.loginForm.get(key)?.markAsTouched();
       });
       if (!this.recaptchaToken) {
-        this.snackBar.open('Lütfen reCAPTCHA\'yı tamamlayın', 'Kapat', {
-          duration: 3000,
-          horizontalPosition: 'end',
-          verticalPosition: 'top',
-        });
+        this.toast.warning('Lütfen reCAPTCHA\'yı tamamlayın');
       }
     }
   }

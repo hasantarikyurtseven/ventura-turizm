@@ -1,7 +1,7 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/toast.service';
 import { ContractModalComponent } from '../../shared/contract-modal/contract-modal.component';
 import { AuthService } from '../../core/auth.service';
 
@@ -31,7 +31,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   constructor(
     private fb: FormBuilder,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private authService: AuthService
   ) {}
 
@@ -206,10 +206,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
         error: (err) => {
           this.isLoading = false;
           const message = err?.error?.message || 'Kayıt sırasında bir hata oluştu. Lütfen tekrar deneyin.';
-          this.snackBar.open(message, 'Kapat', {
-            duration: 6000,
-            panelClass: ['error-snackbar'],
-          });
+          this.toast.error(message, { duration: 6000 });
         },
       });
     } else {
@@ -219,9 +216,7 @@ export class RegisterComponent implements OnInit, AfterViewInit {
       });
 
       if (!this.recaptchaToken) {
-        this.snackBar.open('Lütfen reCAPTCHA doğrulamasını tamamlayın', 'Kapat', {
-          duration: 4000,
-        });
+        this.toast.warning('Lütfen reCAPTCHA doğrulamasını tamamlayın');
       }
     }
   }

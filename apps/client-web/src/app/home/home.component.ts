@@ -1,7 +1,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../core/toast.service';
 import { LocationSelection } from '../shared/location-selector/location-selector.component';
 
 @Component({
@@ -35,7 +35,7 @@ export class HomeComponent implements OnInit {
 
   constructor(
     private readonly router: Router,
-    private readonly snackBar: MatSnackBar,
+    private readonly toast: ToastService,
   ) {}
 
   @HostListener('document:click', ['$event'])
@@ -133,12 +133,7 @@ export class HomeComponent implements OnInit {
   }
 
   private showWarning(message: string): void {
-    this.snackBar.open(message, 'Tamam', {
-      duration: 4000,
-      horizontalPosition: 'center',
-      verticalPosition: 'top',
-      panelClass: ['snack-warning'],
-    });
+    this.toast.warning(message);
   }
 
   /** Location seçilmediyse isCity'yi bilinen şehir kodlarından çıkar (BiletBank API uyumu) */
@@ -203,11 +198,7 @@ export class HomeComponent implements OnInit {
     if (tab.active) {
       this.selectedService = tab.id;
     } else {
-      this.snackBar.open('Bu hizmet yakında aktif olacaktır.', 'Tamam', {
-        duration: 3000,
-        horizontalPosition: 'center',
-        verticalPosition: 'top',
-      });
+      this.toast.info('Bu hizmet yakında aktif olacaktır.');
     }
   }
 

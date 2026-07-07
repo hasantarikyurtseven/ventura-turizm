@@ -9,7 +9,7 @@ import {
 import { isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/toast.service';
 import { firstValueFrom } from 'rxjs';
 import {
   BiletbankApiService,
@@ -131,7 +131,7 @@ export class PaymentComponent implements OnDestroy {
   constructor(
     private fb: FormBuilder,
     private router: Router,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private api: BiletbankApiService,
     private cdr: ChangeDetectorRef,
     @Inject(PLATFORM_ID) platformId: object,
@@ -179,18 +179,10 @@ export class PaymentComponent implements OnDestroy {
     const pb = this.bookingData?.prebooking;
     if (pb) {
       if (pb.isPriceChanged) {
-        this.snackBar.open(
-          `Fiyat güncellendi: ${this.payableAmount} ${this.currency}`,
-          'Tamam',
-          { duration: 8000, panelClass: ['warning-snackbar'] },
-        );
+        this.toast.warning(`Fiyat güncellendi: ${this.payableAmount} ${this.currency}`, { duration: 8000 });
       }
       if (pb.isFlightInfoChanged) {
-        this.snackBar.open(
-          'Uçuş bilgileri değişmiştir. Lütfen aşağıdaki detayları kontrol edin.',
-          'Tamam',
-          { duration: 8000, panelClass: ['warning-snackbar'] },
-        );
+        this.toast.warning('Uçuş bilgileri değişmiştir. Lütfen aşağıdaki detayları kontrol edin.', { duration: 8000 });
       }
     }
 
@@ -464,26 +456,20 @@ export class PaymentComponent implements OnDestroy {
     this.paymentError = null;
     if (this.paymentForm.invalid) {
       this.paymentForm.markAllAsTouched();
-      this.snackBar.open('Lütfen tüm kart bilgilerini eksiksiz doldurun.', 'Tamam', {
-        duration: 3000, panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Lütfen tüm kart bilgilerini eksiksiz doldurun.');
       return;
     }
 
     const pd = this.bookingData;
     if (!pd?.sessionId || !pd?.sessionToken) {
-      this.snackBar.open('Oturum bilgileri bulunamadı. Lütfen yeniden arama yapın.', 'Tamam', {
-        duration: 5000, panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Oturum bilgileri bulunamadı. Lütfen yeniden arama yapın.');
       this.router.navigate(['/']);
       return;
     }
 
     const shoppingFileId = pd.prebooking?.shoppingFileId || pd.allocateId || '';
     if (!shoppingFileId) {
-      this.snackBar.open('Rezervasyon bilgisi eksik. Lütfen yeniden arama yapın.', 'Tamam', {
-        duration: 5000, panelClass: ['error-snackbar'],
-      });
+      this.toast.error('Rezervasyon bilgisi eksik. Lütfen yeniden arama yapın.');
       return;
     }
 
@@ -536,7 +522,7 @@ export class PaymentComponent implements OnDestroy {
         }
 
         // Ne HTML ne URL gelmediyse — test ortamında direkt başarı olabilir
-        this.snackBar.open('Ödeme işlemi tamamlandı.', '', { duration: 2000, panelClass: ['success-snackbar'] });
+        this.toast.success('Ödeme işlemi tamamlandı.', { duration: 2000 });
         this.finalizeSuccess({ bookingCode: this.bookingCode || undefined });
       })
       .catch((error: any) => {
@@ -561,10 +547,9 @@ export class PaymentComponent implements OnDestroy {
           soapResponseXml: soapRes,
         };
 
-        this.snackBar.open(
+        this.toast.error(
           error?.status === 401 ? 'Oturum süreniz dolmuş. Lütfen yeniden giriş yapın.' : msg,
-          'Kapat',
-          { duration: 8000, panelClass: ['error-snackbar'] },
+          { duration: 8000 },
         );
 
         void this.persistInitFailedReservation(msg, corrId);
@@ -701,9 +686,9 @@ export class PaymentComponent implements OnDestroy {
   copyToClipboard(text: string): void {
     if (!this.isBrowser) return;
     navigator.clipboard.writeText(text).then(() => {
-      this.snackBar.open('Panoya kopyalandı!', '', { duration: 2000 });
+      this.toast.success('Panoya kopyalandı!', { duration: 2000 });
     }).catch(() => {
-      this.snackBar.open('Kopyalama başarısız.', '', { duration: 2000 });
+      this.toast.error('Kopyalama başarısız.', { duration: 2000 });
     });
   }
 
@@ -779,9 +764,7 @@ export class PaymentComponent implements OnDestroy {
       sessionStorage.removeItem('booking_payment_data');
       sessionStorage.removeItem('booking_session_start');
     }
-    this.snackBar.open('Ön rezervasyon süreniz doldu. Lütfen yeniden arama yapın.', 'Tamam', {
-      duration: 6000, panelClass: ['error-snackbar'],
-    });
+    this.toast.error('Ön rezervasyon süreniz doldu. Lütfen yeniden arama yapın.');
     this.router.navigate(['/']);
   }
 }

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { ToastService } from '../../core/toast.service';
 import { firstValueFrom } from 'rxjs';
 import {
   BiletbankApiService,
@@ -92,7 +92,7 @@ export class PaymentCallbackComponent {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private snackBar: MatSnackBar,
+    private toast: ToastService,
     private api: BiletbankApiService,
     private ngZone: NgZone,
     private cdr: ChangeDetectorRef,
@@ -294,10 +294,7 @@ export class PaymentCallbackComponent {
         sessionStorage.removeItem('payment_3d_id');
 
         this.isSuccess = true;
-        this.snackBar.open('Biletiniz başarıyla oluşturuldu!', '', {
-          duration: 4000,
-          panelClass: ['success-snackbar'],
-        });
+        this.toast.success('Biletiniz başarıyla oluşturuldu!');
         this.touchUi();
       } else {
         this.isError = true;
