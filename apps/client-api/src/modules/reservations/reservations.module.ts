@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
+import { BullModule } from '@nestjs/bullmq';
 import { Reservation, ReservationSchema } from './reservation.schema';
 import { ReservationsService } from './reservations.service';
 import { ReservationsController } from './reservations.controller';
@@ -13,6 +14,7 @@ import { AdminNotificationsModule } from '../admin-notifications/admin-notificat
   imports: [
     MongooseModule.forFeature([{ name: Reservation.name, schema: ReservationSchema }]),
     AdminNotificationsModule,
+    BullModule.registerQueue({ name: 'reservation-confirmation' }),
   ],
   controllers: [ReservationsController],
   providers: [ReservationsService],

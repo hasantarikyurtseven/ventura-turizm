@@ -90,4 +90,10 @@ export class CreateReservationDto {
 
   /** Ödeme / finalize başarısız olduğunda kısa açıklama */
   @IsOptional() @IsString() failureReason?: string;
+
+  /** İletişim kişisi e-posta — onay maili bu adrese gönderilir */
+  @IsOptional() @IsString() @MaxLength(256) contactEmail?: string;
+
+  /** İletişim kişisi adı (mail selamlama için) */
+  @IsOptional() @IsString() @MaxLength(128) contactName?: string;
 }

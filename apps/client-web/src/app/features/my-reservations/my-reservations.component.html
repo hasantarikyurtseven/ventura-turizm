@@ -97,13 +97,19 @@
                     <span class="t-airline-name">{{ r.flightLegs[0].airline }}</span>
                   </ng-container>
                   <ng-container *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
-                    <img *ngIf="r.flight && r.flight.airlineLogo && r.flight.airlineLogo.startsWith('http')"
-                      [src]="r.flight.airlineLogo" [alt]="r.flight.airline" class="t-logo" />
-                    <span class="t-logo-fallback"
-                      *ngIf="!r.flight || !r.flight.airlineLogo || !r.flight.airlineLogo.startsWith('http')">
-                      {{ (r.flight?.airline || '').substring(0,2).toUpperCase() }}
-                    </span>
-                    <span class="t-airline-name">{{ r.flight?.airline }}</span>
+                    <ng-container *ngIf="getOwFlight(r) as owf">
+                      <img *ngIf="owf.airlineLogo && owf.airlineLogo.startsWith('http')"
+                        [src]="owf.airlineLogo" [alt]="owf.airline" class="t-logo" />
+                      <span class="t-logo-fallback"
+                        *ngIf="!owf.airlineLogo || !owf.airlineLogo.startsWith('http')">
+                        {{ (owf.airline || '').substring(0,2).toUpperCase() }}
+                      </span>
+                      <span class="t-airline-name">{{ owf.airline }}</span>
+                    </ng-container>
+                    <ng-container *ngIf="!getOwFlight(r)">
+                      <span class="t-logo-fallback">??</span>
+                      <span class="t-airline-name">—</span>
+                    </ng-container>
                   </ng-container>
                 </div>
                 <div class="tab-trip-type">
@@ -112,7 +118,7 @@
                 </div>
               </div>
 
-              <!-- Bacaklar -->
+              <!-- Bacaklar: Gidiş-Dönüş (2+ leg) -->
               <ng-container *ngIf="r.flightLegs && r.flightLegs.length > 1">
                 <div class="t-leg" *ngFor="let leg of r.flightLegs; let li = index">
                   <div class="t-leg-badge" [class.badge-rt]="li > 0">
@@ -155,35 +161,36 @@
                 </div>
               </ng-container>
 
+              <!-- Tek Yön: flightLegs[0] öncelikli, yoksa r.flight fallback -->
               <ng-container *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
-                <div class="t-leg" *ngIf="r.flight">
+                <div class="t-leg" *ngIf="getOwFlight(r) as owFlight">
                   <div class="t-route">
                     <div class="t-airport">
-                      <span class="t-iata">{{ r.flight.departure.airportCode }}</span>
-                      <span class="t-city">{{ r.flight.departure.airportCode }}</span>
-                      <span class="t-time">{{ r.flight.departure.time }}</span>
-                      <span class="t-date">{{ formatFlightDate(r.flight.departure.date) }}</span>
+                      <span class="t-iata">{{ owFlight.departure.airportCode }}</span>
+                      <span class="t-city">{{ owFlight.departure.airportCode }}</span>
+                      <span class="t-time">{{ owFlight.departure.time }}</span>
+                      <span class="t-date">{{ formatFlightDate(owFlight.departure.date) }}</span>
                     </div>
                     <div class="t-mid">
                       <span class="t-line"></span>
                       <div class="t-plane-wrap">
                         <mat-icon>airplanemode_active</mat-icon>
-                        <span class="t-fno">{{ r.flight.flightNumber }}</span>
+                        <span class="t-fno">{{ owFlight.flightNumber }}</span>
                       </div>
                       <span class="t-line"></span>
-                      <span class="t-dur">{{ r.flight.duration }}</span>
+                      <span class="t-dur">{{ owFlight.duration }}</span>
                     </div>
                     <div class="t-airport right">
-                      <span class="t-iata">{{ r.flight.arrival.airportCode }}</span>
-                      <span class="t-city">{{ r.flight.arrival.airportCode }}</span>
-                      <span class="t-time">{{ r.flight.arrival.time }}</span>
-                      <span class="t-date">{{ formatFlightDate(r.flight.arrival.date) }}</span>
+                      <span class="t-iata">{{ owFlight.arrival.airportCode }}</span>
+                      <span class="t-city">{{ owFlight.arrival.airportCode }}</span>
+                      <span class="t-time">{{ owFlight.arrival.time }}</span>
+                      <span class="t-date">{{ formatFlightDate(owFlight.arrival.date) }}</span>
                     </div>
                   </div>
                   <div class="t-tags">
-                    <span class="t-tag t-tag--cabin" *ngIf="r.flight.brandName">{{ r.flight.brandName }}</span>
-                    <span class="t-tag t-tag--bag" *ngIf="r.flight.baggageDescription">
-                      <mat-icon>luggage</mat-icon>{{ r.flight.baggageDescription }}
+                    <span class="t-tag t-tag--cabin" *ngIf="owFlight.brandName">{{ owFlight.brandName }}</span>
+                    <span class="t-tag t-tag--bag" *ngIf="owFlight.baggageDescription">
+                      <mat-icon>luggage</mat-icon>{{ owFlight.baggageDescription }}
                     </span>
                   </div>
                 </div>
@@ -227,7 +234,7 @@
                 <div class="stub-meta-item" *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
                   <span class="stub-meta-label">Rota</span>
                   <span class="stub-meta-value mono">
-                    {{ r.flight?.departure?.airportCode }}–{{ r.flight?.arrival?.airportCode }}
+                    {{ getOwFlight(r)?.departure?.airportCode || '??' }}–{{ getOwFlight(r)?.arrival?.airportCode || '??' }}
                   </span>
                 </div>
               </div>

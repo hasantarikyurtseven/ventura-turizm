@@ -85,6 +85,16 @@ export class MyReservationsComponent implements OnInit {
     return map[status] ?? '';
   }
 
+  /**
+   * Tek yön rezervasyonlar için uçuş verisini döndürür.
+   * flightLegs[0] önceliklidir; yoksa r.flight fallback olarak kullanılır.
+   */
+  getOwFlight(r: MyReservationDto): MyReservationDto['flight'] | null {
+    if (r.flightLegs && r.flightLegs.length === 1) return r.flightLegs[0] as any;
+    if (r.flight) return r.flight;
+    return null;
+  }
+
   goHome(): void { this.router.navigate(['/']); }
   goSearch(): void { this.router.navigate(['/']); }
 

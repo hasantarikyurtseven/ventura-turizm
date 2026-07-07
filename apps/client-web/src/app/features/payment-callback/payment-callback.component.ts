@@ -529,11 +529,27 @@ export class PaymentCallbackComponent {
     shoppingFileId: string,
   ): Promise<void> {
     try {
+      // İletişim kişisi e-postası: session'daki contactPerson veya ilk yolcunun emaili
+      const sessionRaw = sessionStorage.getItem('booking_payment_data') || sessionStorage.getItem('booking_allocate_data');
+      const sessionPd = sessionRaw ? JSON.parse(sessionRaw) : null;
+      const contactEmail: string =
+        sessionPd?.contactPerson?.email ||
+        this.passengers.find((p) => p.email)?.email ||
+        '';
+      const contactName: string =
+        sessionPd?.contactPerson
+          ? `${sessionPd.contactPerson.firstName} ${sessionPd.contactPerson.lastName}`.trim()
+          : this.passengers[0]
+            ? `${this.passengers[0].firstName} ${this.passengers[0].lastName}`.trim()
+            : '';
+
       const dto: CreateReservationDto = {
         bookingCode: res.bookingCode ?? this.bookingCode,
         status: 'CONFIRMED',
         type: 'flight',
         shoppingFileId,
+        contactEmail: contactEmail || undefined,
+        contactName: contactName || undefined,
         totalFare: res.totalFare,
         currency: res.currency ?? 'TRY',
         flight: this.flight

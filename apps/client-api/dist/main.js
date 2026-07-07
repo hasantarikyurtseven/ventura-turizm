@@ -7491,6 +7491,8 @@ class CreateReservationDto {
     currency;
     correlationId;
     failureReason;
+    contactEmail;
+    contactName;
 }
 exports.CreateReservationDto = CreateReservationDto;
 __decorate([
@@ -7561,6 +7563,18 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], CreateReservationDto.prototype, "failureReason", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(256),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "contactEmail", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(128),
+    __metadata("design:type", String)
+], CreateReservationDto.prototype, "contactName", void 0);
 
 
 /***/ },
@@ -7996,6 +8010,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationsModule = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const bullmq_1 = __webpack_require__(/*! @nestjs/bullmq */ "@nestjs/bullmq");
 const reservation_schema_1 = __webpack_require__(/*! ./reservation.schema */ "./src/modules/reservations/reservation.schema.ts");
 const reservations_service_1 = __webpack_require__(/*! ./reservations.service */ "./src/modules/reservations/reservations.service.ts");
 const reservations_controller_1 = __webpack_require__(/*! ./reservations.controller */ "./src/modules/reservations/reservations.controller.ts");
@@ -8008,6 +8023,7 @@ exports.ReservationsModule = ReservationsModule = __decorate([
         imports: [
             mongoose_1.MongooseModule.forFeature([{ name: reservation_schema_1.Reservation.name, schema: reservation_schema_1.ReservationSchema }]),
             admin_notifications_module_1.AdminNotificationsModule,
+            bullmq_1.BullModule.registerQueue({ name: 'reservation-confirmation' }),
         ],
         controllers: [reservations_controller_1.ReservationsController],
         providers: [reservations_service_1.ReservationsService],
@@ -8038,11 +8054,13 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 var ReservationsService_1;
-var _a, _b;
+var _a, _b, _c;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ReservationsService = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
 const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const bullmq_1 = __webpack_require__(/*! @nestjs/bullmq */ "@nestjs/bullmq");
+const bullmq_2 = __webpack_require__(/*! bullmq */ "bullmq");
 const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
 const reservation_schema_1 = __webpack_require__(/*! ./reservation.schema */ "./src/modules/reservations/reservation.schema.ts");
 const admin_notifications_service_1 = __webpack_require__(/*! ../admin-notifications/admin-notifications.service */ "./src/modules/admin-notifications/admin-notifications.service.ts");
@@ -8050,10 +8068,12 @@ const sensitive_identifiers_1 = __webpack_require__(/*! ../../common/privacy/sen
 let ReservationsService = ReservationsService_1 = class ReservationsService {
     reservationModel;
     adminNotificationsService;
+    confirmationQueue;
     logger = new common_1.Logger(ReservationsService_1.name);
-    constructor(reservationModel, adminNotificationsService) {
+    constructor(reservationModel, adminNotificationsService, confirmationQueue) {
         this.reservationModel = reservationModel;
         this.adminNotificationsService = adminNotificationsService;
+        this.confirmationQueue = confirmationQueue;
     }
     safeMemberObjectId(memberId) {
         const id = memberId?.trim();
@@ -8156,6 +8176,9 @@ let ReservationsService = ReservationsService_1 = class ReservationsService {
                     bookingCode: saved.bookingCode,
                     reservationId: String(saved._id),
                 });
+            }
+            if (saved.status === 'CONFIRMED') {
+                void this.enqueueConfirmationEmail(saved, dtoNorm);
             }
             return saved;
         }
@@ -8266,6 +8289,7 @@ let ReservationsService = ReservationsService_1 = class ReservationsService {
                 bookingCode: saved.bookingCode,
                 reservationId: String(saved._id),
             });
+            void this.enqueueConfirmationEmail(saved, dto);
         }
         return saved;
     }
@@ -8352,12 +8376,50 @@ let ReservationsService = ReservationsService_1 = class ReservationsService {
     async findByBookingCode(bookingCode) {
         return this.reservationModel.findOne({ bookingCode }).exec();
     }
+    async enqueueConfirmationEmail(saved, dto) {
+        const contactEmail = dto.contactEmail?.trim();
+        if (!contactEmail)
+            return;
+        try {
+            await this.confirmationQueue.add('send-confirmation', {
+                contactEmail,
+                contactName: dto.contactName?.trim() || saved.passengers?.[0]?.firstName || 'Yolcu',
+                bookingCode: saved.bookingCode,
+                totalFare: saved.totalFare,
+                currency: saved.currency || 'TRY',
+                passengers: (saved.passengers || []).map((p) => ({
+                    firstName: p.firstName,
+                    lastName: p.lastName,
+                    type: p.type,
+                })),
+                flight: saved.flight,
+                flightLegs: saved.flightLegs,
+                payment: {
+                    cardHolder: saved.payment?.cardHolder,
+                    cardNumber: saved.payment?.cardNumber,
+                    bankName: saved.payment?.bankName,
+                    installmentCount: saved.payment?.installmentCount,
+                    finalizedDate: saved.payment?.finalizedDate,
+                },
+            }, {
+                attempts: 3,
+                backoff: { type: 'exponential', delay: 5000 },
+                removeOnComplete: true,
+                removeOnFail: false,
+            });
+            this.logger.log(`Rezervasyon onay maili kuyruğa eklendi: ${saved.bookingCode} → ${contactEmail}`);
+        }
+        catch (err) {
+            this.logger.error(`Onay maili kuyruğa eklenemedi: ${saved.bookingCode}`, err);
+        }
+    }
 };
 exports.ReservationsService = ReservationsService;
 exports.ReservationsService = ReservationsService = ReservationsService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(reservation_schema_1.Reservation.name)),
-    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object, typeof (_b = typeof admin_notifications_service_1.AdminNotificationsService !== "undefined" && admin_notifications_service_1.AdminNotificationsService) === "function" ? _b : Object])
+    __param(2, (0, bullmq_1.InjectQueue)('reservation-confirmation')),
+    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object, typeof (_b = typeof admin_notifications_service_1.AdminNotificationsService !== "undefined" && admin_notifications_service_1.AdminNotificationsService) === "function" ? _b : Object, typeof (_c = typeof bullmq_2.Queue !== "undefined" && bullmq_2.Queue) === "function" ? _c : Object])
 ], ReservationsService);
 
 

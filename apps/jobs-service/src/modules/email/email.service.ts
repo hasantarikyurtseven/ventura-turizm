@@ -2,6 +2,10 @@ import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import { renderEmailVerificationTemplate } from './templates/email-verification.template';
+import {
+  renderReservationConfirmationTemplate,
+  ReservationConfirmationTemplateParams,
+} from './templates/reservation-confirmation.template';
 
 @Injectable()
 export class EmailService implements OnModuleInit {
@@ -55,6 +59,30 @@ export class EmailService implements OnModuleInit {
       this.logger.log(`Doğrulama e-postası gönderildi: ${to} (messageId: ${info.messageId})`);
     } catch (error) {
       this.logger.error(`E-posta gönderilemedi: ${to}`, error?.stack || error);
+      throw error;
+    }
+  }
+
+  /**
+   * Rezervasyon onay maili gönder
+   */
+  async sendReservationConfirmation(
+    to: string,
+    params: ReservationConfirmationTemplateParams,
+  ): Promise<void> {
+    const from = this.configService.get<string>('SMTP_FROM', 'noreply@venturaturizm.com');
+    const html = renderReservationConfirmationTemplate(params);
+
+    try {
+      const info = await this.transporter.sendMail({
+        from,
+        to,
+        subject: `Ventura Turizm – Rezervasyon Onayı: ${params.bookingCode}`,
+        html,
+      });
+      this.logger.log(`Rezervasyon onay maili gönderildi: ${to} (messageId: ${info.messageId})`);
+    } catch (error) {
+      this.logger.error(`Rezervasyon onay maili gönderilemedi: ${to}`, error?.stack || error);
       throw error;
     }
   }

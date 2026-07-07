@@ -1,5 +1,7 @@
 import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 import { Model, Types } from 'mongoose';
 import { Reservation } from './reservation.schema';
 import { CreateReservationDto, PassengerDto } from './dto/create-reservation.dto';
@@ -17,6 +19,7 @@ export class ReservationsService {
   constructor(
     @InjectModel(Reservation.name) private readonly reservationModel: Model<Reservation>,
     private readonly adminNotificationsService: AdminNotificationsService,
+    @InjectQueue('reservation-confirmation') private readonly confirmationQueue: Queue,
   ) {}
 
   /** Geçersiz JWT memberId BSON cast hatası → 500 üretmesin */
@@ -155,6 +158,9 @@ export class ReservationsService {
           reservationId: String((saved as any)._id),
         });
       }
+      if (saved.status === 'CONFIRMED') {
+        void this.enqueueConfirmationEmail(saved, dtoNorm);
+      }
       return saved;
     } catch (err: unknown) {
       const code = (err as { code?: number })?.code;
@@ -278,6 +284,7 @@ export class ReservationsService {
         bookingCode: saved.bookingCode,
         reservationId: String((saved as any)._id),
       });
+      void this.enqueueConfirmationEmail(saved, dto);
     }
     return saved;
   }
@@ -362,5 +369,50 @@ export class ReservationsService {
 
   async findByBookingCode(bookingCode: string): Promise<Reservation | null> {
     return this.reservationModel.findOne({ bookingCode }).exec();
+  }
+
+  /** Rezervasyon onay maili kuyruğa ekle */
+  private async enqueueConfirmationEmail(
+    saved: Reservation,
+    dto: CreateReservationDto,
+  ): Promise<void> {
+    const contactEmail = dto.contactEmail?.trim();
+    if (!contactEmail) return;
+
+    try {
+      await this.confirmationQueue.add(
+        'send-confirmation',
+        {
+          contactEmail,
+          contactName: dto.contactName?.trim() || saved.passengers?.[0]?.firstName || 'Yolcu',
+          bookingCode: saved.bookingCode,
+          totalFare: saved.totalFare,
+          currency: saved.currency || 'TRY',
+          passengers: (saved.passengers || []).map((p: any) => ({
+            firstName: p.firstName,
+            lastName: p.lastName,
+            type: p.type,
+          })),
+          flight: saved.flight,
+          flightLegs: saved.flightLegs,
+          payment: {
+            cardHolder: (saved.payment as any)?.cardHolder,
+            cardNumber: (saved.payment as any)?.cardNumber,
+            bankName: (saved.payment as any)?.bankName,
+            installmentCount: (saved.payment as any)?.installmentCount,
+            finalizedDate: (saved.payment as any)?.finalizedDate,
+          },
+        },
+        {
+          attempts: 3,
+          backoff: { type: 'exponential', delay: 5000 },
+          removeOnComplete: true,
+          removeOnFail: false,
+        },
+      );
+      this.logger.log(`Rezervasyon onay maili kuyruğa eklendi: ${saved.bookingCode} → ${contactEmail}`);
+    } catch (err) {
+      this.logger.error(`Onay maili kuyruğa eklenemedi: ${saved.bookingCode}`, err);
+    }
   }
 }

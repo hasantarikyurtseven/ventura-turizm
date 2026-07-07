@@ -365,6 +365,10 @@ export interface CreateReservationDto {
   correlationId?: string;
   /** Ödeme başarısız kayıtları için */
   failureReason?: string;
+  /** Onay maili gönderilecek iletişim e-postası */
+  contactEmail?: string;
+  /** Onay mailinde kullanılacak iletişim kişisi adı */
+  contactName?: string;
 }
 
 export interface CreateReservationResponseDto {

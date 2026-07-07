@@ -6,6 +6,7 @@ import { Connection } from 'mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EmailVerificationModule } from './modules/email-verification/email-verification.module';
+import { ReservationConfirmationModule } from './modules/reservation-confirmation/reservation-confirmation.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { EmailVerificationModule } from './modules/email-verification/email-veri
       inject: [ConfigService],
     }),
     EmailVerificationModule,
+    ReservationConfirmationModule,
   ],
   controllers: [AppController],
   providers: [AppService],
