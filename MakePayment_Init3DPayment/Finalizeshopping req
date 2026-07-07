@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:trev2="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <tem:FinalizeShopping>
+         <!--Optional:-->
+         <tem:request>
+            <!--Optional:-->
+            <trev:AuthenticationHeader>
+               <!--Optional:-->
+               <trev:SessionId>7537396</trev:SessionId>
+               <trev:SessionToken>037f4dfb-d82c-4813-ac09-047395987712</trev:SessionToken>
+            </trev:AuthenticationHeader>
+            <trev1:Form>
+               <!--Optional:-->
+               <trev1:BillingInfo>
+                  <!--Optional:-->
+                  <trev2:Address_City>ISTANBUL</trev2:Address_City>
+                  <!--Optional:-->
+                  <trev2:Address_Detail>COBANCESME SAN. CD. NO.44 NISH ISTANBUL C BLOK K:17 D:200</trev2:Address_Detail>
+                  <!--Optional:-->
+                  <trev2:Address_District>BAHCELIEVLER</trev2:Address_District>
+                  <!--Optional:-->
+                  <trev2:Address_ZipCode>0000</trev2:Address_ZipCode>
+                  <!--Optional:-->
+                  <trev2:BillingName>TEST</trev2:BillingName>
+                  <!--Optional:-->
+                  <trev2:CountryCode>TR</trev2:CountryCode>
+                  <!--Optional:-->
+                  <trev2:IfCompany>1</trev2:IfCompany>
+                  <!--Optional:-->
+                  <trev2:TaxNo>1111111111</trev2:TaxNo>
+                  <!--Optional:-->
+                  <trev2:TaxOffice>test</trev2:TaxOffice>
+               </trev1:BillingInfo>
+               <!--Optional:-->
+               <trev1:ShoppingFileId>5f2edb63-cc76-4b46-afe4-95b8a9572f3f</trev1:ShoppingFileId>
+            </trev1:Form>
+         </tem:request>
+      </tem:FinalizeShopping>
+   </soapenv:Body>
+</soapenv:Envelope>

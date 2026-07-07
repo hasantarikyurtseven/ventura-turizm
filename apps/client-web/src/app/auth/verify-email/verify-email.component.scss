@@ -203,6 +203,66 @@
   }
 }
 
+// ─── Resend Form ───
+.resend-section {
+  text-align: left;
+  margin-bottom: 1.5rem;
+}
+
+.resend-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  .resend-input {
+    width: 100%;
+  }
+
+  .resend-button {
+    align-self: flex-start;
+    border-radius: 8px !important;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    .btn-spinner {
+      display: inline-block;
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.resend-message {
+  font-size: 0.875rem;
+  margin: 0.5rem 0 0;
+  line-height: 1.5;
+}
+
+.error-text {
+  color: #dc2626;
+}
+
+.secondary-button {
+  margin-top: 0.5rem;
+  border-radius: 10px !important;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
 // ─── Footer (maildeki footer ile uyumlu) ───
 .verify-footer {
   text-align: center;

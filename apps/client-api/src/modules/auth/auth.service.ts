@@ -172,6 +172,55 @@ export class AuthService {
   }
 
   // ═══════════════════════════════════════════════
+  //  DOĞRULAMA MAİLİ YENİDEN GÖNDER
+  // ═══════════════════════════════════════════════
+
+  async resendVerificationEmail(email: string): Promise<{ success: boolean; message: string }> {
+    const safeResponse = {
+      success: true,
+      message: 'Eğer bu adresle kayıtlı doğrulanmamış bir hesap varsa, onay linki gönderildi.',
+    };
+
+    const member = await this.memberModel.findOne({
+      email: email.toLowerCase().trim(),
+      emailVerified: false,
+    });
+
+    if (!member) {
+      // Email enumeration koruması: hesap yoksa veya zaten doğrulanmışsa aynı mesaj döner
+      return safeResponse;
+    }
+
+    const verificationToken = crypto.randomUUID();
+    const verificationTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+    await this.memberModel.updateOne(
+      { _id: member._id },
+      { $set: { verificationToken, verificationTokenExpiresAt } },
+    );
+
+    const clientWebUrl = this.configService.get<string>('CLIENT_WEB_URL', 'http://localhost:4300');
+    await this.emailQueue.add(
+      'send-verification',
+      {
+        email: member.email,
+        firstName: this.escapeHtml(member.firstName),
+        verificationToken,
+        clientWebUrl,
+      },
+      {
+        attempts: 3,
+        backoff: { type: 'exponential', delay: 5000 },
+        removeOnComplete: true,
+        removeOnFail: false,
+      },
+    );
+
+    this.logger.log(`Doğrulama maili yeniden gönderildi: ${member.email}`);
+    return safeResponse;
+  }
+
+  // ═══════════════════════════════════════════════
   //  GİRİŞ (LOGIN)
   // ═══════════════════════════════════════════════
 

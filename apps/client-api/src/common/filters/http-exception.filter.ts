@@ -22,10 +22,21 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getStatus()
         : HttpStatus.INTERNAL_SERVER_ERROR;
 
-    const message =
+    // NestJS getResponse() bir string veya { message, error, statusCode } objesi döner.
+    // Her zaman düz string mesaj çıkar — Angular tarafında [object Object] sorununu önler.
+    const rawResponse =
       exception instanceof HttpException
         ? exception.getResponse()
         : 'Internal server error';
+
+    const message: string =
+      typeof rawResponse === 'string'
+        ? rawResponse
+        : typeof (rawResponse as any)?.message === 'string'
+          ? (rawResponse as any).message
+          : Array.isArray((rawResponse as any)?.message)
+            ? ((rawResponse as any).message as string[]).join(', ')
+            : 'Bir hata oluştu.';
 
     // Sanitize error message - remove sensitive information
     const sanitizedMessage = this.sanitizeError(message);

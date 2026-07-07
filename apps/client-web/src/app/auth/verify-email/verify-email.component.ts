@@ -14,6 +14,11 @@ export class VerifyEmailComponent implements OnInit {
   errorMessage = '';
   currentYear = new Date().getFullYear();
 
+  resendEmail = '';
+  resendLoading = false;
+  resendDone = false;
+  resendMessage = '';
+
   constructor(
     private route: ActivatedRoute,
     private authService: AuthService
@@ -38,7 +43,31 @@ export class VerifyEmailComponent implements OnInit {
       error: (err) => {
         this.loading = false;
         this.success = false;
-        this.errorMessage = err?.error?.message || 'Onay linki geçersiz veya süresi dolmuş.';
+        const raw = err?.error?.message;
+        this.errorMessage =
+          typeof raw === 'string' ? raw
+          : typeof raw?.message === 'string' ? raw.message
+          : 'Onay linki geçersiz veya süresi dolmuş.';
+      },
+    });
+  }
+
+  resendVerification(): void {
+    const email = this.resendEmail.trim();
+    if (!email) return;
+
+    this.resendLoading = true;
+    this.resendMessage = '';
+
+    this.authService.resendVerificationEmail(email).subscribe({
+      next: (res) => {
+        this.resendLoading = false;
+        this.resendDone = true;
+        this.resendMessage = res.message || 'Onay linki gönderildi. Lütfen e-postanızı kontrol edin.';
+      },
+      error: () => {
+        this.resendLoading = false;
+        this.resendMessage = 'Bir hata oluştu. Lütfen daha sonra tekrar deneyin.';
       },
     });
   }

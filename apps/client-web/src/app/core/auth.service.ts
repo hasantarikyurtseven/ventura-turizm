@@ -88,6 +88,13 @@ export class AuthService {
     });
   }
 
+  resendVerificationEmail(email: string): Observable<{ success: boolean; message: string }> {
+    return this.http.post<{ success: boolean; message: string }>(
+      `${this.baseUrl}/auth/resend-verification`,
+      { email },
+    );
+  }
+
   // ═══════════════════════════════════════════════
   //  GİRİŞ & ÇIKIŞ
   // ═══════════════════════════════════════════════

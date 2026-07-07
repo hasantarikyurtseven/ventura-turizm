@@ -64,4 +64,24 @@ export class Init3DPaymentRequestDto {
   @IsOptional()
   @IsString()
   installmentOptionId?: string;
+
+  /** Taksit sayısı (opsiyonel) */
+  @IsOptional()
+  @IsNumber()
+  installmentCount?: number;
+
+  /** Bonus taksit sayısı (opsiyonel) */
+  @IsOptional()
+  @IsNumber()
+  bonusInstallmentCount?: number;
+
+  /** Taksit faiz tutarı (opsiyonel) */
+  @IsOptional()
+  @IsNumber()
+  installmentAmountOfInterest?: number;
+
+  /** Taksit faiz oranı (opsiyonel) */
+  @IsOptional()
+  @IsNumber()
+  installmentRateOfInterest?: number;
 }

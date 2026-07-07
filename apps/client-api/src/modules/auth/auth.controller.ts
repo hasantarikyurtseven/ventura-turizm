@@ -47,6 +47,15 @@ export class AuthController {
   }
 
   /**
+   * Doğrulama maili yeniden gönder – IP başına dakikada 3, saatte 10
+   */
+  @Post('resend-verification')
+  @Throttle({ short: { limit: 3, ttl: 60000 }, long: { limit: 10, ttl: 3600000 } })
+  async resendVerification(@Body('email') email: string) {
+    return this.authService.resendVerificationEmail(email);
+  }
+
+  /**
    * Giriş – sıkı rate limit: IP başına dakikada 5, saatte 15
    *
    * GÜVENLİK:

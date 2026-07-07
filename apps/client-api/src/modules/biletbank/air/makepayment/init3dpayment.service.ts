@@ -83,20 +83,37 @@ export class BiletbankInit3DPaymentService {
       card: maskCardNumber(digits),
     });
 
-    // WSDL: IO_Init3DPayment_Request (extends T_OperationRequest)
-    // Base class (T_OperationRequest): AuthenticationHeader, ExtraParamList
-    // Derived class: DeductLastSellerCommission, Form
-    // IO_Init3DPayment_Form (WCF schema sırasıyla - alphabetical):
+    // Amount: tam hassasiyet koru, ondalıksızsa ".0" ekle (BiletBank örnek: "3405.0", "18192.74")
+    const amountFormatted = Number.isInteger(amount) ? `${amount}.0` : String(amount);
+
+    // Taksit alanları (opsiyonel)
+    const installmentFields = [
+      dto.bonusInstallmentCount != null
+        ? `               <trev1:BonusInstallmentCount>${dto.bonusInstallmentCount}</trev1:BonusInstallmentCount>`
+        : null,
+      dto.installmentCount != null
+        ? `               <trev1:InstallmentCount>${dto.installmentCount}</trev1:InstallmentCount>`
+        : null,
+      dto.installmentOptionId?.trim()
+        ? `               <trev1:InstallmentOptionId>${escapeXml(dto.installmentOptionId.trim())}</trev1:InstallmentOptionId>`
+        : null,
+      dto.installmentAmountOfInterest != null
+        ? `               <trev1:Installment_AmountOfInterest>${dto.installmentAmountOfInterest}</trev1:Installment_AmountOfInterest>`
+        : null,
+      dto.installmentRateOfInterest != null
+        ? `               <trev1:Installment_RateOfInterest>${dto.installmentRateOfInterest}</trev1:Installment_RateOfInterest>`
+        : null,
+    ]
+      .filter(Boolean)
+      .join('\n');
+
+    // IO_Init3DPayment_Request (T_OperationRequest tabanlı)
+    // Form alanları WCF şeması sırasıyla (alfabetik):
     //   Amount, BillingName, BonusInstallmentCount, CV2, CardHolder, CardNumber,
     //   CardType, Currency, ExpirationMonth, ExpirationYear, InstallmentCount,
     //   InstallmentOptionId, Installment_AmountOfInterest, Installment_RateOfInterest,
     //   OriginalAmount, ReturnUrl, ShoppingFileId
-    const xml = `<soapenv:Envelope
-  xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:i="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:tem="http://tempuri.org/"
-  xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base"
-  xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping">
+    const xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping">
    <soapenv:Header/>
    <soapenv:Body>
       <tem:MakePayment_Init3DPayment>
@@ -105,10 +122,11 @@ export class BiletbankInit3DPaymentService {
                <trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
                <trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
             </trev:AuthenticationHeader>
-            <trev:ExtraParamList/>
+            <trev:ExtraParamList>
+            </trev:ExtraParamList>
             <trev1:DeductLastSellerCommission>false</trev1:DeductLastSellerCommission>
             <trev1:Form>
-               <trev1:Amount>${amount}</trev1:Amount>
+               <trev1:Amount>${amountFormatted}</trev1:Amount>
                <trev1:BillingName>${escapeXml(dto.cardHolderName.trim().toUpperCase())}</trev1:BillingName>
                <trev1:CV2>${escapeXml(dto.cvv.trim())}</trev1:CV2>
                <trev1:CardHolder>${escapeXml(dto.cardHolderName.trim().toUpperCase())}</trev1:CardHolder>
@@ -116,8 +134,8 @@ export class BiletbankInit3DPaymentService {
                <trev1:CardType/>
                <trev1:Currency>${escapeXml(dto.currency.trim())}</trev1:Currency>
                <trev1:ExpirationMonth>${expirationMonth}</trev1:ExpirationMonth>
-               <trev1:ExpirationYear>${expirationYear}</trev1:ExpirationYear>
-               <trev1:OriginalAmount>${amount}</trev1:OriginalAmount>
+               <trev1:ExpirationYear>${expirationYear}</trev1:ExpirationYear>${installmentFields ? '\n' + installmentFields : ''}
+               <trev1:OriginalAmount>${amountFormatted}</trev1:OriginalAmount>
                <trev1:ReturnUrl>${escapeXml(dto.callbackUrl.trim())}</trev1:ReturnUrl>
                <trev1:ShoppingFileId>${escapeXml(dto.shoppingFileId.trim())}</trev1:ShoppingFileId>
             </trev1:Form>

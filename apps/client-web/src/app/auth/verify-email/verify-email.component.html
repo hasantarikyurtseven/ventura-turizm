@@ -60,18 +60,47 @@
       <h2>Doğrulama Başarısız</h2>
       <p>{{ errorMessage }}</p>
 
-      <!-- Warning Box – maildeki security notice ile uyumlu -->
-      <div class="info-box warning-info">
-        <mat-icon class="info-box-icon">info</mat-icon>
+      <!-- Resend formu -->
+      <div *ngIf="!resendDone" class="resend-section">
+        <div class="info-box warning-info">
+          <mat-icon class="info-box-icon">mail_outline</mat-icon>
+          <div>
+            <strong>Yeni onay linki alın</strong>
+            <span>E-posta adresinizi girerek yeni bir doğrulama bağlantısı gönderebilirsiniz.</span>
+          </div>
+        </div>
+
+        <div class="resend-form">
+          <mat-form-field appearance="outline" class="resend-input">
+            <mat-label>E-posta adresiniz</mat-label>
+            <input matInput type="email" [(ngModel)]="resendEmail" placeholder="ornek@mail.com" [disabled]="resendLoading" />
+            <mat-icon matSuffix>email</mat-icon>
+          </mat-form-field>
+
+          <button mat-raised-button color="primary" class="resend-button"
+            [disabled]="resendLoading || !resendEmail.trim()"
+            (click)="resendVerification()">
+            <mat-spinner *ngIf="resendLoading" diameter="18" class="btn-spinner"></mat-spinner>
+            <mat-icon *ngIf="!resendLoading">send</mat-icon>
+            {{ resendLoading ? 'Gönderiliyor...' : 'Yeni Link Gönder' }}
+          </button>
+        </div>
+
+        <p *ngIf="resendMessage" class="resend-message error-text">{{ resendMessage }}</p>
+      </div>
+
+      <!-- Resend başarılı -->
+      <div *ngIf="resendDone" class="info-box success-info">
+        <mat-icon class="info-box-icon">check_circle</mat-icon>
         <div>
-          <strong>Ne yapabilirsiniz?</strong>
-          <span>Yeniden kayıt olarak yeni bir doğrulama linki alabilirsiniz.</span>
+          <strong>Gönderildi!</strong>
+          <span>{{ resendMessage }}</span>
         </div>
       </div>
 
-      <a routerLink="/register" mat-raised-button class="action-button">
-        <mat-icon>person_add</mat-icon>
-        Tekrar Kayıt Ol
+      <a routerLink="/login" mat-stroked-button class="action-button secondary-button">
+        <mat-icon>login</mat-icon>
+        Giriş Sayfasına Dön
       </a>
     </div>
   </mat-card>

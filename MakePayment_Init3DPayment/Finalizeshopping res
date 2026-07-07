@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">
+   <s:Body>
+      <FinalizeShoppingResponse xmlns="http://tempuri.org/">
+         <FinalizeShoppingResult xmlns:a="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping" xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
+            <HasError xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base">false</HasError>
+            <ServiceError i:nil="true" xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base"/>
+            <SystemLogs xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:b="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+               <b:string>Host:http://dev-ws.biletbank.local/TrevooWS.svc</b:string>
+               <b:string>Env:BBWEB2</b:string>
+               <b:string>ReqId:a06f0a0f-9450-4ee5-928a-51e2360ac7a6</b:string>
+            </SystemLogs>
+            <ShoppingFile xmlns="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:b="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping">
+               <b:AirBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Air">
+                  <c:T_AirBooking>
+                     <b:BaseFare>3251.4000</b:BaseFare>
+                     <b:BaseFare_Discount>0</b:BaseFare_Discount>
+                     <b:BaseFare_Refund>0</b:BaseFare_Refund>
+                     <b:BookingCode>PCP59T</b:BookingCode>
+                     <b:Currency>TRY</b:Currency>
+                     <b:ExchangeCurrencyCode>TRY</b:ExchangeCurrencyCode>
+                     <b:ExchangeCurrencyRate>1.0000</b:ExchangeCurrencyRate>
+                     <b:Ext_FreeData_Detail i:nil="true"/>
+                     <b:Ext_FreeData_RefundPolicy i:nil="true"/>
+                     <b:Ext_FreeField i:nil="true"/>
+                     <b:IsRefundable>false</b:IsRefundable>
+                     <b:LastPriceChange_SessionId i:nil="true"/>
+                     <b:LastPriceChange_TransactionId i:nil="true"/>
+                     <b:LastSellerCommission>0</b:LastSellerCommission>
+                     <b:NetFare>3678.0000</b:NetFare>
+                     <b:ProductId>d9546a87-e15a-4d14-a6a7-584278ee8ae0</b:ProductId>
+                     <b:ProviderBookingCode i:nil="true"/>
+                     <b:ProviderId>726</b:ProviderId>
+                     <b:Refund_Charge i:nil="true"/>
+                     <b:ServiceFee>3.0000</b:ServiceFee>
+                     <b:ServiceFeeType i:nil="true"/>
+                     <b:ServiceFee_Discount>0</b:ServiceFee_Discount>
+                     <b:ServiceFee_Original>3.0000</b:ServiceFee_Original>
+                     <b:ServiceFee_Refund i:nil="true"/>
+                     <b:Status>Booking</b:Status>
+                     <b:StatusTable xmlns:d="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping.Views">
+                        <d:IsBooking>true</d:IsBooking>
+                        <d:IsCancelled>false</d:IsCancelled>
+                        <d:IsExpired>false</d:IsExpired>
+                        <d:IsExpiryDateChanged>false</d:IsExpiryDateChanged>
+                        <d:IsImported>false</d:IsImported>
+                        <d:IsManualRefund>false</d:IsManualRefund>
+                        <d:IsPartialRefunded>false</d:IsPartialRefunded>
+                        <d:IsPartialRefunding>false</d:IsPartialRefunding>
+                        <d:IsPrebooking>false</d:IsPrebooking>
+                        <d:IsRefunded>false</d:IsRefunded>
+                        <d:IsRefunding>false</d:IsRefunding>
+                        <d:IsReservation>true</d:IsReservation>
+                     </b:StatusTable>
+                     <b:Taxes>423.6000</b:Taxes>
+                     <b:Taxes_Discount>0</b:Taxes_Discount>
+                     <b:Taxes_Refund i:nil="true"/>
+                     <b:TimeTable xmlns:d="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping.Views">
+                        <d:BookingDate>2025-06-04T08:24:28</d:BookingDate>
+                        <d:CancellationDate i:nil="true"/>
+                        <d:CreationDate>2025-06-04T08:21:25</d:CreationDate>
+                        <d:ImportedDate i:nil="true"/>
+                        <d:PrebookingDate i:nil="true"/>
+                        <d:Prebooking_ExpiresAt i:nil="true"/>
+                        <d:ReservationDate>2025-06-04T08:21:26</d:ReservationDate>
+                        <d:Reservation_ExpiresAt>2025-06-04T08:41:26</d:Reservation_ExpiresAt>
+                     </b:TimeTable>
+                     <b:TotalFare>3678.0000</b:TotalFare>
+                     <b:Type>Flight</b:Type>
+                     <c:AlternativePrices i:nil="true"/>
+                     <c:BookingItems>
+                        <c:T_AirBookingItem>
+                           <b:BaseFare>3251.4000</b:BaseFare>
+                           <b:BaseFare_Discount>0</b:BaseFare_Discount>
+                           <b:BaseFare_Refund i:nil="true"/>
+                           <b:Currency>TRY</b:Currency>
+                           <b:CustomerCommission i:nil="true"/>
+                           <b:Ext_FreeData_Detail i:nil="true"/>
+                           <b:Ext_FreeData_RefundPolicy i:nil="true"/>
+                           <b:IsRefundDraft>false</b:IsRefundDraft>
+                           <b:IsRefundPerformed>false</b:IsRefundPerformed>
+                           <b:IsRefundWaitingFinalization>false</b:IsRefundWaitingFinalization>
+                           <b:IsRefundWaitingOffer>false</b:IsRefundWaitingOffer>
+                           <b:IsReissue>false</b:IsReissue>
+                           <b:LastSellerCommission>0</b:LastSellerCommission>
+                           <b:NetFare>3678.0000</b:NetFare>
+                           <b:ProductItemId>0c464991-8bf2-478f-969a-cb5f5094cff9</b:ProductItemId>
+                           <b:RefundRequestId i:nil="true"/>
+                           <b:Refund_AgencyDffAmount i:nil="true"/>
+                           <b:Refund_Charge i:nil="true"/>
+                           <b:ServiceFee>3.0000</b:ServiceFee>
+                           <b:ServiceFeeOnRefund i:nil="true"/>
+                           <b:ServiceFeeType i:nil="true"/>
+                           <b:ServiceFee_Discount>0</b:ServiceFee_Discount>
+                           <b:ServiceFee_Original>3.0000</b:ServiceFee_Original>
+                           <b:ServiceFee_Refund i:nil="true"/>
+                           <b:SystemServiceFee>0</b:SystemServiceFee>
+                           <b:Taxes>423.6000</b:Taxes>
+                           <b:Taxes_Discount>0</b:Taxes_Discount>
+                           <b:Taxes_Refund i:nil="true"/>
+                           <b:TotalFare>3678.0000</b:TotalFare>
+                           <c:Baggage>20K</c:Baggage>
+                           <c:ETicketLink i:nil="true"/>
+                           <c:ExternalCampaignAppliedAmount i:nil="true"/>
+                           <c:InvoiceLink>http://invoice.biletbank.com/InvoiceDocument.ashx?6242233385922</c:InvoiceLink>
+                           <c:PaxReference>
+                              <b:Age>0</b:Age>
+                              <b:LocalPaxType>ADT</b:LocalPaxType>
+                              <b:LocalSequenceNo>1</b:LocalSequenceNo>
+                              <b:PassengerId>1dbaae11-5063-4e6f-9d08-e278d25aa427</b:PassengerId>
+                              <b:PaxReferenceId>affa7a17-dfd0-4a42-9839-6d4078824d5b</b:PaxReferenceId>
+                           </c:PaxReference>
+                           <c:ReissueOldTicketNumber i:nil="true"/>
+                           <c:TicketNumber>6242233385922</c:TicketNumber>
+                           <c:VQ>148.6000</c:VQ>
+                           <c:YR>275.0000</c:YR>
+                        </c:T_AirBookingItem>
+                     </c:BookingItems>
+                     <c:BrandedFares>
+                        <c:BrandedFareItems>
+                           <c:BrandedFareItem>
+                              <c:BrandedFareItemId>a5350d92-379c-4622-805c-9c873d06ba79</c:BrandedFareItemId>
+                              <c:BrandedFarePassengers>
+                                 <c:BrandedFarePassenger>
+                                    <c:FareComponents>
+                                       <c:FareComponent>
+                                          <c:BookingClass>H</c:BookingClass>
+                                          <c:BrandId>968c0609-3afb-4be1-bf9e-2a70f161dbd9</c:BrandId>
+                                          <c:CabinClass>Economy</c:CabinClass>
+                                          <c:FareBasisCode>H</c:FareBasisCode>
+                                          <c:FreeBaggageAllowanceId>1</c:FreeBaggageAllowanceId>
+                                          <c:SeatsAvailable>9</c:SeatsAvailable>
+                                          <c:SegmentId>9bb98c4b-5c6f-4779-a57d-320cd7c66dc9</c:SegmentId>
+                                       </c:FareComponent>
+                                    </c:FareComponents>
+                                    <c:PassengerCount>1</c:PassengerCount>
+                                    <c:PassengerFareInfo>
+                                       <c:BaseFare>2451.40</c:BaseFare>
+                                       <c:BaseFareDiscount>0</c:BaseFareDiscount>
+                                       <c:Currency>TRY</c:Currency>
+                                       <c:PaxSequence>1</c:PaxSequence>
+                                       <c:PaxType>ADT</c:PaxType>
+                                       <c:Taxes>423.60</c:Taxes>
+                                       <c:TotalFare>2875.00</c:TotalFare>
+                                    </c:PassengerFareInfo>
+                                    <c:PassengerType>ADT</c:PassengerType>
+                                    <c:Policy>
+                                       <c:CancellationPolicies/>
+                                       <c:ChangePolicies/>
+                                    </c:Policy>
+                                 </c:BrandedFarePassenger>
+                              </c:BrandedFarePassengers>
+                              <c:Currency>TRY</c:Currency>
+                              <c:TotalFareInfo>
+                                 <c:TotalFare>2875.00</c:TotalFare>
+                                 <c:TotalTaxes>423.60</c:TotalTaxes>
+                              </c:TotalFareInfo>
+                           </c:BrandedFareItem>
+                           <c:BrandedFareItem>
+                              <c:BrandedFareItemId>53b3630a-fbc1-4197-864c-51dd976629ce</c:BrandedFareItemId>
+                              <c:BrandedFarePassengers>
+                                 <c:BrandedFarePassenger>
+                                    <c:FareComponents>
+                                       <c:FareComponent>
+                                          <c:BookingClass>H</c:BookingClass>
+                                          <c:BrandId>114e33fb-27da-4561-ba3e-22e5003dfa41</c:BrandId>
+                                          <c:CabinClass>Economy</c:CabinClass>
+                                          <c:FareBasisCode>H</c:FareBasisCode>
+                                          <c:FreeBaggageAllowanceId>2</c:FreeBaggageAllowanceId>
+                                          <c:SeatsAvailable>9</c:SeatsAvailable>
+                                          <c:SegmentId>9bb98c4b-5c6f-4779-a57d-320cd7c66dc9</c:SegmentId>
+                                       </c:FareComponent>
+                                    </c:FareComponents>
+                                    <c:PassengerCount>1</c:PassengerCount>
+                                    <c:PassengerFareInfo>
+                                       <c:BaseFare>3251.40</c:BaseFare>
+                                       <c:BaseFareDiscount>0</c:BaseFareDiscount>
+                                       <c:Currency>TRY</c:Currency>
+                                       <c:PaxSequence>1</c:PaxSequence>
+                                       <c:PaxType>ADT</c:PaxType>
+                                       <c:Taxes>423.60</c:Taxes>
+                                       <c:TotalFare>3675.00</c:TotalFare>
+                                    </c:PassengerFareInfo>
+                                    <c:PassengerType>ADT</c:PassengerType>
+                                    <c:Policy>
+                                       <c:CancellationPolicies/>
+                                       <c:ChangePolicies/>
+                                    </c:Policy>
+                                 </c:BrandedFarePassenger>
+                              </c:BrandedFarePassengers>
+                              <c:Currency>TRY</c:Currency>
+                              <c:TotalFareInfo>
+                                 <c:TotalFare>3675.00</c:TotalFare>
+                                 <c:TotalTaxes>423.60</c:TotalTaxes>
+                              </c:TotalFareInfo>
+                           </c:BrandedFareItem>
+                           <c:BrandedFareItem>
+                              <c:BrandedFareItemId>dc87c8ca-c2a7-4d58-b028-9851c5b94a70</c:BrandedFareItemId>
+                              <c:BrandedFarePassengers>
+                                 <c:BrandedFarePassenger>
+                                    <c:FareComponents>
+                                       <c:FareComponent>
+                                          <c:BookingClass>H</c:BookingClass>
+                                          <c:BrandId>f7ab887f-7a33-419c-be80-2a19acb09bdd</c:BrandId>
+                                          <c:CabinClass>Economy</c:CabinClass>
+                                          <c:FareBasisCode>H</c:FareBasisCode>
+                                          <c:FreeBaggageAllowanceId>3</c:FreeBaggageAllowanceId>
+                                          <c:SeatsAvailable>9</c:SeatsAvailable>
+                                          <c:SegmentId>9bb98c4b-5c6f-4779-a57d-320cd7c66dc9</c:SegmentId>
+                                       </c:FareComponent>
+                                    </c:FareComponents>
+                                    <c:PassengerCount>1</c:PassengerCount>
+                                    <c:PassengerFareInfo>
+                                       <c:BaseFare>3501.40</c:BaseFare>
+                                       <c:BaseFareDiscount>0</c:BaseFareDiscount>
+                                       <c:Currency>TRY</c:Currency>
+                                       <c:PaxSequence>1</c:PaxSequence>
+                                       <c:PaxType>ADT</c:PaxType>
+                                       <c:Taxes>423.60</c:Taxes>
+                                       <c:TotalFare>3925.00</c:TotalFare>
+                                    </c:PassengerFareInfo>
+                                    <c:PassengerType>ADT</c:PassengerType>
+                                    <c:Policy>
+                                       <c:CancellationPolicies/>
+                                       <c:ChangePolicies/>
+                                    </c:Policy>
+                                 </c:BrandedFarePassenger>
+                              </c:BrandedFarePassengers>
+                              <c:Currency>TRY</c:Currency>
+                              <c:TotalFareInfo>
+                                 <c:TotalFare>3925.00</c:TotalFare>
+                                 <c:TotalTaxes>423.60</c:TotalTaxes>
+                              </c:TotalFareInfo>
+                           </c:BrandedFareItem>
+                        </c:BrandedFareItems>
+                        <c:BrandedItems>
+                           <c:BrandedItem>
+                              <c:BrandCode>ECO</c:BrandCode>
+                              <c:BrandId>968c0609-3afb-4be1-bf9e-2a70f161dbd9</c:BrandId>
+                              <c:BrandName>ECO</c:BrandName>
+                              <c:BrandedRules>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>1 Piece Carry On Baggage (55x40x20 cm)</c:RuleDescription>
+                                    <c:ServiceGroup>CY</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>15 * KG Checked Baggage</c:RuleDescription>
+                                    <c:ServiceGroup>BG</c:ServiceGroup>
+                                 </c:BrandedRule>
+                              </c:BrandedRules>
+                           </c:BrandedItem>
+                           <c:BrandedItem>
+                              <c:BrandCode>ADVANTAGE</c:BrandCode>
+                              <c:BrandId>114e33fb-27da-4561-ba3e-22e5003dfa41</c:BrandId>
+                              <c:BrandName>ADVANTAGE</c:BrandName>
+                              <c:BrandedRules>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>1 Piece Carry On Baggage (55x40x20 cm)</c:RuleDescription>
+                                    <c:ServiceGroup>CY</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>20 * KG Checked Baggage</c:RuleDescription>
+                                    <c:ServiceGroup>BG</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>STANDARD SEAT SELECTION</c:RuleDescription>
+                                    <c:ServiceGroup>SE</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>NotDisplay</c:DisplayType>
+                                    <c:RuleDescription>Catering Services</c:RuleDescription>
+                                    <c:ServiceGroup>ML</c:ServiceGroup>
+                                 </c:BrandedRule>
+                              </c:BrandedRules>
+                           </c:BrandedItem>
+                           <c:BrandedItem>
+                              <c:BrandCode>EXTRA</c:BrandCode>
+                              <c:BrandId>f7ab887f-7a33-419c-be80-2a19acb09bdd</c:BrandId>
+                              <c:BrandName>EXTRA</c:BrandName>
+                              <c:BrandedRules>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>1 Piece Carry On Baggage (55x40x20 cm)</c:RuleDescription>
+                                    <c:ServiceGroup>CY</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>20 * KG Checked Baggage</c:RuleDescription>
+                                    <c:ServiceGroup>BG</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>C</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>Changeable Ticket</c:RuleDescription>
+                                    <c:ServiceGroup>VC</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>C</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>REFUNDABLE TICKET</c:RuleDescription>
+                                    <c:ServiceGroup>VR</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>PREFERRED SEAT SELECTION</c:RuleDescription>
+                                    <c:ServiceGroup>SE</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>NotDisplay</c:DisplayType>
+                                    <c:RuleDescription>Catering Services</c:RuleDescription>
+                                    <c:ServiceGroup>ML</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>F</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription>In-flight Entertainment</c:RuleDescription>
+                                    <c:ServiceGroup>IE</c:ServiceGroup>
+                                 </c:BrandedRule>
+                                 <c:BrandedRule>
+                                    <c:Application>BIKE</c:Application>
+                                    <c:DisplayType>Display</c:DisplayType>
+                                    <c:RuleDescription i:nil="true"/>
+                                    <c:ServiceGroup>EQP</c:ServiceGroup>
+                                 </c:BrandedRule>
+                              </c:BrandedRules>
+                           </c:BrandedItem>
+                        </c:BrandedItems>
+                        <c:FreeBaggageAllowances>
+                           <c:FreeBaggageAllowance>
+                              <c:FBA>
+                                 <c:PaxBaggageAllowance>
+                                    <c:PaxFBA>
+                                       <c:Allowance>15</c:Allowance>
+                                       <c:Category>Checked</c:Category>
+                                       <c:Type>Weight</c:Type>
+                                       <c:Unit>K</c:Unit>
+                                    </c:PaxFBA>
+                                    <c:PaxType>ADT</c:PaxType>
+                                 </c:PaxBaggageAllowance>
+                              </c:FBA>
+                           </c:FreeBaggageAllowance>
+                           <c:FreeBaggageAllowance>
+                              <c:FBA>
+                                 <c:PaxBaggageAllowance>
+                                    <c:PaxFBA>
+                                       <c:Allowance>20</c:Allowance>
+                                       <c:Category>Checked</c:Category>
+                                       <c:Type>Weight</c:Type>
+                                       <c:Unit>K</c:Unit>
+                                    </c:PaxFBA>
+                                    <c:PaxType>ADT</c:PaxType>
+                                 </c:PaxBaggageAllowance>
+                              </c:FBA>
+                           </c:FreeBaggageAllowance>
+                           <c:FreeBaggageAllowance>
+                              <c:FBA>
+                                 <c:PaxBaggageAllowance>
+                                    <c:PaxFBA>
+                                       <c:Allowance>1</c:Allowance>
+                                       <c:Category>Cabin</c:Category>
+                                       <c:Type>Carry</c:Type>
+                                       <c:Unit>N</c:Unit>
+                                    </c:PaxFBA>
+                                    <c:PaxType>ADT</c:PaxType>
+                                 </c:PaxBaggageAllowance>
+                                 <c:PaxBaggageAllowance>
+                                    <c:PaxFBA>
+                                       <c:Allowance>20</c:Allowance>
+                                       <c:Category>Checked</c:Category>
+                                       <c:Type>Weight</c:Type>
+                                       <c:Unit>K</c:Unit>
+                                    </c:PaxFBA>
+                                    <c:PaxType>ADT</c:PaxType>
+                                 </c:PaxBaggageAllowance>
+                              </c:FBA>
+                           </c:FreeBaggageAllowance>
+                        </c:FreeBaggageAllowances>
+                        <c:IsPackagedPrice>false</c:IsPackagedPrice>
+                     </c:BrandedFares>
+                     <c:CanBeReserved>false</c:CanBeReserved>
+                     <c:ETicketLink i:nil="true"/>
+                     <c:Segments>
+                        <c:T_Segment>
+                           <c:ArrivalDay>2025-10-25T00:00:00</c:ArrivalDay>
+                           <c:ArrivalTime>PT9H35M</c:ArrivalTime>
+                           <c:BookingClass>H</c:BookingClass>
+                           <c:Cabin>Economy</c:Cabin>
+                           <c:DepartureDay>2025-10-25T00:00:00</c:DepartureDay>
+                           <c:DepartureTime>PT8H30M</c:DepartureTime>
+                           <c:DestinationCode>ADB</c:DestinationCode>
+                           <c:Duration>01:05</c:Duration>
+                           <c:Equipment i:nil="true"/>
+                           <c:FareBasis>H</c:FareBasis>
+                           <c:FareType xmlns:d="http://schemas.microsoft.com/2003/10/Serialization/Arrays">
+                              <d:string>HOW</d:string>
+                           </c:FareType>
+                           <c:FlightNumber>PC3307</c:FlightNumber>
+                           <c:Id>9bb98c4b-5c6f-4779-a57d-320cd7c66dc9</c:Id>
+                           <c:MarketingAirline>PC</c:MarketingAirline>
+                           <c:OD_DestinationCode>ADB</c:OD_DestinationCode>
+                           <c:OD_OriginCode>IST</c:OD_OriginCode>
+                           <c:OperatingAirline>PC</c:OperatingAirline>
+                           <c:OriginCode>IST</c:OriginCode>
+                           <c:SelectedBrandedFareItemId>53b3630a-fbc1-4197-864c-51dd976629ce</c:SelectedBrandedFareItemId>
+                           <c:SequenceNo>1</c:SequenceNo>
+                        </c:T_Segment>
+                     </c:Segments>
+                     <c:VQ>148.6000</c:VQ>
+                     <c:YR>275.0000</c:YR>
+                  </c:T_AirBooking>
+               </b:AirBookings>
+               <b:BillingInformation>
+                  <b:Address_City>ISTANBUL</b:Address_City>
+                  <b:Address_Detail>COBANCESME SAN. CD. NO.44 NISH ISTANBUL C BLOK K:17 D:200</b:Address_Detail>
+                  <b:Address_District>BAHCELIEVLER</b:Address_District>
+                  <b:Address_ZipCode>0000</b:Address_ZipCode>
+                  <b:BillingName>TEST</b:BillingName>
+                  <b:CountryCode>TR</b:CountryCode>
+                  <b:IfCompany>true</b:IfCompany>
+                  <b:TaxNo>1111111111</b:TaxNo>
+                  <b:TaxOffice>TEST</b:TaxOffice>
+               </b:BillingInformation>
+               <b:CarBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Car"/>
+               <b:CreationDate>2025-06-04T08:21:21</b:CreationDate>
+               <b:Currency>TRY</b:Currency>
+               <b:CustomerInfo>
+                  <b:BusinessId>16040</b:BusinessId>
+                  <b:BusinessName>TUGSAN</b:BusinessName>
+                  <b:Email>TUGSAN.TORUNOGLU@PETOUR.COM</b:Email>
+                  <b:Key i:nil="true"/>
+                  <b:Phone>
+                     <b:HomePhone>+90-5382392398</b:HomePhone>
+                     <b:MobilePhone>+90-5382392398</b:MobilePhone>
+                  </b:Phone>
+                  <b:Username>TESTTUGSAN</b:Username>
+               </b:CustomerInfo>
+               <b:HotelBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Hotel"/>
+               <b:Id>5f2edb63-cc76-4b46-afe4-95b8a9572f3f</b:Id>
+               <b:IfFinalized>true</b:IfFinalized>
+               <b:InsuranceBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Insurance"/>
+               <b:IsCompanyPriceDiscountApplied>false</b:IsCompanyPriceDiscountApplied>
+               <b:IsFlightInfoChanged>false</b:IsFlightInfoChanged>
+               <b:IsPriceChanged>false</b:IsPriceChanged>
+               <b:IsReservationCancelled>false</b:IsReservationCancelled>
+               <b:Is_CC_Payment_Enabled>true</b:Is_CC_Payment_Enabled>
+               <b:Is_RA_Payment_Enabled>true</b:Is_RA_Payment_Enabled>
+               <b:LastTransactionDate>2025-06-04T08:24:28.0533887Z</b:LastTransactionDate>
+               <b:LastTransactionId>a06f0a0f-9450-4ee5-928a-51e2360ac7a6</b:LastTransactionId>
+               <b:MaxSc>0</b:MaxSc>
+               <b:MinSc>0</b:MinSc>
+               <b:Passengers>
+                  <b:T_Passenger>
+                     <b:BirthDate>1980-10-10</b:BirthDate>
+                     <b:CitizenNo>00000000000</b:CitizenNo>
+                     <b:DestinationAddress i:nil="true"/>
+                     <b:Email>TUG@PETOUR.COM</b:Email>
+                     <b:FirstName>TUGSAN</b:FirstName>
+                     <b:FrequentFlayerNo i:nil="true"/>
+                     <b:Gender>M</b:Gender>
+                     <b:HesCode i:nil="true"/>
+                     <b:Id>1dbaae11-5063-4e6f-9d08-e278d25aa427</b:Id>
+                     <b:IfContact>true</b:IfContact>
+                     <b:LastName>TORUN</b:LastName>
+                     <b:Nationality>TR</b:Nationality>
+                     <b:PassportCountry>TR</b:PassportCountry>
+                     <b:PassportNo>P1234567</b:PassportNo>
+                     <b:PassportValidDate i:nil="true"/>
+                     <b:PaxReferences>
+                        <b:T_ForwardPaxReference>
+                           <b:ProductId>d9546a87-e15a-4d14-a6a7-584278ee8ae0</b:ProductId>
+                           <b:ProductItemId>0c464991-8bf2-478f-969a-cb5f5094cff9</b:ProductItemId>
+                        </b:T_ForwardPaxReference>
+                     </b:PaxReferences>
+                     <b:Phone>+90-5325731877</b:Phone>
+                     <b:SecondaryPhoneNumber i:nil="true"/>
+                     <b:SequenceNo>1</b:SequenceNo>
+                     <b:TempTag i:nil="true"/>
+                     <b:Type>ADT</b:Type>
+                     <b:WheelChairServiceType>0</b:WheelChairServiceType>
+                  </b:T_Passenger>
+               </b:Passengers>
+               <b:PaymentOptions i:nil="true" xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Shopping.Views"/>
+               <b:Payments>
+                  <b:T_Payment>
+                     <b:CC_BankName>LIDIO</b:CC_BankName>
+                     <b:CC_BonusInstallmentCount>0</b:CC_BonusInstallmentCount>
+                     <b:CC_CardHolder>TUGSAN</b:CC_CardHolder>
+                     <b:CC_CardNumber>4506-34**-****-3988</b:CC_CardNumber>
+                     <b:CC_InstallmentCount>0</b:CC_InstallmentCount>
+                     <b:CC_MonthlyPayment>0</b:CC_MonthlyPayment>
+                     <b:CurrentHandling_FinalizedDate i:nil="true"/>
+                     <b:Ext_FreeData i:nil="true"/>
+                     <b:Id>3765e74b-40ba-483e-9547-21af6cb7beea</b:Id>
+                     <b:InterestAmount>0</b:InterestAmount>
+                     <b:LastApprovedCommand>PSTH</b:LastApprovedCommand>
+                     <b:LastCommand>PSTH</b:LastCommand>
+                     <b:OriginalAmount>3678.0000</b:OriginalAmount>
+                     <b:PaymentAmount>3678.0000</b:PaymentAmount>
+                     <b:PaymentConfirmedAmount>3678.0000</b:PaymentConfirmedAmount>
+                     <b:PaymentCurrency>TRY</b:PaymentCurrency>
+                     <b:PaymentType>CC</b:PaymentType>
+                     <b:SellingCurrency>TRY</b:SellingCurrency>
+                     <b:T_Credit_TransactionDate i:nil="true"/>
+                     <b:T_PostAuth_TransactionDate>2025-06-04T08:24:28</b:T_PostAuth_TransactionDate>
+                     <b:T_PreAuth_TransactionDate>2025-06-04T08:23:57</b:T_PreAuth_TransactionDate>
+                     <b:TotalAmount>3678.0000</b:TotalAmount>
+                  </b:T_Payment>
+               </b:Payments>
+               <b:PriceSummary>
+                  <b:GrandTotal>3678.0000</b:GrandTotal>
+                  <b:PriceItems>
+                     <b:T_PriceItem>
+                        <b:InCart>true</b:InCart>
+                        <b:ProductId>d9546a87-e15a-4d14-a6a7-584278ee8ae0</b:ProductId>
+                        <b:ProductType>Flight</b:ProductType>
+                        <b:Total>3678.0000</b:Total>
+                     </b:T_PriceItem>
+                  </b:PriceItems>
+               </b:PriceSummary>
+               <b:RefundRequests i:nil="true"/>
+               <b:RemainingSum>0</b:RemainingSum>
+               <b:TimeZone>3</b:TimeZone>
+               <b:TransferBookings xmlns:c="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Transfer"/>
+            </ShoppingFile>
+         </FinalizeShoppingResult>
+      </FinalizeShoppingResponse>
+   </s:Body>
+</s:Envelope>

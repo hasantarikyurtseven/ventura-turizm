@@ -220,9 +220,16 @@ let HttpExceptionFilter = HttpExceptionFilter_1 = class HttpExceptionFilter {
         const status = exception instanceof common_1.HttpException
             ? exception.getStatus()
             : common_1.HttpStatus.INTERNAL_SERVER_ERROR;
-        const message = exception instanceof common_1.HttpException
+        const rawResponse = exception instanceof common_1.HttpException
             ? exception.getResponse()
             : 'Internal server error';
+        const message = typeof rawResponse === 'string'
+            ? rawResponse
+            : typeof rawResponse?.message === 'string'
+                ? rawResponse.message
+                : Array.isArray(rawResponse?.message)
+                    ? rawResponse.message.join(', ')
+                    : 'Bir hata oluştu.';
         const sanitizedMessage = this.sanitizeError(message);
         const errorLog = {
             statusCode: status,
@@ -1292,6 +1299,9 @@ let AuthController = class AuthController {
     async verifyEmail(token) {
         return this.authService.verifyEmail(token);
     }
+    async resendVerification(email) {
+        return this.authService.resendVerificationEmail(email);
+    }
     async login(dto, req, userAgent) {
         return this.authService.login(dto, this.getIpAddress(req), userAgent || 'unknown');
     }
@@ -1326,6 +1336,14 @@ __decorate([
     __metadata("design:paramtypes", [String]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "verifyEmail", null);
+__decorate([
+    (0, common_1.Post)('resend-verification'),
+    (0, throttler_1.Throttle)({ short: { limit: 3, ttl: 60000 }, long: { limit: 10, ttl: 3600000 } }),
+    __param(0, (0, common_1.Body)('email')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "resendVerification", null);
 __decorate([
     (0, common_1.Post)('login'),
     (0, throttler_1.Throttle)({ short: { limit: 5, ttl: 60000 }, long: { limit: 15, ttl: 3600000 } }),
@@ -1570,6 +1588,36 @@ let AuthService = AuthService_1 = class AuthService {
             success: true,
             message: 'E-posta adresiniz başarıyla onaylandı. Artık giriş yapabilirsiniz.',
         };
+    }
+    async resendVerificationEmail(email) {
+        const safeResponse = {
+            success: true,
+            message: 'Eğer bu adresle kayıtlı doğrulanmamış bir hesap varsa, onay linki gönderildi.',
+        };
+        const member = await this.memberModel.findOne({
+            email: email.toLowerCase().trim(),
+            emailVerified: false,
+        });
+        if (!member) {
+            return safeResponse;
+        }
+        const verificationToken = crypto.randomUUID();
+        const verificationTokenExpiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        await this.memberModel.updateOne({ _id: member._id }, { $set: { verificationToken, verificationTokenExpiresAt } });
+        const clientWebUrl = this.configService.get('CLIENT_WEB_URL', 'http://localhost:4300');
+        await this.emailQueue.add('send-verification', {
+            email: member.email,
+            firstName: this.escapeHtml(member.firstName),
+            verificationToken,
+            clientWebUrl,
+        }, {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 5000 },
+            removeOnComplete: true,
+            removeOnFail: false,
+        });
+        this.logger.log(`Doğrulama maili yeniden gönderildi: ${member.email}`);
+        return safeResponse;
     }
     async login(dto, ipAddress, userAgent) {
         const email = dto.email.toLowerCase().trim();
@@ -4170,12 +4218,27 @@ let BiletbankInit3DPaymentService = BiletbankInit3DPaymentService_1 = class Bile
             currency: dto.currency,
             card: maskCardNumber(digits),
         });
-        const xml = `<soapenv:Envelope
-  xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-  xmlns:i="http://www.w3.org/2001/XMLSchema-instance"
-  xmlns:tem="http://tempuri.org/"
-  xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base"
-  xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping">
+        const amountFormatted = Number.isInteger(amount) ? `${amount}.0` : String(amount);
+        const installmentFields = [
+            dto.bonusInstallmentCount != null
+                ? `               <trev1:BonusInstallmentCount>${dto.bonusInstallmentCount}</trev1:BonusInstallmentCount>`
+                : null,
+            dto.installmentCount != null
+                ? `               <trev1:InstallmentCount>${dto.installmentCount}</trev1:InstallmentCount>`
+                : null,
+            dto.installmentOptionId?.trim()
+                ? `               <trev1:InstallmentOptionId>${escapeXml(dto.installmentOptionId.trim())}</trev1:InstallmentOptionId>`
+                : null,
+            dto.installmentAmountOfInterest != null
+                ? `               <trev1:Installment_AmountOfInterest>${dto.installmentAmountOfInterest}</trev1:Installment_AmountOfInterest>`
+                : null,
+            dto.installmentRateOfInterest != null
+                ? `               <trev1:Installment_RateOfInterest>${dto.installmentRateOfInterest}</trev1:Installment_RateOfInterest>`
+                : null,
+        ]
+            .filter(Boolean)
+            .join('\n');
+        const xml = `<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:tem="http://tempuri.org/" xmlns:trev="http://schemas.datacontract.org/2004/07/Trevoo.WS.Entities.Base" xmlns:trev1="http://schemas.datacontract.org/2004/07/Trevoo.WS.IO.Shopping">
    <soapenv:Header/>
    <soapenv:Body>
       <tem:MakePayment_Init3DPayment>
@@ -4184,10 +4247,11 @@ let BiletbankInit3DPaymentService = BiletbankInit3DPaymentService_1 = class Bile
                <trev:SessionId>${escapeXml(dto.sessionId)}</trev:SessionId>
                <trev:SessionToken>${escapeXml(dto.sessionToken)}</trev:SessionToken>
             </trev:AuthenticationHeader>
-            <trev:ExtraParamList/>
+            <trev:ExtraParamList>
+            </trev:ExtraParamList>
             <trev1:DeductLastSellerCommission>false</trev1:DeductLastSellerCommission>
             <trev1:Form>
-               <trev1:Amount>${amount}</trev1:Amount>
+               <trev1:Amount>${amountFormatted}</trev1:Amount>
                <trev1:BillingName>${escapeXml(dto.cardHolderName.trim().toUpperCase())}</trev1:BillingName>
                <trev1:CV2>${escapeXml(dto.cvv.trim())}</trev1:CV2>
                <trev1:CardHolder>${escapeXml(dto.cardHolderName.trim().toUpperCase())}</trev1:CardHolder>
@@ -4195,8 +4259,8 @@ let BiletbankInit3DPaymentService = BiletbankInit3DPaymentService_1 = class Bile
                <trev1:CardType/>
                <trev1:Currency>${escapeXml(dto.currency.trim())}</trev1:Currency>
                <trev1:ExpirationMonth>${expirationMonth}</trev1:ExpirationMonth>
-               <trev1:ExpirationYear>${expirationYear}</trev1:ExpirationYear>
-               <trev1:OriginalAmount>${amount}</trev1:OriginalAmount>
+               <trev1:ExpirationYear>${expirationYear}</trev1:ExpirationYear>${installmentFields ? '\n' + installmentFields : ''}
+               <trev1:OriginalAmount>${amountFormatted}</trev1:OriginalAmount>
                <trev1:ReturnUrl>${escapeXml(dto.callbackUrl.trim())}</trev1:ReturnUrl>
                <trev1:ShoppingFileId>${escapeXml(dto.shoppingFileId.trim())}</trev1:ShoppingFileId>
             </trev1:Form>
@@ -6374,6 +6438,10 @@ class Init3DPaymentRequestDto {
     cvv;
     callbackUrl;
     installmentOptionId;
+    installmentCount;
+    bonusInstallmentCount;
+    installmentAmountOfInterest;
+    installmentRateOfInterest;
 }
 exports.Init3DPaymentRequestDto = Init3DPaymentRequestDto;
 __decorate([
@@ -6440,6 +6508,26 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], Init3DPaymentRequestDto.prototype, "installmentOptionId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], Init3DPaymentRequestDto.prototype, "installmentCount", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], Init3DPaymentRequestDto.prototype, "bonusInstallmentCount", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], Init3DPaymentRequestDto.prototype, "installmentAmountOfInterest", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsNumber)(),
+    __metadata("design:type", Number)
+], Init3DPaymentRequestDto.prototype, "installmentRateOfInterest", void 0);
 
 
 /***/ },
