@@ -25,7 +25,6 @@
       <p>Rezervasyonlarınız yükleniyor…</p>
     </div>
 
-
     <!-- Hata -->
     <div class="empty-state" *ngIf="!isLoading && errorMessage">
       <mat-icon class="empty-icon error">error_outline</mat-icon>
@@ -51,196 +50,194 @@
     </div>
 
     <!-- Rezervasyon Listesi -->
-    <div class="reservations-grid" *ngIf="!isLoading && !errorMessage && reservations.length > 0">
-      <div
-        class="reservation-card"
-        *ngFor="let r of reservations"
-      >
-        <!-- Kart üst şerit -->
-        <div class="rc-stripe" [class.stripe-cancelled]="r.status === 'CANCELLED'"></div>
+    <div class="reservations-list" *ngIf="!isLoading && !errorMessage && reservations.length > 0">
 
-        <!-- Kart İçeriği -->
-        <div class="rc-body">
+      <div class="reservation-group" *ngFor="let r of reservations">
 
-          <!-- Sol: Uçuş Rotası — Gidiş+Dönüş veya tek yön -->
-          <ng-container *ngIf="r.flightLegs && r.flightLegs.length > 1; else singleFlight">
-            <div class="rc-col-flight rc-col-flight--multi">
-              <div class="rc-leg" *ngFor="let leg of r.flightLegs; let i = index">
-                <div class="rc-leg-label">
-                  <div class="rc-leg-label-left">
-                    <mat-icon>{{ i === 0 ? 'flight_takeoff' : 'flight_land' }}</mat-icon>
-                    <span>{{ i === 0 ? 'Gidiş' : 'Dönüş' }}</span>
-                  </div>
-                  <span class="rc-leg-fare" *ngIf="leg.fare">
-                    {{ leg.fare | number:'1.2-2' }} {{ leg.currency || r.currency }}
-                  </span>
-                </div>
-
-                <!-- Havayolu -->
-                <div class="rc-airline-row">
-                  <img
-                    *ngIf="leg.airlineLogo && leg.airlineLogo.startsWith('http')"
-                    [src]="leg.airlineLogo"
-                    [alt]="leg.airline"
-                    class="rc-airline-logo"
-                  />
-                  <span class="rc-airline-fallback"
-                    *ngIf="!leg.airlineLogo || !leg.airlineLogo.startsWith('http')">
-                    {{ (leg.airline || '').substring(0, 2).toUpperCase() }}
-                  </span>
-                  <span class="rc-airline-name">{{ leg.airline }}</span>
-                  <span class="rc-flight-no">{{ leg.flightNumber }}</span>
-                  <span class="rc-cabin" *ngIf="leg.brandName">{{ leg.brandName }}</span>
-                </div>
-
-                <!-- Kalkış → Varış -->
-                <div class="rc-airports">
-                  <div class="rc-airport">
-                    <span class="rc-iata">{{ leg.departure.airportCode }}</span>
-                    <span class="rc-time">{{ leg.departure.time }}</span>
-                    <span class="rc-date">{{ formatFlightDate(leg.departure.date) }}</span>
-                  </div>
-                  <div class="rc-mid">
-                    <div class="rc-mid-line">
-                      <span class="rc-dot"></span>
-                      <mat-icon>{{ i === 0 ? 'flight_takeoff' : 'flight_land' }}</mat-icon>
-                      <span class="rc-dot"></span>
-                    </div>
-                    <span class="rc-duration">{{ leg.duration }}</span>
-                  </div>
-                  <div class="rc-airport right">
-                    <span class="rc-iata">{{ leg.arrival.airportCode }}</span>
-                    <span class="rc-time">{{ leg.arrival.time }}</span>
-                    <span class="rc-date">{{ formatFlightDate(leg.arrival.date) }}</span>
-                  </div>
-                </div>
-
-                <!-- Bagaj -->
-                <div class="rc-baggage" *ngIf="leg.baggageDescription">
-                  <mat-icon>luggage</mat-icon>
-                  {{ leg.baggageDescription }}
-                </div>
-
-                <!-- Ayırıcı -->
-                <div class="rc-leg-divider" *ngIf="i < r.flightLegs!.length - 1"></div>
-              </div>
-            </div>
-          </ng-container>
-
-          <ng-template #singleFlight>
-            <div class="rc-col-flight" *ngIf="r.flight">
-
-              <!-- Havayolu -->
-              <div class="rc-airline-row">
-                <img
-                  *ngIf="r.flight.airlineLogo && r.flight.airlineLogo.startsWith('http')"
-                  [src]="r.flight.airlineLogo"
-                  [alt]="r.flight.airline"
-                  class="rc-airline-logo"
-                />
-                <span class="rc-airline-fallback"
-                  *ngIf="!r.flight.airlineLogo || !r.flight.airlineLogo.startsWith('http')">
-                  {{ (r.flight.airline || '').substring(0, 2).toUpperCase() }}
-                </span>
-                <span class="rc-airline-name">{{ r.flight.airline }}</span>
-                <span class="rc-flight-no">{{ r.flight.flightNumber }}</span>
-                <span class="rc-cabin" *ngIf="r.flight.brandName">{{ r.flight.brandName }}</span>
-              </div>
-
-              <!-- Kalkış → Varış -->
-              <div class="rc-airports">
-                <div class="rc-airport">
-                  <span class="rc-iata">{{ r.flight.departure.airportCode }}</span>
-                  <span class="rc-time">{{ r.flight.departure.time }}</span>
-                  <span class="rc-date">{{ formatFlightDate(r.flight.departure.date) }}</span>
-                </div>
-                <div class="rc-mid">
-                  <div class="rc-mid-line">
-                    <span class="rc-dot"></span>
-                    <mat-icon>flight</mat-icon>
-                    <span class="rc-dot"></span>
-                  </div>
-                  <span class="rc-duration">{{ r.flight.duration }}</span>
-                </div>
-                <div class="rc-airport right">
-                  <span class="rc-iata">{{ r.flight.arrival.airportCode }}</span>
-                  <span class="rc-time">{{ r.flight.arrival.time }}</span>
-                  <span class="rc-date">{{ formatFlightDate(r.flight.arrival.date) }}</span>
-                </div>
-              </div>
-
-              <!-- Bagaj -->
-              <div class="rc-baggage" *ngIf="r.flight.baggageDescription">
-                <mat-icon>luggage</mat-icon>
-                {{ r.flight.baggageDescription }}
-              </div>
-
-            </div>
-          </ng-template>
-
-          <!-- Sağ: PNR + Yolcular + Fiyat -->
-          <div class="rc-col-info">
-
-            <!-- PNR + Durum -->
-            <div class="rc-top-row">
-              <div class="rc-pnr-block">
-                <span class="rc-meta-label">PNR / Rezervasyon Kodu</span>
-                <span class="rc-pnr">{{ r.bookingCode }}</span>
-              </div>
-              <span class="rc-status" [ngClass]="getStatusClass(r.status)">
-                {{ getStatusLabel(r.status) }}
-              </span>
-            </div>
-
-            <!-- Yolcular -->
-            <div class="rc-pax" *ngIf="r.passengers && r.passengers.length > 0">
-              <div class="rc-section-label">Yolcular</div>
-              <div class="rc-pax-chips">
-                <span class="rc-pax-chip" *ngFor="let p of r.passengers">
-                  <mat-icon>person</mat-icon>
-                  {{ p.firstName }} {{ p.lastName }}
-                  <span class="pax-type-tag">
-                    {{ p.type === 'ADT' ? 'Yetişkin' : p.type === 'CHD' ? 'Çocuk' : 'Bebek' }}
-                  </span>
-                </span>
-              </div>
-            </div>
-
-            <!-- Fiyat dökümü (gidiş-dönüş) -->
-            <div class="rc-fare-breakdown" *ngIf="r.flightLegs && r.flightLegs.length > 1">
-              <div class="rc-fare-row" *ngFor="let leg of r.flightLegs; let i = index">
-                <span class="rc-fare-leg-label">
-                  <mat-icon>{{ i === 0 ? 'flight_takeoff' : 'flight_land' }}</mat-icon>
-                  {{ i === 0 ? 'Gidiş' : 'Dönüş' }}
-                  <em>{{ leg.departure.airportCode }} → {{ leg.arrival.airportCode }}</em>
-                </span>
-                <span class="rc-fare-leg-amount" *ngIf="leg.fare">
-                  {{ leg.fare | number:'1.2-2' }} {{ leg.currency || r.currency }}
-                </span>
-                <span class="rc-fare-leg-amount muted" *ngIf="!leg.fare">—</span>
-              </div>
-            </div>
-
-            <!-- Tutar + Tarih -->
-            <div class="rc-footer">
-              <div class="rc-amount" *ngIf="r.totalFare">
-                <span class="rc-amount-label">Toplam Tutar</span>
-                <span class="rc-amount-value">
-                  <mat-icon>payments</mat-icon>
-                  {{ r.totalFare | number:'1.2-2' }} {{ r.currency }}
-                </span>
-              </div>
-              <div class="rc-created" *ngIf="r.createdAt">
-                <mat-icon>calendar_today</mat-icon>
-                <span>{{ r.createdAt | date:'dd.MM.yyyy HH:mm' }}</span>
-              </div>
-            </div>
-
+        <!-- Rezervasyon Başlık Bandı -->
+        <div class="rg-banner">
+          <div class="rg-banner-left">
+            <mat-icon>confirmation_number</mat-icon>
+            <span class="rg-pnr">{{ r.bookingCode || '—' }}</span>
+            <span class="rg-status" [ngClass]="getStatusClass(r.status)">{{ getStatusLabel(r.status) }}</span>
           </div>
+          <div class="rg-banner-right">
+            <span class="rg-total" *ngIf="r.totalFare">
+              <mat-icon>payments</mat-icon>
+              {{ r.totalFare | number:'1.2-2' }} {{ r.currency }}
+            </span>
+            <span class="rg-date" *ngIf="r.createdAt">
+              <mat-icon>calendar_today</mat-icon>
+              {{ r.createdAt | date:'dd.MM.yyyy HH:mm' }}
+            </span>
+          </div>
+        </div>
 
-        </div><!-- /rc-body -->
-      </div>
-    </div><!-- /reservations-grid -->
+        <!-- Yolcu Biletleri -->
+        <div class="tickets-wrap">
+          <div
+            class="ticket"
+            *ngFor="let p of (r.passengers && r.passengers.length > 0 ? r.passengers : emptyPassenger); let pi = index"
+            [class.ticket-cancelled]="r.status === 'CANCELLED'"
+          >
+
+            <!-- ─── BİLET: Üst Bölüm (Uçuş Bilgileri) ─── -->
+            <div class="ticket-top">
+
+              <!-- Havayolu şeridi -->
+              <div class="ticket-airline-bar">
+                <div class="tab-airline">
+                  <ng-container *ngIf="r.flightLegs && r.flightLegs.length > 1">
+                    <img *ngIf="r.flightLegs[0].airlineLogo && r.flightLegs[0].airlineLogo.startsWith('http')"
+                      [src]="r.flightLegs[0].airlineLogo" [alt]="r.flightLegs[0].airline" class="t-logo" />
+                    <span class="t-logo-fallback"
+                      *ngIf="!r.flightLegs[0].airlineLogo || !r.flightLegs[0].airlineLogo.startsWith('http')">
+                      {{ (r.flightLegs[0].airline || '').substring(0,2).toUpperCase() }}
+                    </span>
+                    <span class="t-airline-name">{{ r.flightLegs[0].airline }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
+                    <img *ngIf="r.flight && r.flight.airlineLogo && r.flight.airlineLogo.startsWith('http')"
+                      [src]="r.flight.airlineLogo" [alt]="r.flight.airline" class="t-logo" />
+                    <span class="t-logo-fallback"
+                      *ngIf="!r.flight || !r.flight.airlineLogo || !r.flight.airlineLogo.startsWith('http')">
+                      {{ (r.flight?.airline || '').substring(0,2).toUpperCase() }}
+                    </span>
+                    <span class="t-airline-name">{{ r.flight?.airline }}</span>
+                  </ng-container>
+                </div>
+                <div class="tab-trip-type">
+                  <mat-icon>{{ r.flightLegs && r.flightLegs.length > 1 ? 'sync_alt' : 'arrow_forward' }}</mat-icon>
+                  <span>{{ r.flightLegs && r.flightLegs.length > 1 ? 'Gidiş – Dönüş' : 'Tek Yön' }}</span>
+                </div>
+              </div>
+
+              <!-- Bacaklar -->
+              <ng-container *ngIf="r.flightLegs && r.flightLegs.length > 1">
+                <div class="t-leg" *ngFor="let leg of r.flightLegs; let li = index">
+                  <div class="t-leg-badge" [class.badge-rt]="li > 0">
+                    <mat-icon>{{ li === 0 ? 'flight_takeoff' : 'flight_land' }}</mat-icon>
+                    {{ li === 0 ? 'Gidiş' : 'Dönüş' }}
+                  </div>
+                  <div class="t-route">
+                    <div class="t-airport">
+                      <span class="t-iata">{{ leg.departure.airportCode }}</span>
+                      <span class="t-city">{{ leg.departure.airportCode }}</span>
+                      <span class="t-time">{{ leg.departure.time }}</span>
+                      <span class="t-date">{{ formatFlightDate(leg.departure.date) }}</span>
+                    </div>
+                    <div class="t-mid">
+                      <span class="t-line"></span>
+                      <div class="t-plane-wrap">
+                        <mat-icon>airplanemode_active</mat-icon>
+                        <span class="t-fno">{{ leg.flightNumber }}</span>
+                      </div>
+                      <span class="t-line"></span>
+                      <span class="t-dur">{{ leg.duration }}</span>
+                    </div>
+                    <div class="t-airport right">
+                      <span class="t-iata">{{ leg.arrival.airportCode }}</span>
+                      <span class="t-city">{{ leg.arrival.airportCode }}</span>
+                      <span class="t-time">{{ leg.arrival.time }}</span>
+                      <span class="t-date">{{ formatFlightDate(leg.arrival.date) }}</span>
+                    </div>
+                  </div>
+                  <div class="t-tags">
+                    <span class="t-tag t-tag--cabin" *ngIf="leg.brandName">{{ leg.brandName }}</span>
+                    <span class="t-tag t-tag--bag" *ngIf="leg.baggageDescription">
+                      <mat-icon>luggage</mat-icon>{{ leg.baggageDescription }}
+                    </span>
+                    <span class="t-tag t-tag--price" *ngIf="leg.fare">
+                      {{ leg.fare | number:'1.2-2' }} {{ leg.currency || r.currency }}
+                    </span>
+                  </div>
+                  <div class="t-leg-sep" *ngIf="li < r.flightLegs!.length - 1"></div>
+                </div>
+              </ng-container>
+
+              <ng-container *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
+                <div class="t-leg" *ngIf="r.flight">
+                  <div class="t-route">
+                    <div class="t-airport">
+                      <span class="t-iata">{{ r.flight.departure.airportCode }}</span>
+                      <span class="t-city">{{ r.flight.departure.airportCode }}</span>
+                      <span class="t-time">{{ r.flight.departure.time }}</span>
+                      <span class="t-date">{{ formatFlightDate(r.flight.departure.date) }}</span>
+                    </div>
+                    <div class="t-mid">
+                      <span class="t-line"></span>
+                      <div class="t-plane-wrap">
+                        <mat-icon>airplanemode_active</mat-icon>
+                        <span class="t-fno">{{ r.flight.flightNumber }}</span>
+                      </div>
+                      <span class="t-line"></span>
+                      <span class="t-dur">{{ r.flight.duration }}</span>
+                    </div>
+                    <div class="t-airport right">
+                      <span class="t-iata">{{ r.flight.arrival.airportCode }}</span>
+                      <span class="t-city">{{ r.flight.arrival.airportCode }}</span>
+                      <span class="t-time">{{ r.flight.arrival.time }}</span>
+                      <span class="t-date">{{ formatFlightDate(r.flight.arrival.date) }}</span>
+                    </div>
+                  </div>
+                  <div class="t-tags">
+                    <span class="t-tag t-tag--cabin" *ngIf="r.flight.brandName">{{ r.flight.brandName }}</span>
+                    <span class="t-tag t-tag--bag" *ngIf="r.flight.baggageDescription">
+                      <mat-icon>luggage</mat-icon>{{ r.flight.baggageDescription }}
+                    </span>
+                  </div>
+                </div>
+              </ng-container>
+
+            </div><!-- /ticket-top -->
+
+            <!-- ─── Perfore Çizgi ─── -->
+            <div class="ticket-tear">
+              <span class="tear-circle tear-left"></span>
+              <div class="tear-line"></div>
+              <span class="tear-circle tear-right"></span>
+            </div>
+
+            <!-- ─── BİLET: Alt Bölüm (Yolcu Koçanı) ─── -->
+            <div class="ticket-stub">
+              <div class="stub-pax-no">{{ pi + 1 }}</div>
+              <div class="stub-avatar" [class.pax-chd]="p?.type === 'CHD'" [class.pax-inf]="p?.type === 'INF'">
+                <mat-icon>{{ p?.type === 'INF' ? 'child_friendly' : 'person' }}</mat-icon>
+              </div>
+              <div class="stub-pax-info">
+                <span class="stub-name">{{ (p?.firstName || 'YOLCU') | uppercase }} {{ (p?.lastName || '') | uppercase }}</span>
+                <span class="stub-type">
+                  {{ p?.type === 'ADT' ? 'Yetişkin' : p?.type === 'CHD' ? 'Çocuk' : p?.type === 'INF' ? 'Bebek' : 'Yolcu' }}
+                </span>
+              </div>
+              <div class="stub-divider"></div>
+              <div class="stub-meta">
+                <div class="stub-meta-item">
+                  <span class="stub-meta-label">PNR</span>
+                  <span class="stub-meta-value mono">{{ r.bookingCode || '—' }}</span>
+                </div>
+                <div class="stub-meta-item" *ngIf="r.flightLegs && r.flightLegs.length > 1">
+                  <span class="stub-meta-label">Rota</span>
+                  <span class="stub-meta-value mono">
+                    {{ r.flightLegs[0].departure.airportCode }}–{{ r.flightLegs[0].arrival.airportCode }}
+                    &nbsp;·&nbsp;
+                    {{ r.flightLegs[1].departure.airportCode }}–{{ r.flightLegs[1].arrival.airportCode }}
+                  </span>
+                </div>
+                <div class="stub-meta-item" *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
+                  <span class="stub-meta-label">Rota</span>
+                  <span class="stub-meta-value mono">
+                    {{ r.flight?.departure?.airportCode }}–{{ r.flight?.arrival?.airportCode }}
+                  </span>
+                </div>
+              </div>
+            </div><!-- /ticket-stub -->
+
+          </div><!-- /ticket -->
+        </div><!-- /tickets-wrap -->
+
+      </div><!-- /reservation-group -->
+    </div><!-- /reservations-list -->
 
   </div><!-- /page-content -->
 </div>

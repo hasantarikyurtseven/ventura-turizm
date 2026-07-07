@@ -14,6 +14,7 @@ export class MyReservationsComponent implements OnInit {
   isLoading = true;
   reservations: MyReservationDto[] = [];
   errorMessage = '';
+  readonly emptyPassenger: any[] = [{ firstName: 'YOLCU', lastName: '', type: 'ADT' }];
 
   readonly isBrowser: boolean;
 
