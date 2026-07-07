@@ -51,7 +51,7 @@ export class ToastService {
       duration: options?.duration ?? DEFAULT_DURATION[type],
       panelClass: ['ventura-toast', PANEL_CLASS[type]],
       verticalPosition: 'top',
-      horizontalPosition: 'end',
+      horizontalPosition: 'right',
     };
     return this.snackBar.open(message, options?.action ?? undefined, config);
   }

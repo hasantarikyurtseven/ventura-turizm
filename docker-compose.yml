@@ -56,6 +56,9 @@ services:
       context: ./apps/client-api
       dockerfile: Dockerfile.dev
     container_name: ventura-client-api
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
     ports:
       - "${CLIENT_API_PORT:-3002}:3000"
     env_file:

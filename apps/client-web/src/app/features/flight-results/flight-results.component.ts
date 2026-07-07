@@ -489,10 +489,45 @@ export class FlightResultsComponent implements OnInit {
         this.cdr.detectChanges();
         
         // Hata mesajı göster
-        const errorMessage = error?.error?.message || error?.message || 'Uçuş arama sırasında bir hata oluştu.';
+        const rawMsg: string = error?.error?.message || error?.message || '';
+        const errorMessage = this.toUserFriendlySearchError(rawMsg);
         this.toast.error(errorMessage);
       },
     });
+  }
+
+  /** "2026-07-09" → "9 Temmuz 2026, Perşembe" */
+  formatSearchDate(dateStr: string): string {
+    if (!dateStr) return '';
+    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(dateStr.trim());
+    if (!m) return dateStr;
+    const months = ['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran',
+                    'Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+    const days   = ['Pazar','Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi'];
+    const y = +m[1], mo = +m[2] - 1, d = +m[3];
+    const weekday = days[new Date(Date.UTC(y, mo, d)).getUTCDay()];
+    return `${d} ${months[mo]} ${y}, ${weekday}`;
+  }
+
+  /** Teknik hata mesajlarını kullanıcı dostu metne çevirir */
+  private toUserFriendlySearchError(raw: string): string {
+    const r = raw.toLowerCase();
+    if (r.includes('eai_again') || r.includes('getaddrinfo') || r.includes('enotfound')) {
+      return 'Uçuş sağlayıcısına bağlanılamıyor. Lütfen birkaç dakika sonra tekrar deneyin.';
+    }
+    if (r.includes('econnrefused') || r.includes('econnreset') || r.includes('etimedout') || r.includes('timeout')) {
+      return 'Bağlantı zaman aşımına uğradı. Lütfen tekrar deneyin.';
+    }
+    if (r.includes('network') || r.includes('fetch') || r.includes('socket')) {
+      return 'Ağ hatası oluştu. İnternet bağlantınızı kontrol edip tekrar deneyin.';
+    }
+    if (r.includes('500') || r.includes('internal server')) {
+      return 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+    }
+    if (raw && raw.length < 120 && !r.includes('apitest') && !r.includes('http')) {
+      return raw; // Güvenli, kısa backend mesajı — göster
+    }
+    return 'Uçuş arama sırasında bir hata oluştu. Lütfen tekrar deneyin.';
   }
 
   /** Filtrelenmiş listeyi gidiş / dönüş olarak ayırır */
@@ -1507,7 +1542,7 @@ export class FlightResultsComponent implements OnInit {
             this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
           });
       } else {
-        this.toast.error(error?.error?.message || error?.message || 'Koltuk tahsisi sırasında bir hata oluştu. Lütfen tekrar deneyin.');
+        this.toast.error(this.toUserFriendlySearchError(error?.error?.message || error?.message || ''));
       }
     } finally {
       this.isLoading = false;

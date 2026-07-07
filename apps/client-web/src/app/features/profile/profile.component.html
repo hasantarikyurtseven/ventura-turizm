@@ -1,0 +1,461 @@
+<div class="profile-page">
+  <!-- ── Sayfa başlığı ──────────────────────────────────────── -->
+  <div class="page-header">
+    <div class="page-header-inner">
+      <div class="page-title-block">
+        <div class="avatar-circle">
+          <span>{{ profile ? (profile.firstName[0] + profile.lastName[0]) : '?' }}</span>
+        </div>
+        <div>
+          <h1 class="page-title">{{ profile ? (profile.firstName + ' ' + profile.lastName) : 'Profilim' }}</h1>
+          <p class="page-subtitle">{{ profile?.email }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sekmeler ───────────────────────────────────────────── -->
+  <div class="tabs-bar">
+    <div class="tabs-inner">
+      <button class="tab-btn" [class.active]="activeTab === 'info'" (click)="activeTab = 'info'">
+        <mat-icon>person</mat-icon>
+        <span>Profil Bilgileri</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'reservations'" (click)="activeTab = 'reservations'">
+        <mat-icon>flight</mat-icon>
+        <span>Rezervasyonlarım</span>
+      </button>
+      <button class="tab-btn" [class.active]="activeTab === 'passengers'" (click)="activeTab = 'passengers'">
+        <mat-icon>people</mat-icon>
+        <span>Kayıtlı Yolcular</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Sekme içerikleri ──────────────────────────────────── -->
+  <div class="tab-content">
+
+    <!-- ══════════════════ PROFİL BİLGİLERİ ══════════════════ -->
+    <div *ngIf="activeTab === 'info'" class="section-card">
+      <div *ngIf="profileLoading" class="loading-state">
+        <mat-spinner diameter="36"></mat-spinner>
+      </div>
+
+      <ng-container *ngIf="!profileLoading && profile">
+        <h2 class="section-title">Kişisel Bilgiler</h2>
+        <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="profile-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Ad</mat-label>
+              <input matInput formControlName="firstName" />
+              <mat-error *ngIf="profileForm.get('firstName')?.hasError('required')">Ad zorunlu</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Soyad</mat-label>
+              <input matInput formControlName="lastName" />
+              <mat-error *ngIf="profileForm.get('lastName')?.hasError('required')">Soyad zorunlu</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Telefon</mat-label>
+              <input matInput formControlName="phone" type="tel" />
+            </mat-form-field>
+          </div>
+
+          <!-- Salt okunur alanlar -->
+          <div class="readonly-info">
+            <div class="info-item">
+              <span class="info-label">E-posta</span>
+              <span class="info-value">{{ profile.email }}</span>
+              <span class="badge-verified" *ngIf="profile.emailVerified">
+                <mat-icon>verified</mat-icon> Doğrulandı
+              </span>
+            </div>
+            <div class="info-item">
+              <span class="info-label">Üyelik tarihi</span>
+              <span class="info-value">{{ formatDate(profile.createdAt) }}</span>
+            </div>
+          </div>
+
+          <div class="form-actions">
+            <button mat-flat-button class="btn-brand" type="submit"
+              [disabled]="profileForm.invalid || profileSaving">
+              <mat-icon>save</mat-icon>
+              {{ profileSaving ? 'Kaydediliyor…' : 'Kaydet' }}
+            </button>
+          </div>
+        </form>
+      </ng-container>
+    </div>
+
+    <!-- ══════════════════ REZERVASYONLAR ══════════════════════ -->
+    <div *ngIf="activeTab === 'reservations'">
+
+      <!-- Filtre bantı -->
+      <div class="res-filter-bar">
+        <button class="chip" [class.active]="reservationFilter === 'upcoming'"
+          (click)="reservationFilter = 'upcoming'">
+          <mat-icon>flight_takeoff</mat-icon> Yaklaşan
+        </button>
+        <button class="chip" [class.active]="reservationFilter === 'past'"
+          (click)="reservationFilter = 'past'">
+          <mat-icon>history</mat-icon> Geçmiş
+        </button>
+        <button class="chip" [class.active]="reservationFilter === 'all'"
+          (click)="reservationFilter = 'all'">
+          <mat-icon>list</mat-icon> Tümü
+        </button>
+        <button class="chip refresh-chip" (click)="loadReservations()" [disabled]="reservationsLoading">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </div>
+
+      <!-- Yükleniyor -->
+      <div class="loading-state" *ngIf="reservationsLoading">
+        <mat-spinner diameter="40"></mat-spinner>
+      </div>
+
+      <!-- Boş -->
+      <div class="empty-state" *ngIf="!reservationsLoading && filteredReservations.length === 0">
+        <mat-icon>flight_off</mat-icon>
+        <p>Bu kategoride rezervasyon bulunamadı.</p>
+      </div>
+
+      <!-- Bilet listesi -->
+      <div class="reservations-list" *ngIf="!reservationsLoading && filteredReservations.length > 0">
+        <div class="reservation-group" *ngFor="let r of filteredReservations">
+
+          <!-- PNR Banner -->
+          <div class="rg-banner">
+            <div class="rg-banner-left">
+              <mat-icon>confirmation_number</mat-icon>
+              <span class="rg-pnr">{{ r.bookingCode || '—' }}</span>
+              <span class="rg-status" [ngClass]="getStatusClass(r.status)">{{ getStatusLabel(r.status) }}</span>
+            </div>
+            <div class="rg-banner-right">
+              <span class="rg-total" *ngIf="r.totalFare">
+                <mat-icon>payments</mat-icon>
+                {{ r.totalFare | number:'1.2-2' }} {{ r.currency }}
+              </span>
+              <span class="rg-date" *ngIf="r.createdAt">
+                <mat-icon>calendar_today</mat-icon>
+                {{ r.createdAt | date:'dd.MM.yyyy HH:mm' }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Biletler -->
+          <div class="tickets-wrap">
+            <div class="ticket"
+              *ngFor="let p of (r.passengers && r.passengers.length > 0 ? r.passengers : emptyPassenger); let pi = index"
+              [class.ticket-cancelled]="r.status === 'CANCELLED'">
+
+              <!-- Üst: Uçuş Bilgileri -->
+              <div class="ticket-top">
+                <div class="ticket-airline-bar">
+                  <div class="tab-airline">
+                    <ng-container *ngIf="r.flightLegs && r.flightLegs.length > 1">
+                      <img *ngIf="r.flightLegs[0].airlineLogo && r.flightLegs[0].airlineLogo.startsWith('http')"
+                        [src]="r.flightLegs[0].airlineLogo" [alt]="r.flightLegs[0].airline" class="t-logo" />
+                      <span class="t-logo-fallback"
+                        *ngIf="!r.flightLegs[0].airlineLogo || !r.flightLegs[0].airlineLogo.startsWith('http')">
+                        {{ (r.flightLegs[0].airline || '').substring(0,2).toUpperCase() }}
+                      </span>
+                      <span class="t-airline-name">{{ r.flightLegs[0].airline }}</span>
+                    </ng-container>
+                    <ng-container *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
+                      <ng-container *ngIf="getOwFlight(r) as owf">
+                        <img *ngIf="owf.airlineLogo && owf.airlineLogo.startsWith('http')"
+                          [src]="owf.airlineLogo" [alt]="owf.airline" class="t-logo" />
+                        <span class="t-logo-fallback"
+                          *ngIf="!owf.airlineLogo || !owf.airlineLogo.startsWith('http')">
+                          {{ (owf.airline || '').substring(0,2).toUpperCase() }}
+                        </span>
+                        <span class="t-airline-name">{{ owf.airline }}</span>
+                      </ng-container>
+                    </ng-container>
+                  </div>
+                  <div class="tab-trip-type">
+                    <mat-icon>{{ r.flightLegs && r.flightLegs.length > 1 ? 'sync_alt' : 'arrow_forward' }}</mat-icon>
+                    <span>{{ r.flightLegs && r.flightLegs.length > 1 ? 'Gidiş – Dönüş' : 'Tek Yön' }}</span>
+                  </div>
+                </div>
+
+                <!-- Gidiş-Dönüş bacakları -->
+                <ng-container *ngIf="r.flightLegs && r.flightLegs.length > 1">
+                  <div class="t-leg" *ngFor="let leg of r.flightLegs; let li = index">
+                    <div class="t-leg-badge" [class.badge-rt]="li > 0">
+                      <mat-icon>{{ li === 0 ? 'flight_takeoff' : 'flight_land' }}</mat-icon>
+                      {{ li === 0 ? 'Gidiş' : 'Dönüş' }}
+                    </div>
+                    <div class="t-route">
+                      <div class="t-airport">
+                        <span class="t-iata">{{ leg.departure.airportCode }}</span>
+                        <span class="t-time">{{ leg.departure.time }}</span>
+                        <span class="t-date">{{ formatFlightDate(leg.departure.date) }}</span>
+                      </div>
+                      <div class="t-mid">
+                        <span class="t-line"></span>
+                        <div class="t-plane-wrap">
+                          <mat-icon>airplanemode_active</mat-icon>
+                          <span class="t-fno">{{ leg.flightNumber }}</span>
+                        </div>
+                        <span class="t-line"></span>
+                        <span class="t-dur">{{ leg.duration }}</span>
+                      </div>
+                      <div class="t-airport right">
+                        <span class="t-iata">{{ leg.arrival.airportCode }}</span>
+                        <span class="t-time">{{ leg.arrival.time }}</span>
+                        <span class="t-date">{{ formatFlightDate(leg.arrival.date) }}</span>
+                      </div>
+                    </div>
+                    <div class="t-tags">
+                      <span class="t-tag t-tag--cabin" *ngIf="leg.brandName">{{ leg.brandName }}</span>
+                      <span class="t-tag t-tag--bag" *ngIf="leg.baggageDescription">
+                        <mat-icon>luggage</mat-icon>{{ leg.baggageDescription }}
+                      </span>
+                    </div>
+                    <div class="t-leg-sep" *ngIf="li < r.flightLegs!.length - 1"></div>
+                  </div>
+                </ng-container>
+
+                <!-- Tek yön -->
+                <ng-container *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
+                  <div class="t-leg" *ngIf="getOwFlight(r) as owf">
+                    <div class="t-route">
+                      <div class="t-airport">
+                        <span class="t-iata">{{ owf.departure.airportCode }}</span>
+                        <span class="t-time">{{ owf.departure.time }}</span>
+                        <span class="t-date">{{ formatFlightDate(owf.departure.date) }}</span>
+                      </div>
+                      <div class="t-mid">
+                        <span class="t-line"></span>
+                        <div class="t-plane-wrap">
+                          <mat-icon>airplanemode_active</mat-icon>
+                          <span class="t-fno">{{ owf.flightNumber }}</span>
+                        </div>
+                        <span class="t-line"></span>
+                        <span class="t-dur">{{ owf.duration }}</span>
+                      </div>
+                      <div class="t-airport right">
+                        <span class="t-iata">{{ owf.arrival.airportCode }}</span>
+                        <span class="t-time">{{ owf.arrival.time }}</span>
+                        <span class="t-date">{{ formatFlightDate(owf.arrival.date) }}</span>
+                      </div>
+                    </div>
+                    <div class="t-tags">
+                      <span class="t-tag t-tag--cabin" *ngIf="owf.brandName">{{ owf.brandName }}</span>
+                      <span class="t-tag t-tag--bag" *ngIf="owf.baggageDescription">
+                        <mat-icon>luggage</mat-icon>{{ owf.baggageDescription }}
+                      </span>
+                    </div>
+                  </div>
+                </ng-container>
+              </div><!-- /ticket-top -->
+
+              <!-- Perfore çizgi -->
+              <div class="ticket-tear">
+                <span class="tear-circle tear-left"></span>
+                <div class="tear-line"></div>
+                <span class="tear-circle tear-right"></span>
+              </div>
+
+              <!-- Alt: Yolcu koçanı -->
+              <div class="ticket-stub">
+                <div class="stub-pax-no">{{ pi + 1 }}</div>
+                <div class="stub-avatar" [class.pax-chd]="p?.type === 'CHD'" [class.pax-inf]="p?.type === 'INF'">
+                  <mat-icon>{{ p?.type === 'INF' ? 'child_friendly' : 'person' }}</mat-icon>
+                </div>
+                <div class="stub-pax-info">
+                  <span class="stub-name">{{ (p?.firstName || 'YOLCU') | uppercase }} {{ (p?.lastName || '') | uppercase }}</span>
+                  <span class="stub-type">
+                    {{ p?.type === 'ADT' ? 'Yetişkin' : p?.type === 'CHD' ? 'Çocuk' : p?.type === 'INF' ? 'Bebek' : 'Yolcu' }}
+                  </span>
+                </div>
+                <div class="stub-divider"></div>
+                <div class="stub-meta">
+                  <div class="stub-meta-item">
+                    <span class="stub-meta-label">PNR</span>
+                    <span class="stub-meta-value mono">{{ r.bookingCode || '—' }}</span>
+                  </div>
+                  <div class="stub-meta-item" *ngIf="r.flightLegs && r.flightLegs.length > 1">
+                    <span class="stub-meta-label">Rota</span>
+                    <span class="stub-meta-value mono">
+                      {{ r.flightLegs[0].departure.airportCode }}–{{ r.flightLegs[0].arrival.airportCode }}
+                      &nbsp;·&nbsp;
+                      {{ r.flightLegs[1].departure.airportCode }}–{{ r.flightLegs[1].arrival.airportCode }}
+                    </span>
+                  </div>
+                  <div class="stub-meta-item" *ngIf="!r.flightLegs || r.flightLegs.length <= 1">
+                    <span class="stub-meta-label">Rota</span>
+                    <span class="stub-meta-value mono">
+                      {{ getOwFlight(r)?.departure?.airportCode || '??' }}–{{ getOwFlight(r)?.arrival?.airportCode || '??' }}
+                    </span>
+                  </div>
+                </div>
+              </div><!-- /ticket-stub -->
+
+            </div><!-- /ticket -->
+          </div><!-- /tickets-wrap -->
+
+        </div><!-- /reservation-group -->
+      </div><!-- /reservations-list -->
+
+    </div>
+
+    <!-- ══════════════════ KAYITLI YOLCULAR ═══════════════════ -->
+    <div *ngIf="activeTab === 'passengers'" class="section-card">
+      <div class="pax-header">
+        <h2 class="section-title">Kayıtlı Yolcular</h2>
+        <button mat-flat-button class="btn-brand" (click)="openAddPassenger()" *ngIf="!showPassengerForm">
+          <mat-icon>person_add</mat-icon> Yolcu Ekle
+        </button>
+      </div>
+
+      <p class="pax-hint">Booking sayfasında tek tıkla bu yolcuları forma aktarabilirsiniz.</p>
+
+      <!-- Form ekleme / düzenleme -->
+      <div class="passenger-form-card" *ngIf="showPassengerForm">
+        <h3 class="pform-title">
+          <mat-icon>{{ editingPassengerId ? 'edit' : 'person_add' }}</mat-icon>
+          {{ editingPassengerId ? 'Yolcu Düzenle' : 'Yeni Yolcu Ekle' }}
+        </h3>
+        <form [formGroup]="passengerForm" (ngSubmit)="savePassenger()" class="pax-form">
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-full">
+              <mat-label>Kısa İsim (isteğe bağlı)</mat-label>
+              <input matInput formControlName="label" placeholder="Örn: Annem, Eşim" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Ad</mat-label>
+              <input matInput formControlName="firstName" />
+              <mat-error>Ad zorunlu</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Soyad</mat-label>
+              <input matInput formControlName="lastName" />
+              <mat-error>Soyad zorunlu</mat-error>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-third">
+              <mat-label>Doğum Tarihi</mat-label>
+              <input matInput type="date" formControlName="birthDate" />
+              <mat-error>Doğum tarihi gerekli</mat-error>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-third">
+              <mat-label>Cinsiyet</mat-label>
+              <mat-icon matPrefix>wc</mat-icon>
+              <mat-select formControlName="gender">
+                <mat-option value="M">Erkek</mat-option>
+                <mat-option value="F">Kadın</mat-option>
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-third">
+              <mat-label>Yolcu Tipi</mat-label>
+              <mat-icon matPrefix>person_outline</mat-icon>
+              <mat-select formControlName="paxType">
+                <mat-option value="ADT">Yetişkin</mat-option>
+                <mat-option value="CHD">Çocuk</mat-option>
+                <mat-option value="INF">Bebek</mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>TC Kimlik No</mat-label>
+              <mat-icon matPrefix>badge</mat-icon>
+              <input matInput formControlName="tcNo" maxlength="11" placeholder="12345678901" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Uyruk</mat-label>
+              <mat-icon matPrefix>flag</mat-icon>
+              <input matInput formControlName="nationality" maxlength="2" placeholder="TR" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Pasaport No</mat-label>
+              <mat-icon matPrefix>card_travel</mat-icon>
+              <input matInput formControlName="passportNumber" placeholder="A12345678" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Pasaport Geçerlilik Tarihi</mat-label>
+              <input matInput type="date" formControlName="passportExpiry" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-row">
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>E-posta</mat-label>
+              <input matInput formControlName="email" type="email" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" class="field-half">
+              <mat-label>Telefon</mat-label>
+              <input matInput formControlName="phone" type="tel" />
+            </mat-form-field>
+          </div>
+
+          <div class="form-actions">
+            <button mat-button type="button" (click)="cancelPassengerForm()">İptal</button>
+            <button mat-flat-button class="btn-brand" type="submit"
+              [disabled]="passengerForm.invalid || passengerSaving">
+              <mat-icon>save</mat-icon>
+              {{ passengerSaving ? 'Kaydediliyor…' : (editingPassengerId ? 'Güncelle' : 'Kaydet') }}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Liste -->
+      <div *ngIf="passengersLoading" class="loading-state">
+        <mat-spinner diameter="36"></mat-spinner>
+      </div>
+
+      <div *ngIf="!passengersLoading && savedPassengers.length === 0 && !showPassengerForm" class="empty-state">
+        <mat-icon>people_outline</mat-icon>
+        <p>Henüz kayıtlı yolcu yok. "Yolcu Ekle" ile ekleyebilirsiniz.</p>
+      </div>
+
+      <div class="passenger-list" *ngIf="savedPassengers.length > 0">
+        <div class="pax-card" *ngFor="let p of savedPassengers">
+          <div class="pax-avatar">{{ p.firstName[0] }}{{ p.lastName[0] }}</div>
+          <div class="pax-info">
+            <div class="pax-name">
+              {{ p.firstName }} {{ p.lastName }}
+              <span class="pax-label" *ngIf="p.label">{{ p.label }}</span>
+            </div>
+            <div class="pax-meta">
+              <span>{{ genderLabels[p.gender] }}</span>
+              <span class="dot">·</span>
+              <span>{{ paxTypeLabels[p.paxType] }}</span>
+              <span class="dot">·</span>
+              <span>{{ p.nationality }}</span>
+              <ng-container *ngIf="p.birthDate">
+                <span class="dot">·</span>
+                <span>{{ formatDate(p.birthDate) }}</span>
+              </ng-container>
+            </div>
+          </div>
+          <div class="pax-actions">
+            <button mat-icon-button (click)="openEditPassenger(p)" matTooltip="Düzenle">
+              <mat-icon>edit</mat-icon>
+            </button>
+            <button mat-icon-button color="warn" (click)="deletePassenger(p)" matTooltip="Sil">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

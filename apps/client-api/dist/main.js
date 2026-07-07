@@ -97,6 +97,7 @@ const airlines_module_1 = __webpack_require__(/*! ./modules/airlines/airlines.mo
 const contracts_module_1 = __webpack_require__(/*! ./modules/contracts/contracts.module */ "./src/modules/contracts/contracts.module.ts");
 const auth_module_1 = __webpack_require__(/*! ./modules/auth/auth.module */ "./src/modules/auth/auth.module.ts");
 const reservations_module_1 = __webpack_require__(/*! ./modules/reservations/reservations.module */ "./src/modules/reservations/reservations.module.ts");
+const saved_passengers_module_1 = __webpack_require__(/*! ./modules/saved-passengers/saved-passengers.module */ "./src/modules/saved-passengers/saved-passengers.module.ts");
 let AppModule = AppModule_1 = class AppModule {
     connection;
     logger = new common_1.Logger(AppModule_1.name);
@@ -154,6 +155,7 @@ exports.AppModule = AppModule = AppModule_1 = __decorate([
             contracts_module_1.ContractsModule,
             auth_module_1.AuthModule,
             reservations_module_1.ReservationsModule,
+            saved_passengers_module_1.SavedPassengersModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
@@ -1272,7 +1274,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d, _e, _f;
+var _a, _b, _c, _d, _e, _f, _g;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AuthController = void 0;
 const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
@@ -1281,6 +1283,7 @@ const express_1 = __webpack_require__(/*! express */ "express");
 const auth_service_1 = __webpack_require__(/*! ./auth.service */ "./src/modules/auth/auth.service.ts");
 const register_dto_1 = __webpack_require__(/*! ./dto/register.dto */ "./src/modules/auth/dto/register.dto.ts");
 const login_dto_1 = __webpack_require__(/*! ./dto/login.dto */ "./src/modules/auth/dto/login.dto.ts");
+const update_profile_dto_1 = __webpack_require__(/*! ./dto/update-profile.dto */ "./src/modules/auth/dto/update-profile.dto.ts");
 const jwt_member_guard_1 = __webpack_require__(/*! ./guards/jwt-member.guard */ "./src/modules/auth/guards/jwt-member.guard.ts");
 let AuthController = class AuthController {
     authService;
@@ -1316,6 +1319,9 @@ let AuthController = class AuthController {
     }
     async getProfile(req) {
         return this.authService.getProfile(req.user.memberId);
+    }
+    async updateProfile(req, dto) {
+        return this.authService.updateProfile(req.user.memberId, dto);
     }
 };
 exports.AuthController = AuthController;
@@ -1387,6 +1393,15 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "getProfile", null);
+__decorate([
+    (0, common_1.Put)('profile'),
+    (0, common_1.UseGuards)(jwt_member_guard_1.JwtMemberGuard),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, typeof (_g = typeof update_profile_dto_1.UpdateProfileDto !== "undefined" && update_profile_dto_1.UpdateProfileDto) === "function" ? _g : Object]),
+    __metadata("design:returntype", Promise)
+], AuthController.prototype, "updateProfile", null);
 exports.AuthController = AuthController = __decorate([
     (0, common_1.Controller)('auth'),
     (0, common_1.UseGuards)(throttler_1.ThrottlerGuard),
@@ -1705,6 +1720,26 @@ let AuthService = AuthService_1 = class AuthService {
         }
         return { success: true, user: member };
     }
+    async updateProfile(memberId, dto) {
+        const updates = {};
+        if (dto.firstName?.trim())
+            updates.firstName = dto.firstName.trim();
+        if (dto.lastName?.trim())
+            updates.lastName = dto.lastName.trim();
+        if (dto.phone?.trim())
+            updates.phone = dto.phone.trim();
+        if (Object.keys(updates).length === 0) {
+            throw new common_1.BadRequestException('Güncellenecek alan belirtilmedi.');
+        }
+        const member = await this.memberModel
+            .findByIdAndUpdate(memberId, { $set: updates }, { new: true })
+            .select('firstName lastName email phone emailVerified status marketingConsent createdAt')
+            .lean();
+        if (!member)
+            throw new common_1.UnauthorizedException('Kullanıcı bulunamadı.');
+        this.logger.log(`Profil güncellendi: ${member['email']}`);
+        return { success: true, user: member };
+    }
     async generateTokens(member, ipAddress, userAgent) {
         const accessExpiresIn = this.configService.get('CLIENT_JWT_ACCESS_EXPIRES', '15m');
         const refreshExpiresIn = this.configService.get('CLIENT_JWT_REFRESH_EXPIRES', '7d');
@@ -1917,6 +1952,55 @@ __decorate([
     (0, class_validator_1.IsBoolean)(),
     __metadata("design:type", Boolean)
 ], RegisterDto.prototype, "acceptMarketing", void 0);
+
+
+/***/ },
+
+/***/ "./src/modules/auth/dto/update-profile.dto.ts"
+/*!****************************************************!*\
+  !*** ./src/modules/auth/dto/update-profile.dto.ts ***!
+  \****************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateProfileDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class UpdateProfileDto {
+    firstName;
+    lastName;
+    phone;
+}
+exports.UpdateProfileDto = UpdateProfileDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(64),
+    __metadata("design:type", String)
+], UpdateProfileDto.prototype, "firstName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MinLength)(1),
+    (0, class_validator_1.MaxLength)(64),
+    __metadata("design:type", String)
+], UpdateProfileDto.prototype, "lastName", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(20),
+    __metadata("design:type", String)
+], UpdateProfileDto.prototype, "phone", void 0);
 
 
 /***/ },
@@ -8421,6 +8505,441 @@ exports.ReservationsService = ReservationsService = ReservationsService_1 = __de
     __param(2, (0, bullmq_1.InjectQueue)('reservation-confirmation')),
     __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object, typeof (_b = typeof admin_notifications_service_1.AdminNotificationsService !== "undefined" && admin_notifications_service_1.AdminNotificationsService) === "function" ? _b : Object, typeof (_c = typeof bullmq_2.Queue !== "undefined" && bullmq_2.Queue) === "function" ? _c : Object])
 ], ReservationsService);
+
+
+/***/ },
+
+/***/ "./src/modules/saved-passengers/dto/saved-passenger.dto.ts"
+/*!*****************************************************************!*\
+  !*** ./src/modules/saved-passengers/dto/saved-passenger.dto.ts ***!
+  \*****************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.UpdateSavedPassengerDto = exports.CreateSavedPassengerDto = void 0;
+const class_validator_1 = __webpack_require__(/*! class-validator */ "class-validator");
+class CreateSavedPassengerDto {
+    label;
+    firstName;
+    lastName;
+    birthDate;
+    gender;
+    nationality;
+    paxType;
+    tcNo;
+    passportNumber;
+    passportExpiry;
+    email;
+    phone;
+}
+exports.CreateSavedPassengerDto = CreateSavedPassengerDto;
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(64),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "label", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(64),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "firstName", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(64),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "lastName", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Matches)(/^\d{4}-\d{2}-\d{2}$/, { message: 'birthDate YYYY-MM-DD formatında olmalı' }),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "birthDate", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(['M', 'F']),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "gender", void 0);
+__decorate([
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(2),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "nationality", void 0);
+__decorate([
+    (0, class_validator_1.IsEnum)(['ADT', 'CHD', 'INF']),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "paxType", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(20),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "tcNo", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(20),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "passportNumber", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.Matches)(/^\d{4}-\d{2}-\d{2}$/, { message: 'passportExpiry YYYY-MM-DD formatında olmalı' }),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "passportExpiry", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(128),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "email", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.MaxLength)(20),
+    __metadata("design:type", String)
+], CreateSavedPassengerDto.prototype, "phone", void 0);
+class UpdateSavedPassengerDto extends CreateSavedPassengerDto {
+}
+exports.UpdateSavedPassengerDto = UpdateSavedPassengerDto;
+
+
+/***/ },
+
+/***/ "./src/modules/saved-passengers/saved-passengers.controller.ts"
+/*!*********************************************************************!*\
+  !*** ./src/modules/saved-passengers/saved-passengers.controller.ts ***!
+  \*********************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SavedPassengersController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const jwt_member_guard_1 = __webpack_require__(/*! ../auth/guards/jwt-member.guard */ "./src/modules/auth/guards/jwt-member.guard.ts");
+const saved_passengers_service_1 = __webpack_require__(/*! ./saved-passengers.service */ "./src/modules/saved-passengers/saved-passengers.service.ts");
+const saved_passenger_dto_1 = __webpack_require__(/*! ./dto/saved-passenger.dto */ "./src/modules/saved-passengers/dto/saved-passenger.dto.ts");
+let SavedPassengersController = class SavedPassengersController {
+    service;
+    constructor(service) {
+        this.service = service;
+    }
+    async findAll(req) {
+        const list = await this.service.findAll(req.user.memberId);
+        return { success: true, passengers: list };
+    }
+    async create(req, dto) {
+        const doc = await this.service.create(req.user.memberId, dto);
+        return { success: true, passenger: doc };
+    }
+    async update(req, id, dto) {
+        const doc = await this.service.update(req.user.memberId, id, dto);
+        return { success: true, passenger: doc };
+    }
+    async remove(req, id) {
+        await this.service.remove(req.user.memberId, id);
+    }
+};
+exports.SavedPassengersController = SavedPassengersController;
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Req)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], SavedPassengersController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, typeof (_b = typeof saved_passenger_dto_1.CreateSavedPassengerDto !== "undefined" && saved_passenger_dto_1.CreateSavedPassengerDto) === "function" ? _b : Object]),
+    __metadata("design:returntype", Promise)
+], SavedPassengersController.prototype, "create", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __param(2, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String, typeof (_c = typeof saved_passenger_dto_1.UpdateSavedPassengerDto !== "undefined" && saved_passenger_dto_1.UpdateSavedPassengerDto) === "function" ? _c : Object]),
+    __metadata("design:returntype", Promise)
+], SavedPassengersController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, common_1.HttpCode)(common_1.HttpStatus.NO_CONTENT),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
+], SavedPassengersController.prototype, "remove", null);
+exports.SavedPassengersController = SavedPassengersController = __decorate([
+    (0, common_1.Controller)('saved-passengers'),
+    (0, common_1.UseGuards)(jwt_member_guard_1.JwtMemberGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof saved_passengers_service_1.SavedPassengersService !== "undefined" && saved_passengers_service_1.SavedPassengersService) === "function" ? _a : Object])
+], SavedPassengersController);
+
+
+/***/ },
+
+/***/ "./src/modules/saved-passengers/saved-passengers.module.ts"
+/*!*****************************************************************!*\
+  !*** ./src/modules/saved-passengers/saved-passengers.module.ts ***!
+  \*****************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SavedPassengersModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const saved_passenger_schema_1 = __webpack_require__(/*! ./schemas/saved-passenger.schema */ "./src/modules/saved-passengers/schemas/saved-passenger.schema.ts");
+const saved_passengers_service_1 = __webpack_require__(/*! ./saved-passengers.service */ "./src/modules/saved-passengers/saved-passengers.service.ts");
+const saved_passengers_controller_1 = __webpack_require__(/*! ./saved-passengers.controller */ "./src/modules/saved-passengers/saved-passengers.controller.ts");
+let SavedPassengersModule = class SavedPassengersModule {
+};
+exports.SavedPassengersModule = SavedPassengersModule;
+exports.SavedPassengersModule = SavedPassengersModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            mongoose_1.MongooseModule.forFeature([
+                { name: saved_passenger_schema_1.SavedPassenger.name, schema: saved_passenger_schema_1.SavedPassengerSchema },
+            ]),
+        ],
+        controllers: [saved_passengers_controller_1.SavedPassengersController],
+        providers: [saved_passengers_service_1.SavedPassengersService],
+    })
+], SavedPassengersModule);
+
+
+/***/ },
+
+/***/ "./src/modules/saved-passengers/saved-passengers.service.ts"
+/*!******************************************************************!*\
+  !*** ./src/modules/saved-passengers/saved-passengers.service.ts ***!
+  \******************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SavedPassengersService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+const saved_passenger_schema_1 = __webpack_require__(/*! ./schemas/saved-passenger.schema */ "./src/modules/saved-passengers/schemas/saved-passenger.schema.ts");
+const MAX_SAVED_PASSENGERS = 20;
+let SavedPassengersService = class SavedPassengersService {
+    model;
+    constructor(model) {
+        this.model = model;
+    }
+    async findAll(memberId) {
+        return this.model
+            .find({ memberId: new mongoose_2.Types.ObjectId(memberId) })
+            .sort({ createdAt: -1 })
+            .lean()
+            .exec();
+    }
+    async create(memberId, dto) {
+        const count = await this.model.countDocuments({ memberId: new mongoose_2.Types.ObjectId(memberId) });
+        if (count >= MAX_SAVED_PASSENGERS) {
+            throw new common_1.BadRequestException(`En fazla ${MAX_SAVED_PASSENGERS} kayıtlı yolcu ekleyebilirsiniz.`);
+        }
+        const doc = new this.model({
+            memberId: new mongoose_2.Types.ObjectId(memberId),
+            label: dto.label?.trim() || '',
+            firstName: dto.firstName.trim(),
+            lastName: dto.lastName.trim(),
+            birthDate: dto.birthDate,
+            gender: dto.gender,
+            nationality: dto.nationality.toUpperCase(),
+            paxType: dto.paxType,
+            tcNo: dto.tcNo?.trim() || '',
+            passportNumber: dto.passportNumber?.trim() || '',
+            passportExpiry: dto.passportExpiry || '',
+            email: dto.email?.trim() || '',
+            phone: dto.phone?.trim() || '',
+        });
+        return doc.save();
+    }
+    async update(memberId, id, dto) {
+        const doc = await this.model.findById(id);
+        if (!doc)
+            throw new common_1.NotFoundException('Kayıtlı yolcu bulunamadı.');
+        if (doc.memberId.toString() !== memberId)
+            throw new common_1.ForbiddenException();
+        Object.assign(doc, {
+            label: dto.label?.trim() ?? doc.label,
+            firstName: dto.firstName?.trim() ?? doc.firstName,
+            lastName: dto.lastName?.trim() ?? doc.lastName,
+            birthDate: dto.birthDate ?? doc.birthDate,
+            gender: dto.gender ?? doc.gender,
+            nationality: (dto.nationality?.toUpperCase()) ?? doc.nationality,
+            paxType: dto.paxType ?? doc.paxType,
+            tcNo: dto.tcNo?.trim() ?? doc.tcNo,
+            passportNumber: dto.passportNumber?.trim() ?? doc.passportNumber,
+            passportExpiry: dto.passportExpiry ?? doc.passportExpiry,
+            email: dto.email?.trim() ?? doc.email,
+            phone: dto.phone?.trim() ?? doc.phone,
+        });
+        return doc.save();
+    }
+    async remove(memberId, id) {
+        const doc = await this.model.findById(id);
+        if (!doc)
+            throw new common_1.NotFoundException('Kayıtlı yolcu bulunamadı.');
+        if (doc.memberId.toString() !== memberId)
+            throw new common_1.ForbiddenException();
+        await doc.deleteOne();
+    }
+};
+exports.SavedPassengersService = SavedPassengersService;
+exports.SavedPassengersService = SavedPassengersService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, mongoose_1.InjectModel)(saved_passenger_schema_1.SavedPassenger.name)),
+    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object])
+], SavedPassengersService);
+
+
+/***/ },
+
+/***/ "./src/modules/saved-passengers/schemas/saved-passenger.schema.ts"
+/*!************************************************************************!*\
+  !*** ./src/modules/saved-passengers/schemas/saved-passenger.schema.ts ***!
+  \************************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.SavedPassengerSchema = exports.SavedPassenger = void 0;
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+let SavedPassenger = class SavedPassenger extends mongoose_2.Document {
+    memberId;
+    label;
+    firstName;
+    lastName;
+    birthDate;
+    gender;
+    nationality;
+    paxType;
+    tcNo;
+    passportNumber;
+    passportExpiry;
+    email;
+    phone;
+};
+exports.SavedPassenger = SavedPassenger;
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, type: mongoose_2.Types.ObjectId, ref: 'Member', index: true }),
+    __metadata("design:type", typeof (_a = typeof mongoose_2.Types !== "undefined" && mongoose_2.Types.ObjectId) === "function" ? _a : Object)
+], SavedPassenger.prototype, "memberId", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ trim: true, default: '' }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "label", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, trim: true }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "firstName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, trim: true }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "lastName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "birthDate", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, enum: ['M', 'F'] }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "gender", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, uppercase: true, trim: true }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "nationality", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, enum: ['ADT', 'CHD', 'INF'], default: 'ADT' }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "paxType", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ trim: true, default: '' }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "tcNo", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ trim: true, default: '' }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "passportNumber", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "passportExpiry", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ trim: true, default: '' }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "email", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ trim: true, default: '' }),
+    __metadata("design:type", String)
+], SavedPassenger.prototype, "phone", void 0);
+exports.SavedPassenger = SavedPassenger = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true, collection: 'saved_passengers' })
+], SavedPassenger);
+exports.SavedPassengerSchema = mongoose_1.SchemaFactory.createForClass(SavedPassenger);
+exports.SavedPassengerSchema.index({ memberId: 1, createdAt: -1 });
 
 
 /***/ },

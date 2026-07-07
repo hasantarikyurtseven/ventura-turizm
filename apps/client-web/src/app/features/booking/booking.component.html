@@ -96,76 +96,6 @@
     <!-- Sol Taraf: Form -->
     <div class="booking-form-section">
       <form [formGroup]="bookingForm" (ngSubmit)="onSubmit()" class="booking-form">
-        <mat-card class="booking-card contact-person-card">
-          <mat-card-header>
-            <div class="booking-header">
-              <h1>İletişim Kişisi</h1>
-              <p class="booking-subtitle">Rezervasyonla ilgili bilgilendirmeler bu kişiye gönderilir.</p>
-            </div>
-          </mat-card-header>
-          <mat-card-content>
-            <div class="form-section">
-              <h2 class="section-title">
-                <mat-icon>contact_mail</mat-icon>
-                İletişim Kişisi
-              </h2>
-              <div formGroupName="contactInfo">
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field-half">
-                    <mat-label>Ad</mat-label>
-                    <input matInput formControlName="firstName" placeholder="Ad">
-                    <mat-icon matPrefix>badge</mat-icon>
-                    <mat-error *ngIf="contactInfo.get('firstName')?.hasError('required') && contactInfo.get('firstName')?.touched">
-                      Ad gereklidir
-                    </mat-error>
-                    <mat-error *ngIf="contactInfo.get('firstName')?.hasError('minlength') && contactInfo.get('firstName')?.touched">
-                      Ad en az 2 karakter olmalıdır
-                    </mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="form-field-half">
-                    <mat-label>Soyad</mat-label>
-                    <input matInput formControlName="lastName" placeholder="Soyad">
-                    <mat-icon matPrefix>badge</mat-icon>
-                    <mat-error *ngIf="contactInfo.get('lastName')?.hasError('required') && contactInfo.get('lastName')?.touched">
-                      Soyad gereklidir
-                    </mat-error>
-                    <mat-error *ngIf="contactInfo.get('lastName')?.hasError('minlength') && contactInfo.get('lastName')?.touched">
-                      Soyad en az 2 karakter olmalıdır
-                    </mat-error>
-                  </mat-form-field>
-                </div>
-
-                <div class="form-row">
-                  <mat-form-field appearance="outline" class="form-field-half">
-                    <mat-label>Telefon</mat-label>
-                    <input matInput type="tel" formControlName="phone" placeholder="0555 123 45 67">
-                    <mat-icon matPrefix>phone</mat-icon>
-                    <mat-error *ngIf="contactInfo.get('phone')?.hasError('required') && contactInfo.get('phone')?.touched">
-                      Telefon gereklidir
-                    </mat-error>
-                    <mat-error *ngIf="contactInfo.get('phone')?.hasError('pattern') && contactInfo.get('phone')?.touched">
-                      Geçerli bir telefon numarası giriniz
-                    </mat-error>
-                  </mat-form-field>
-
-                  <mat-form-field appearance="outline" class="form-field-half">
-                    <mat-label>E-posta</mat-label>
-                    <input matInput type="email" formControlName="email" placeholder="ornek@email.com">
-                    <mat-icon matPrefix>email</mat-icon>
-                    <mat-error *ngIf="contactInfo.get('email')?.hasError('required') && contactInfo.get('email')?.touched">
-                      E-posta gereklidir
-                    </mat-error>
-                    <mat-error *ngIf="contactInfo.get('email')?.hasError('email') && contactInfo.get('email')?.touched">
-                      Geçerli bir e-posta adresi giriniz
-                    </mat-error>
-                  </mat-form-field>
-                </div>
-              </div>
-            </div>
-          </mat-card-content>
-        </mat-card>
-
         <mat-card class="booking-card">
           <mat-card-header>
             <div class="booking-header">
@@ -178,13 +108,32 @@
 
             <!-- Yolcu Bilgileri -->
             <div class="form-section">
-              <h2 class="section-title">
-                <mat-icon>person</mat-icon>
-                Yolcu Bilgileri
-              </h2>
               <div formArrayName="passengers">
                 <div *ngFor="let passenger of passengers.controls; let i = index" [formGroupName]="i" class="passenger-form" [id]="'passenger-' + i">
-                  <h3 class="passenger-title">{{ getPassengerTitle(i) }}</h3>
+                  <div class="passenger-title-row">
+                    <h3 class="passenger-title">{{ getPassengerTitle(i) }}</h3>
+
+                    <!-- Kayıtlı yolculardan doldur -->
+                    <div class="saved-pax-picker" *ngIf="savedPassengers.length > 0">
+                      <button type="button" class="saved-pax-trigger"
+                        (click)="togglePassengerDropdown(i)">
+                        <mat-icon>people</mat-icon>
+                        <span>Kayıtlı Yolcu</span>
+                        <mat-icon class="chevron">{{ passengerDropdownOpen[i] ? 'expand_less' : 'expand_more' }}</mat-icon>
+                      </button>
+                      <div class="saved-pax-dropdown" *ngIf="passengerDropdownOpen[i]">
+                        <button type="button" class="saved-pax-item"
+                          *ngFor="let sp of savedPassengers"
+                          (click)="fillFromSavedPassenger(i, sp)">
+                          <div class="spi-avatar">{{ sp.firstName[0] }}{{ sp.lastName[0] }}</div>
+                          <div class="spi-info">
+                            <span class="spi-name">{{ sp.firstName }} {{ sp.lastName }}</span>
+                            <span class="spi-label" *ngIf="sp.label">{{ sp.label }}</span>
+                          </div>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                   <div class="form-row">
                     <mat-form-field appearance="outline" class="form-field-half">
                       <mat-label>Ad</mat-label>
@@ -280,13 +229,82 @@
               </div>
             </div>
 
+            <!-- Butonlar Yolcu kartından taşındı -->
+          </mat-card-content>
+        </mat-card>
+
+        <!-- İletişim Kişisi -->
+        <mat-card class="booking-card contact-person-card">
+          <mat-card-header>
+            <div class="booking-header">
+              <h1>İletişim Kişisi</h1>
+              <p class="booking-subtitle">Rezervasyonla ilgili bilgilendirmeler bu kişiye gönderilir.</p>
+            </div>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="form-section">
+              <div formGroupName="contactInfo">
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field-half">
+                    <mat-label>Ad</mat-label>
+                    <input matInput formControlName="firstName" placeholder="Ad">
+                    <mat-icon matPrefix>badge</mat-icon>
+                    <mat-error *ngIf="contactInfo.get('firstName')?.hasError('required') && contactInfo.get('firstName')?.touched">
+                      Ad gereklidir
+                    </mat-error>
+                    <mat-error *ngIf="contactInfo.get('firstName')?.hasError('minlength') && contactInfo.get('firstName')?.touched">
+                      Ad en az 2 karakter olmalıdır
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field-half">
+                    <mat-label>Soyad</mat-label>
+                    <input matInput formControlName="lastName" placeholder="Soyad">
+                    <mat-icon matPrefix>badge</mat-icon>
+                    <mat-error *ngIf="contactInfo.get('lastName')?.hasError('required') && contactInfo.get('lastName')?.touched">
+                      Soyad gereklidir
+                    </mat-error>
+                    <mat-error *ngIf="contactInfo.get('lastName')?.hasError('minlength') && contactInfo.get('lastName')?.touched">
+                      Soyad en az 2 karakter olmalıdır
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+
+                <div class="form-row">
+                  <mat-form-field appearance="outline" class="form-field-half">
+                    <mat-label>Telefon</mat-label>
+                    <input matInput type="tel" formControlName="phone" placeholder="0555 123 45 67">
+                    <mat-icon matPrefix>phone</mat-icon>
+                    <mat-error *ngIf="contactInfo.get('phone')?.hasError('required') && contactInfo.get('phone')?.touched">
+                      Telefon gereklidir
+                    </mat-error>
+                    <mat-error *ngIf="contactInfo.get('phone')?.hasError('pattern') && contactInfo.get('phone')?.touched">
+                      Geçerli bir telefon numarası giriniz
+                    </mat-error>
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="form-field-half">
+                    <mat-label>E-posta</mat-label>
+                    <input matInput type="email" formControlName="email" placeholder="ornek@email.com">
+                    <mat-icon matPrefix>email</mat-icon>
+                    <mat-error *ngIf="contactInfo.get('email')?.hasError('required') && contactInfo.get('email')?.touched">
+                      E-posta gereklidir
+                    </mat-error>
+                    <mat-error *ngIf="contactInfo.get('email')?.hasError('email') && contactInfo.get('email')?.touched">
+                      Geçerli bir e-posta adresi giriniz
+                    </mat-error>
+                  </mat-form-field>
+                </div>
+              </div>
+            </div>
+
             <!-- Butonlar -->
             <div class="form-actions">
               <button mat-button type="button" (click)="goBack()" class="back-button">
                 <mat-icon>arrow_back</mat-icon>
                 Geri Dön
               </button>
-              <button mat-raised-button color="primary" type="submit" [disabled]="isLoading" class="submit-button">
+              <button mat-raised-button type="submit" [disabled]="isLoading" class="submit-button btn-brand">
                 <mat-spinner *ngIf="isLoading" diameter="20" class="button-spinner"></mat-spinner>
                 <span *ngIf="!isLoading">Devam Et</span>
                 <span *ngIf="isLoading">İşleniyor...</span>

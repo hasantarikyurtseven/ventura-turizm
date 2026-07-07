@@ -44,6 +44,7 @@ export interface AuthUser {
   firstName: string;
   lastName: string;
   email: string;
+  phone?: string;
 }
 
 export interface RefreshResponse {
@@ -194,6 +195,15 @@ export class AuthService {
   private saveUser(user: AuthUser): void {
     if (!this.isBrowser) return;
     localStorage.setItem('vt_user', JSON.stringify(user));
+  }
+
+  /** Profil yüklendikten sonra local user'a telefon ekler */
+  updateLocalPhone(phone: string): void {
+    const user = this.currentUserSubject.value;
+    if (!user || !phone) return;
+    const updated = { ...user, phone };
+    this.currentUserSubject.next(updated);
+    this.saveUser(updated);
   }
 
   private loadFromStorage(): void {

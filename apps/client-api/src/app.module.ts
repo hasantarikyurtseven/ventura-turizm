@@ -12,6 +12,7 @@ import { AirlinesModule } from './modules/airlines/airlines.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
+import { SavedPassengersModule } from './modules/saved-passengers/saved-passengers.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
     ContractsModule,
     AuthModule,
     ReservationsModule,
+    SavedPassengersModule,
   ],
   controllers: [AppController],
   providers: [AppService],

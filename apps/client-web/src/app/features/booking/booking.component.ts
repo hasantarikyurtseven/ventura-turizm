@@ -10,6 +10,7 @@ import {
   UpdatePassengerRequestDto,
   MakePrebookingRequestDto,
   AllocatePaxRefDto,
+  SavedPassengerDto,
 } from '../../core/biletbank-api.service';
 import { firstValueFrom } from 'rxjs';
 
@@ -118,6 +119,12 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
   activePackageLegIndex = 0;
   passengerTypes: Array<'ADT' | 'CHD' | 'INF'> = ['ADT'];
 
+  /** Kayıtlı yolcular (hızlı doldurma için) */
+  savedPassengers: SavedPassengerDto[] = [];
+  savedPassengersLoaded = false;
+  /** Her yolcu formu için açık/kapalı dropdown durumu */
+  passengerDropdownOpen: boolean[] = [];
+
   /** Rezervasyon geri sayımı (örn: "14:32") */
   countdownDisplay = '';
   private countdownInterval: ReturnType<typeof setInterval> | null = null;
@@ -182,17 +189,42 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
 
-    // Kullanıcı bilgilerini doldur (varsa)
+    // Kayıtlı yolcuları yükle (giriş yapılmışsa)
+    if (this.authService.currentUser) {
+      this.api.getSavedPassengers().subscribe({
+        next: (res) => {
+          this.savedPassengers = res.passengers || [];
+          this.savedPassengersLoaded = true;
+          this.passengerDropdownOpen = new Array(this.passengerTypes.length).fill(false);
+        },
+        error: () => { this.savedPassengersLoaded = true; },
+      });
+    }
+
+    // Kullanıcı bilgilerini doldur (varsa) — telefon için profil API'si çağrılır
     const user = this.authService.currentUser;
     if (user) {
       this.bookingForm.patchValue({
         contactInfo: {
-          firstName: (user as any).firstName || '',
-          lastName: (user as any).lastName || '',
-          email: user.email || '',
-          phone: '',
+          firstName: user.firstName || '',
+          lastName:  user.lastName  || '',
+          email:     user.email     || '',
+          phone:     user.phone     || '',
         },
       });
+
+      // Telefon local'de yoksa API'den tamamla
+      if (!user.phone) {
+        this.api.getProfile().subscribe({
+          next: (res) => {
+            if (res.user?.phone) {
+              this.bookingForm.get('contactInfo.phone')?.setValue(res.user.phone);
+              this.authService.updateLocalPhone(res.user.phone);
+            }
+          },
+          error: () => { /* sessiz hata — form zaten kısmen dolu */ },
+        });
+      }
     }
 
     // Rezervasyon sayacını başlat
@@ -264,6 +296,36 @@ export class BookingComponent implements OnInit, AfterViewInit, OnDestroy {
 
   get passengers(): FormArray {
     return this.bookingForm.get('passengers') as FormArray;
+  }
+
+  /** Kayıtlı yolcudan seçilen yolcuyu o index'teki forma aktar */
+  fillFromSavedPassenger(index: number, p: SavedPassengerDto): void {
+    const fg = this.passengers.at(index) as FormGroup;
+    if (!fg) return;
+
+    fg.patchValue({
+      firstName: p.firstName,
+      lastName: p.lastName,
+      birthDate: p.birthDate,
+      gender: p.gender,
+      idType: p.tcNo ? 'TC' : (p.passportNumber ? 'PASSPORT' : 'TC'),
+      idNumber: p.tcNo || p.passportNumber || '',
+      passportValidDate: p.passportExpiry || '',
+      passportCountry: p.nationality || 'TR',
+    });
+
+    this.passengerDropdownOpen[index] = false;
+    this.toast.info(`${p.firstName} ${p.lastName} bilgileri aktarıldı.`);
+  }
+
+  togglePassengerDropdown(index: number): void {
+    this.passengerDropdownOpen = this.passengerDropdownOpen.map((v, i) =>
+      i === index ? !v : false,
+    );
+  }
+
+  closeAllPassengerDropdowns(): void {
+    this.passengerDropdownOpen = this.passengerDropdownOpen.map(() => false);
   }
 
   private syncPassengerFormsFromBookingData(): void {

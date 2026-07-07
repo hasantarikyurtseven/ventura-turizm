@@ -212,7 +212,7 @@
                   <h2 class="section-title">Uçuş Sonuçları</h2>
                   <p class="section-route" *ngIf="searchOriginCode && searchDestinationCode">
                     {{ searchOriginCode }} → {{ searchDestinationCode }}
-                    <span class="section-date" *ngIf="searchDepartureDate">{{ searchDepartureDate }}</span>
+                    <span class="section-date" *ngIf="searchDepartureDate">{{ formatSearchDate(searchDepartureDate) }}</span>
                   </p>
                 </div>
                 <span class="section-badge">{{ filteredFlights.length }} uçuş</span>
@@ -233,7 +233,7 @@
                   <p class="section-route" *ngIf="searchOriginCode && searchDestinationCode">
                     {{ searchOriginCode }} → {{ searchDestinationCode }} → {{ searchOriginCode }}
                     <span class="section-date" *ngIf="searchDepartureDate || searchReturnDate">
-                      {{ searchDepartureDate }}<ng-container *ngIf="searchReturnDate"> - {{ searchReturnDate }}</ng-container>
+                      {{ formatSearchDate(searchDepartureDate) }}<ng-container *ngIf="searchReturnDate"> – {{ formatSearchDate(searchReturnDate) }}</ng-container>
                     </span>
                   </p>
                 </div>
@@ -254,7 +254,7 @@
                   <h2 class="section-title">Gidiş biletleri</h2>
                   <p class="section-route" *ngIf="searchOriginCode && searchDestinationCode">
                     {{ searchOriginCode }} → {{ searchDestinationCode }}
-                    <span class="section-date" *ngIf="searchDepartureDate">{{ searchDepartureDate }}</span>
+                    <span class="section-date" *ngIf="searchDepartureDate">{{ formatSearchDate(searchDepartureDate) }}</span>
                   </p>
                 </div>
                 <span class="section-badge">{{ filteredOutboundFlights.length }} uçuş</span>
@@ -274,7 +274,7 @@
                   <h2 class="section-title">Dönüş biletleri</h2>
                   <p class="section-route">
                     {{ searchDestinationCode }} → {{ searchOriginCode }}
-                    <span class="section-date" *ngIf="searchReturnDate">{{ searchReturnDate }}</span>
+                    <span class="section-date" *ngIf="searchReturnDate">{{ formatSearchDate(searchReturnDate) }}</span>
                   </p>
                 </div>
                 <span class="section-badge">{{ filteredReturnFlights.length }} uçuş</span>
@@ -484,11 +484,11 @@
         <div class="details-summary" *ngIf="!flight.segments || !flight.segments.length">
           <div class="details-summary-row">
             <span class="label">Kalkış</span>
-            <span class="value">{{ getAirportLabel(flight.departure.airportCode) }} — {{ flight.departure.time }}, {{ flight.departure.date }}</span>
+            <span class="value">{{ getAirportLabel(flight.departure.airportCode) }} — {{ flight.departure.time }}, {{ formatSearchDate(flight.departure.date) }}</span>
           </div>
           <div class="details-summary-row">
             <span class="label">Varış</span>
-            <span class="value">{{ getAirportLabel(flight.arrival.airportCode) }} — {{ flight.arrival.time }}, {{ flight.arrival.date }}</span>
+            <span class="value">{{ getAirportLabel(flight.arrival.airportCode) }} — {{ flight.arrival.time }}, {{ formatSearchDate(flight.arrival.date) }}</span>
           </div>
           <div class="details-summary-row">
             <span class="label">Süre</span>

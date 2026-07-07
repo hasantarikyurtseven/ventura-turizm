@@ -24,6 +24,7 @@ import { BookingComponent } from './features/booking/booking.component';
 import { PaymentComponent } from './features/payment/payment.component';
 import { PaymentCallbackComponent } from './features/payment-callback/payment-callback.component';
 import { MyReservationsComponent } from './features/my-reservations/my-reservations.component';
+import { ProfileComponent } from './features/profile/profile.component';
 import { API_BASE_URL_PROVIDER } from './core/api-url.token';
 import { AuthInterceptor } from './core/auth.interceptor';
 
@@ -45,6 +46,7 @@ import { AuthInterceptor } from './core/auth.interceptor';
     PaymentComponent,
     PaymentCallbackComponent,
     MyReservationsComponent,
+    ProfileComponent,
   ],
   imports: [
     BrowserModule,

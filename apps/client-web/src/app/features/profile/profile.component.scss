@@ -1,0 +1,607 @@
+// ── Renk değişkenleri ────────────────────────────────────────────────────────
+$brand: #183641;
+$brand-light: #4088b3;
+$surface: #ffffff;
+$surface-alt: #f7f8fa;
+$border: #e5e7eb;
+$text: #1a2332;
+$text-muted: #6b7280;
+$success: #16a34a;
+$danger: #dc2626;
+$warn: #d97706;
+
+// ── Sayfa kapsayıcı ──────────────────────────────────────────────────────────
+.profile-page {
+  min-height: 100vh;
+  background: $surface-alt;
+  padding-bottom: 64px;
+}
+
+// ── Başlık bandı ─────────────────────────────────────────────────────────────
+.page-header {
+  background: linear-gradient(135deg, $brand 0%, darken($brand-light, 10%) 100%);
+  padding: 36px 0 28px;
+  color: #fff;
+}
+
+.page-header-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.page-title-block {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.avatar-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #fff;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.page-title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.page-subtitle {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  opacity: 0.75;
+}
+
+// ── Sekme bandı ──────────────────────────────────────────────────────────────
+.tabs-bar {
+  background: $surface;
+  border-bottom: 1px solid $border;
+  position: sticky;
+  top: 64px;
+  z-index: 10;
+}
+
+.tabs-inner {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 24px;
+  display: flex;
+  gap: 4px;
+}
+
+.tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 14px 20px;
+  border: none;
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $text-muted;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover { color: $text; }
+
+  &.active {
+    color: $brand;
+    border-bottom-color: $brand;
+    font-weight: 600;
+  }
+
+  @media (max-width: 500px) {
+    span { display: none; }
+    padding: 14px 16px;
+  }
+}
+
+// ── Sekme içerik alanı ───────────────────────────────────────────────────────
+.tab-content {
+  max-width: 1400px;
+  margin: 32px auto 0;
+  padding: 0 24px;
+}
+
+.section-card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 32px;
+
+  @media (max-width: 600px) {
+    padding: 20px 16px;
+  }
+}
+
+.section-title {
+  margin: 0 0 24px;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: $text;
+}
+
+// ── Yükleniyor / Boş durum ───────────────────────────────────────────────────
+.loading-state {
+  display: flex;
+  justify-content: center;
+  padding: 48px 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 48px 0;
+  color: $text-muted;
+  text-align: center;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    opacity: 0.35;
+  }
+}
+
+// ── type=date inputlarda placeholder kesilmesini önle ────────────────────────
+input[type="date"].mat-mdc-input-element {
+  min-width: 130px;
+}
+
+// ── Form yardımcıları ────────────────────────────────────────────────────────
+.form-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 4px;
+
+  @media (max-width: 600px) { flex-wrap: wrap; }
+}
+
+.field-full  { flex: 1 1 100%; }
+.field-half  { flex: 1 1 calc(50% - 8px); min-width: 0; }
+.field-third { flex: 1 1 calc(33.3% - 11px); min-width: 0;
+  @media (max-width: 600px) { flex: 1 1 100%; }
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+// ── Profil: salt okunur bilgiler ─────────────────────────────────────────────
+.readonly-info {
+  background: $surface-alt;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 16px 20px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.info-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  min-width: 90px;
+}
+
+.info-value {
+  font-size: 0.95rem;
+  color: $text;
+}
+
+.badge-verified {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $success;
+  background: rgba($success, 0.1);
+  border-radius: 20px;
+  padding: 2px 10px;
+
+  mat-icon { font-size: 14px; width: 14px; height: 14px; }
+}
+
+// ── Rezervasyonlar ───────────────────────────────────────────────────────────
+$r-primary:     #183641;
+$r-primary-mid: #2d6a8a;
+$r-primary-lt:  #4088b3;
+$r-surface:     #ffffff;
+$r-surface-100: #f2f5f9;
+$r-border:      #dde3ec;
+$r-text:        #0f1923;
+$r-text-sec:    #64748b;
+
+.res-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 16px;
+  border-radius: 20px;
+  border: 1px solid $border;
+  background: $surface;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: $text-muted;
+  transition: all 0.15s;
+
+  mat-icon { font-size: 15px; width: 15px; height: 15px; }
+
+  &:hover { background: $surface-alt; color: $text; }
+  &.active { background: $brand; color: #fff; border-color: $brand; }
+  &.refresh-chip { padding: 7px 10px; }
+  &[disabled] { opacity: 0.5; cursor: not-allowed; }
+}
+
+// Bilet listesi
+.reservations-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.reservation-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+// PNR Banner
+.rg-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: .75rem;
+  background: $r-primary;
+  color: #fff;
+  border-radius: 12px;
+  padding: .75rem 1.25rem;
+}
+.rg-banner-left {
+  display: flex; align-items: center; gap: .75rem; flex-wrap: wrap;
+  mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; opacity: .7; }
+}
+.rg-banner-right {
+  display: flex; align-items: center; gap: 1.25rem; flex-wrap: wrap;
+}
+.rg-pnr {
+  font-size: 1.25rem; font-weight: 900; letter-spacing: .18em;
+  font-family: 'Roboto Mono', monospace; color: #fff;
+}
+.rg-status {
+  font-size: .75rem; font-weight: 700; border-radius: 20px;
+  padding: .25rem .75rem; white-space: nowrap;
+  &.status-confirmed { background: rgba(255,255,255,.15); color: #a7f3d0; border: 1px solid rgba(167,243,208,.3); }
+  &.status-cancelled { background: rgba(255,255,255,.1); color: #fca5a5; border: 1px solid rgba(252,165,165,.3); }
+  &.status-pending   { background: rgba(255,255,255,.1); color: #fde68a; border: 1px solid rgba(253,230,138,.3); }
+}
+.rg-total {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .9375rem; font-weight: 700; color: #a7f3d0;
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+}
+.rg-date {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .8125rem; color: rgba(255,255,255,.6);
+  mat-icon { font-size: .9rem; width: .9rem; height: .9rem; }
+}
+
+// Bilet
+.tickets-wrap { display: flex; flex-direction: column; gap: 1rem; }
+
+.ticket {
+  background: $r-surface;
+  border-radius: 16px;
+  box-shadow: 0 2px 8px rgba(15,25,35,.07), 0 8px 32px rgba(15,25,35,.06);
+  border: 1px solid $r-border;
+  overflow: hidden;
+  transition: box-shadow .2s, transform .15s;
+  &:hover { box-shadow: 0 4px 16px rgba(15,25,35,.1), 0 12px 40px rgba(15,25,35,.09); transform: translateY(-2px); }
+  &.ticket-cancelled { opacity: .75; filter: grayscale(.3); }
+}
+.ticket-top { padding: 0; }
+
+.ticket-airline-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: .75rem 1.5rem;
+  background: linear-gradient(135deg, $r-primary 0%, $r-primary-mid 60%, $r-primary-lt 100%);
+  gap: 1rem;
+}
+.tab-airline { display: flex; align-items: center; gap: .6rem; }
+.t-logo {
+  height: 28px; width: auto; object-fit: contain; border-radius: 4px;
+  background: rgba(255,255,255,.15); padding: 2px 6px;
+  border: 1px solid rgba(255,255,255,.2);
+}
+.t-logo-fallback {
+  width: 38px; height: 28px; border-radius: 6px;
+  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: .6875rem; font-weight: 800; color: #fff;
+}
+.t-airline-name { font-size: .9375rem; font-weight: 700; color: #fff; }
+.tab-trip-type {
+  display: flex; align-items: center; gap: .35rem;
+  font-size: .75rem; font-weight: 600; color: rgba(255,255,255,.75);
+  mat-icon { font-size: 1rem; width: 1rem; height: 1rem; }
+}
+
+.t-leg {
+  padding: 1rem 1.5rem .875rem;
+  display: flex; flex-direction: column; gap: .75rem;
+}
+.t-leg-badge {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font-size: .625rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+  color: $r-primary; background: #eef2ff; border: 1px solid #c7d2fe;
+  border-radius: 6px; padding: .2rem .6rem; width: fit-content;
+  mat-icon { font-size: .875rem; width: .875rem; height: .875rem; color: $r-primary; }
+  &.badge-rt { color: #15803d; background: #f0fdf4; border-color: #bbf7d0; mat-icon { color: #15803d; } }
+}
+.t-route { display: flex; align-items: center; gap: 1rem; }
+.t-airport {
+  display: flex; flex-direction: column; align-items: flex-start; min-width: 70px;
+  &.right { align-items: flex-end; }
+}
+.t-iata { font-size: 2.25rem; font-weight: 900; color: $r-text; line-height: 1; letter-spacing: -.03em; }
+.t-time { font-size: 1.125rem; font-weight: 800; color: $r-primary-mid; margin-top: .2rem; }
+.t-date { font-size: .6875rem; color: $r-text-sec; white-space: nowrap; margin-top: .1rem; }
+.t-mid {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  gap: .2rem; position: relative;
+}
+.t-line { flex: 1; height: 1px; background: linear-gradient(90deg, transparent, $r-primary-lt, transparent); }
+.t-plane-wrap {
+  display: flex; flex-direction: row; align-items: center; gap: .35rem;
+  padding: .2rem .5rem; background: $r-surface-100;
+  border: 1px solid $r-border; border-radius: 8px;
+  mat-icon { font-size: 1.25rem; width: 1.25rem; height: 1.25rem; color: $r-primary-lt; }
+}
+.t-fno { font-size: .75rem; font-weight: 700; color: $r-primary; font-family: 'Roboto Mono', monospace; }
+.t-dur { font-size: .675rem; color: $r-text-sec; margin-top: .15rem; }
+.t-tags { display: flex; align-items: center; gap: .4rem; flex-wrap: wrap; }
+.t-tag {
+  display: inline-flex; align-items: center; gap: .25rem;
+  font-size: .7rem; font-weight: 600; border-radius: 20px;
+  padding: .2rem .6rem; white-space: nowrap;
+  mat-icon { font-size: .75rem; width: .75rem; height: .75rem; }
+  &.t-tag--cabin { color: $r-primary; background: #eef2ff; border: 1px solid #c7d2fe; }
+  &.t-tag--bag { color: #b45309; background: #fffbeb; border: 1px solid #fde68a; }
+}
+.t-leg-sep { border-top: 1px dashed $r-border; margin: .25rem 0 0; }
+
+// Perfore çizgi
+.ticket-tear {
+  position: relative; display: flex; align-items: center; height: 2px; margin: 0 -1px;
+  .tear-circle {
+    position: absolute; width: 20px; height: 20px; background: $r-surface-100;
+    border-radius: 50%; border: 1px solid $r-border; z-index: 2; flex-shrink: 0;
+    &.tear-left  { left: -10px; border-left: 1px solid $r-surface-100; }
+    &.tear-right { right: -10px; border-right: 1px solid $r-surface-100; }
+  }
+  .tear-line { flex: 1; border-top: 2px dashed $r-border; margin: 0 4px; }
+}
+
+// Yolcu koçanı
+.ticket-stub {
+  display: flex; align-items: center; gap: 1rem;
+  padding: .875rem 1.5rem; background: #f8fafc; flex-wrap: wrap;
+}
+.stub-pax-no {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: $r-primary; color: #fff; font-size: .8125rem; font-weight: 900;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.stub-avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: #eef2ff; border: 2px solid #c7d2fe;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  mat-icon { font-size: 1.5rem; width: 1.5rem; height: 1.5rem; color: $r-primary; }
+  &.pax-chd { background: #fef9c3; border-color: #fde047; mat-icon { color: #b45309; } }
+  &.pax-inf { background: #fce7f3; border-color: #f9a8d4; mat-icon { color: #be185d; } }
+}
+.stub-pax-info { display: flex; flex-direction: column; gap: .1rem; min-width: 160px; }
+.stub-name { font-size: 1.0625rem; font-weight: 800; color: $r-text; letter-spacing: .03em; }
+.stub-type { font-size: .75rem; color: $r-text-sec; font-weight: 500; }
+.stub-divider { width: 1px; height: 36px; background: $r-border; flex-shrink: 0; }
+.stub-meta { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+.stub-meta-item { display: flex; flex-direction: column; gap: .1rem; }
+.stub-meta-label { font-size: .6rem; text-transform: uppercase; letter-spacing: .1em; color: $r-text-sec; }
+.stub-meta-value {
+  font-size: .875rem; font-weight: 700; color: $r-text;
+  &.mono { font-family: 'Roboto Mono', monospace; letter-spacing: .08em; }
+}
+
+@media (max-width: 700px) {
+  .t-iata { font-size: 1.75rem; }
+  .t-time { font-size: .9375rem; }
+  .rg-banner { flex-direction: column; align-items: flex-start; }
+  .ticket-stub { gap: .75rem; }
+  .stub-divider { display: none; }
+  .stub-pax-info { min-width: unset; }
+  .t-leg { padding: .875rem 1rem .75rem; }
+  .ticket-airline-bar { padding: .625rem 1rem; }
+}
+
+// ── Kayıtlı Yolcular ─────────────────────────────────────────────────────────
+.pax-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
+
+  .section-title { margin: 0; }
+}
+
+.pax-hint {
+  font-size: 0.82rem;
+  color: $text-muted;
+  margin: 0 0 24px;
+}
+
+.passenger-form-card {
+  background: $surface-alt;
+  border: 1px solid $border;
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.pform-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: $text;
+  margin: 0 0 20px;
+
+  mat-icon { color: $brand; }
+}
+
+.passenger-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.pax-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid $border;
+  border-radius: 12px;
+  transition: box-shadow 0.15s;
+
+  &:hover { box-shadow: 0 2px 10px rgba($brand, 0.07); }
+}
+
+.pax-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, $brand 0%, $brand-light 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.pax-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pax-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: $text;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pax-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: rgba($brand, 0.1);
+  color: $brand;
+  border-radius: 12px;
+  padding: 2px 8px;
+}
+
+.pax-meta {
+  font-size: 0.78rem;
+  color: $text-muted;
+  margin-top: 3px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.dot { opacity: 0.4; }
+
+.pax-actions {
+  display: flex;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+// ── Marka butonu ─────────────────────────────────────────────────────────────
+.btn-brand {
+  background: linear-gradient(135deg, $brand 0%, $brand-light 100%) !important;
+  color: #ffffff !important;
+  border-radius: 8px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.01em;
+  box-shadow: 0 2px 8px rgba($brand, 0.25) !important;
+  transition: box-shadow 0.15s, opacity 0.15s !important;
+
+  mat-icon { margin-right: 4px; }
+
+  &:hover:not([disabled]) {
+    box-shadow: 0 4px 16px rgba($brand, 0.35) !important;
+    opacity: 0.93;
+  }
+
+  &[disabled] {
+    opacity: 0.45 !important;
+    cursor: not-allowed;
+  }
+}

@@ -644,13 +644,120 @@
   }
 }
 
+.passenger-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--ventura-border);
+  flex-wrap: wrap;
+}
+
 .passenger-title {
-  margin: 0 0 0.75rem 0;
+  margin: 0;
   font-size: 0.9375rem;
   font-weight: 600;
   color: var(--ventura-primary);
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid var(--ventura-border);
+}
+
+// ── Kayıtlı yolcu picker ──────────────────────────────────────────────────────
+.saved-pax-picker {
+  position: relative;
+}
+
+.saved-pax-trigger {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+  }
+
+  .chevron { opacity: 0.6; }
+
+  &:hover {
+    border-color: #183641;
+    box-shadow: 0 0 0 2px rgba(24, 54, 65, 0.06);
+  }
+}
+
+.saved-pax-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  min-width: 220px;
+  max-height: 260px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(24, 54, 65, 0.14);
+  z-index: 50;
+  padding: 6px;
+}
+
+.saved-pax-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s;
+
+  &:hover { background: #f7f8fa; }
+}
+
+.spi-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #183641 0%, #4088b3 100%);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  font-weight: 700;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.spi-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.spi-name {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #1a2332;
+}
+
+.spi-label {
+  font-size: 0.72rem;
+  color: #6b7280;
 }
 
 .form-actions {
@@ -685,6 +792,22 @@
       display: inline-block;
       margin-right: 0.5rem;
     }
+  }
+}
+
+.btn-brand {
+  background-color: var(--ventura-primary) !important;
+  color: var(--ventura-text-on-primary) !important;
+  font-weight: 600 !important;
+  transition: background-color 0.15s !important;
+
+  &:hover:not([disabled]) {
+    background-color: var(--ventura-primary-600) !important;
+  }
+
+  &[disabled] {
+    opacity: 0.45 !important;
+    cursor: not-allowed;
   }
 }
 

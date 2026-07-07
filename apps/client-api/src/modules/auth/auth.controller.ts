@@ -1,6 +1,7 @@
 import {
   Controller,
   Post,
+  Put,
   Get,
   Body,
   Req,
@@ -13,6 +14,7 @@ import { Request } from 'express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { JwtMemberGuard } from './guards/jwt-member.guard';
 
 @Controller('auth')
@@ -114,5 +116,14 @@ export class AuthController {
   @UseGuards(JwtMemberGuard)
   async getProfile(@Req() req: any) {
     return this.authService.getProfile(req.user.memberId);
+  }
+
+  /**
+   * Profil bilgilerini güncelle (ad, soyad, telefon)
+   */
+  @Put('profile')
+  @UseGuards(JwtMemberGuard)
+  async updateProfile(@Req() req: any, @Body() dto: UpdateProfileDto) {
+    return this.authService.updateProfile(req.user.memberId, dto);
   }
 }

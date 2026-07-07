@@ -421,6 +421,30 @@ export class AuthService {
     return { success: true, user: member };
   }
 
+  async updateProfile(
+    memberId: string,
+    dto: { firstName?: string; lastName?: string; phone?: string },
+  ) {
+    const updates: Record<string, string> = {};
+    if (dto.firstName?.trim()) updates.firstName = dto.firstName.trim();
+    if (dto.lastName?.trim()) updates.lastName = dto.lastName.trim();
+    if (dto.phone?.trim()) updates.phone = dto.phone.trim();
+
+    if (Object.keys(updates).length === 0) {
+      throw new BadRequestException('Güncellenecek alan belirtilmedi.');
+    }
+
+    const member = await this.memberModel
+      .findByIdAndUpdate(memberId, { $set: updates }, { new: true })
+      .select('firstName lastName email phone emailVerified status marketingConsent createdAt')
+      .lean();
+
+    if (!member) throw new UnauthorizedException('Kullanıcı bulunamadı.');
+
+    this.logger.log(`Profil güncellendi: ${member['email']}`);
+    return { success: true, user: member };
+  }
+
   // ═══════════════════════════════════════════════
   //  YARDIMCI METODLAR
   // ═══════════════════════════════════════════════

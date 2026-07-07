@@ -396,6 +396,56 @@ export interface MyReservationsResponseDto {
   reservations: MyReservationDto[];
 }
 
+export interface MemberProfileDto {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  emailVerified: boolean;
+  status: string;
+  marketingConsent: boolean;
+  createdAt: string;
+}
+
+export interface UpdateProfileRequestDto {
+  firstName?: string;
+  lastName?: string;
+  phone?: string;
+}
+
+export interface SavedPassengerDto {
+  _id: string;
+  label: string;
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  gender: 'M' | 'F';
+  nationality: string;
+  paxType: 'ADT' | 'CHD' | 'INF';
+  tcNo: string;
+  passportNumber: string;
+  passportExpiry: string;
+  email: string;
+  phone: string;
+  createdAt: string;
+}
+
+export interface SavedPassengerFormDto {
+  label?: string;
+  firstName: string;
+  lastName: string;
+  birthDate: string;
+  gender: string;
+  nationality: string;
+  paxType: string;
+  tcNo?: string;
+  passportNumber?: string;
+  passportExpiry?: string;
+  email?: string;
+  phone?: string;
+}
+
 export interface AirSearchRequestBody {
   tripType: 'OW' | 'RT';
   originCode: string;
@@ -529,6 +579,45 @@ export class BiletbankApiService {
   /** Üyenin tüm rezervasyonları */
   getMyReservations(): Observable<MyReservationsResponseDto> {
     return this.http.get<MyReservationsResponseDto>(`${this.baseUrl}/reservations/mine`);
+  }
+
+  // ─── Profil ──────────────────────────────────────────────────────────────
+
+  getProfile(): Observable<{ success: boolean; user: MemberProfileDto }> {
+    return this.http.get<{ success: boolean; user: MemberProfileDto }>(`${this.baseUrl}/auth/profile`);
+  }
+
+  updateProfile(body: UpdateProfileRequestDto): Observable<{ success: boolean; user: MemberProfileDto }> {
+    return this.http.put<{ success: boolean; user: MemberProfileDto }>(
+      `${this.baseUrl}/auth/profile`,
+      body,
+    );
+  }
+
+  // ─── Kayıtlı Yolcular ────────────────────────────────────────────────────
+
+  getSavedPassengers(): Observable<{ success: boolean; passengers: SavedPassengerDto[] }> {
+    return this.http.get<{ success: boolean; passengers: SavedPassengerDto[] }>(
+      `${this.baseUrl}/saved-passengers`,
+    );
+  }
+
+  createSavedPassenger(body: SavedPassengerFormDto): Observable<{ success: boolean; passenger: SavedPassengerDto }> {
+    return this.http.post<{ success: boolean; passenger: SavedPassengerDto }>(
+      `${this.baseUrl}/saved-passengers`,
+      body,
+    );
+  }
+
+  updateSavedPassenger(id: string, body: SavedPassengerFormDto): Observable<{ success: boolean; passenger: SavedPassengerDto }> {
+    return this.http.put<{ success: boolean; passenger: SavedPassengerDto }>(
+      `${this.baseUrl}/saved-passengers/${id}`,
+      body,
+    );
+  }
+
+  deleteSavedPassenger(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/saved-passengers/${id}`);
   }
 }
 
