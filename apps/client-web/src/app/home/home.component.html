@@ -4,21 +4,6 @@
       <h1>Biletini Kolayca Bul</h1>
       <p class="hero-subtitle">Uçak, otobüs, tur ve araç kiralama seçeneklerini tek yerde karşılaştır.</p>
       
-      <!-- Service Tabs -->
-      <div class="service-tabs">
-        <button 
-          *ngFor="let tab of serviceTabs" 
-          mat-button
-          [class.active]="selectedService === tab.id"
-          [class.disabled-tab]="!tab.active"
-          (click)="onTabClick(tab)"
-          class="service-tab">
-          <mat-icon>{{ tab.icon }}</mat-icon>
-          <span>{{ tab.label }}</span>
-          <span class="tab-badge" *ngIf="tab.badge">{{ tab.badge }}</span>
-        </button>
-      </div>
-
       <!-- Search Form -->
       <mat-card class="search-form-card">
         <mat-card-content>
@@ -41,8 +26,10 @@
             <div class="airport-pair">
               <div class="airport-field from-field">
                 <app-location-selector
+                  #fromSelector
                   label="Nereden"
                   [control]="fromAirportControl"
+                  [presetDisplay]="fromDisplay"
                   (locationSelected)="onFromLocationSelected($event)">
                 </app-location-selector>
               </div>
@@ -53,8 +40,10 @@
 
               <div class="airport-field to-field">
                 <app-location-selector
+                  #toSelector
                   label="Nereye"
                   [control]="toAirportControl"
+                  [presetDisplay]="toDisplay"
                   (locationSelected)="onToLocationSelected($event)">
                 </app-location-selector>
               </div>

@@ -1,9 +1,11 @@
-import { NgModule } from '@angular/core';
+import { NgModule, LOCALE_ID } from '@angular/core';
 import { BrowserModule, provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient, withFetch, withInterceptorsFromDi, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { DateAdapter, MAT_DATE_FORMATS } from '@angular/material/core';
+import { registerLocaleData } from '@angular/common';
+import localeTr from '@angular/common/locales/tr';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -15,7 +17,6 @@ import { LoginComponent } from './auth/login/login.component';
 import { LoginModalComponent } from './auth/login/login-modal.component';
 import { FlightResultsComponent } from './features/flight-results/flight-results.component';
 import { TurkishDateAdapter, TURKISH_DATE_FORMATS } from './core/date-format';
-import { AirsearchTestComponent } from './features/airsearch-test/airsearch-test.component';
 import { LocationSelectorComponent } from './shared/location-selector/location-selector.component';
 import { ContractModalComponent } from './shared/contract-modal/contract-modal.component';
 import { FlightSearchLoadingDialogComponent } from './shared/flight-search-loading-dialog/flight-search-loading-dialog.component';
@@ -28,6 +29,8 @@ import { ProfileComponent } from './features/profile/profile.component';
 import { API_BASE_URL_PROVIDER } from './core/api-url.token';
 import { AuthInterceptor } from './core/auth.interceptor';
 
+registerLocaleData(localeTr);
+
 @NgModule({
   declarations: [
     AppComponent,
@@ -37,7 +40,6 @@ import { AuthInterceptor } from './core/auth.interceptor';
     LoginComponent,
     LoginModalComponent,
     FlightResultsComponent,
-    AirsearchTestComponent,
     LocationSelectorComponent,
     ContractModalComponent,
     FlightSearchLoadingDialogComponent,
@@ -62,7 +64,8 @@ import { AuthInterceptor } from './core/auth.interceptor';
     { provide: DateAdapter, useClass: TurkishDateAdapter },
     { provide: MAT_DATE_FORMATS, useValue: TURKISH_DATE_FORMATS },
     API_BASE_URL_PROVIDER,
-    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true },
+    { provide: LOCALE_ID, useValue: 'tr-TR' },
   ],
   bootstrap: [AppComponent]
 })

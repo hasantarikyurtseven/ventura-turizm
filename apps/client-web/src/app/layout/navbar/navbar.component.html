@@ -59,10 +59,6 @@
             <mat-icon>confirmation_number</mat-icon>
             <span>Rezervasyonlarım</span>
           </button>
-          <button mat-menu-item class="user-dropdown-item">
-            <mat-icon>favorite_border</mat-icon>
-            <span>Favorilerim</span>
-          </button>
           <hr style="margin:0;border:none;border-top:1px solid #f1f5f9;" />
           <button mat-menu-item class="user-dropdown-item logout-item" (click)="onLogout()">
             <mat-icon>logout</mat-icon>
@@ -92,89 +88,49 @@
       </button>
     </nav>
 
-    <!-- Mobile Menu Toggle -->
-    <button 
-      mat-icon-button 
-      class="mobile-menu-toggle"
-      (click)="sidenav.toggle()"
-      *ngIf="(isHandset$ | async)">
-      <mat-icon>menu</mat-icon>
-    </button>
+    <!-- Mobile Header: logo + sağ aksiyonlar -->
+    <ng-container *ngIf="(isHandset$ | async)">
+      <div class="mobile-header-bar">
+        <div class="mobile-logo" routerLink="/">
+          <img src="/images/logo/logo.svg" alt="Ventura Turizm" class="mobile-logo-img">
+        </div>
+        <div class="mobile-header-actions">
+          <!-- Giriş yapılmış -->
+          <ng-container *ngIf="authService.currentUser$ | async as user">
+            <button mat-icon-button [matMenuTriggerFor]="mobileUserMenu" class="mobile-avatar-btn">
+              <div class="mobile-avatar">{{ getUserInitials() }}</div>
+            </button>
+            <mat-menu #mobileUserMenu="matMenu" class="user-dropdown-panel">
+              <div class="user-dropdown-header" (click)="$event.stopPropagation()">
+                <div class="user-dropdown-avatar">{{ getUserInitials() }}</div>
+                <div class="user-dropdown-info">
+                  <span class="user-dropdown-name">{{ user.firstName }} {{ user.lastName }}</span>
+                  <span class="user-dropdown-email">{{ user.email }}</span>
+                </div>
+              </div>
+              <hr style="margin:0;border:none;border-top:1px solid #f1f5f9;" />
+              <button mat-menu-item routerLink="/profil">
+                <mat-icon>account_circle</mat-icon><span>Profilim</span>
+              </button>
+              <button mat-menu-item routerLink="/rezervasyonlarim">
+                <mat-icon>confirmation_number</mat-icon><span>Rezervasyonlarım</span>
+              </button>
+              <hr style="margin:0;border:none;border-top:1px solid #f1f5f9;" />
+              <button mat-menu-item (click)="onLogout()">
+                <mat-icon>logout</mat-icon><span>Çıkış Yap</span>
+              </button>
+            </mat-menu>
+          </ng-container>
+          <!-- Giriş yapılmamış -->
+          <ng-container *ngIf="!(authService.currentUser$ | async)">
+            <button mat-button class="mobile-login-btn" (click)="openLoginModal()">
+              <mat-icon>person</mat-icon>
+              <span>Giriş Yap</span>
+            </button>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
   </div>
 </mat-toolbar>
 
-<!-- Mobile Sidenav -->
-<div class="sidenav-wrapper" *ngIf="isHandset$ | async">
-  <mat-sidenav-container class="sidenav-container">
-    <mat-sidenav 
-      #sidenav 
-      mode="over" 
-      position="end"
-      class="mobile-sidenav">
-      <div class="sidenav-header">
-        <div class="sidenav-logo">
-          <img src="/images/logo/ventura-logo.svg" alt="Ventura Turizm" class="logo-image">
-        </div>
-        <button mat-icon-button (click)="sidenav.close()" class="close-button">
-          <mat-icon>close</mat-icon>
-        </button>
-      </div>
-      
-      <nav class="mobile-menu">
-        <button 
-          *ngFor="let item of menuItems" 
-          mat-button 
-          [routerLink]="item.route"
-          routerLinkActive="active"
-          [routerLinkActiveOptions]="{exact: item.route === '/'}"
-          (click)="sidenav.close()"
-          [class.highlight]="item.highlight"
-          class="mobile-nav-button">
-          <mat-icon>{{ item.icon }}</mat-icon>
-          <span>{{ item.label }}</span>
-        </button>
-      </nav>
-
-      <div class="sidenav-topbar">
-        <button mat-button class="mobile-topbar-button" routerLink="/help" (click)="sidenav.close()">
-          <mat-icon>help_outline</mat-icon>
-          <span>Yardım</span>
-        </button>
-        <button mat-button class="mobile-topbar-button" routerLink="/blog" (click)="sidenav.close()">
-          <mat-icon>article</mat-icon>
-          <span>Blog</span>
-        </button>
-      </div>
-
-      <div class="sidenav-actions">
-        <ng-container *ngIf="!(authService.currentUser$ | async)">
-          <button mat-button class="mobile-action-button" routerLink="/login" (click)="sidenav.close()">
-            <mat-icon>login</mat-icon>
-            <span>Giriş Yap</span>
-          </button>
-          <button mat-raised-button color="accent" class="mobile-action-button primary" routerLink="/register" (click)="sidenav.close()">
-            <span>Üye Ol</span>
-          </button>
-        </ng-container>
-        <ng-container *ngIf="authService.currentUser$ | async as user">
-          <div class="mobile-user-info">
-            <span>{{ user.firstName }} {{ user.lastName }}</span>
-          </div>
-          <button mat-button class="mobile-action-button" routerLink="/profil" (click)="sidenav.close()">
-            <mat-icon>account_circle</mat-icon>
-            <span>Profilim</span>
-          </button>
-          <button mat-button class="mobile-action-button" routerLink="/rezervasyonlarim" (click)="sidenav.close()">
-            <mat-icon>confirmation_number</mat-icon>
-            <span>Rezervasyonlarım</span>
-          </button>
-          <button mat-button class="mobile-action-button" (click)="onLogout(); sidenav.close()">
-            <mat-icon>logout</mat-icon>
-            <span>Çıkış Yap</span>
-          </button>
-        </ng-container>
-      </div>
-    </mat-sidenav>
-    <mat-sidenav-content></mat-sidenav-content>
-  </mat-sidenav-container>
-</div>

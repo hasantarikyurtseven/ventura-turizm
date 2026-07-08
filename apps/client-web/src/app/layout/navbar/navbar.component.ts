@@ -20,20 +20,11 @@ export class NavbarComponent implements OnInit {
   isHandset$!: Observable<boolean>;
 
   topBarItems = [
-    { label: 'AirSearch Test', route: '/airsearch-test', icon: 'science' },
     { label: 'Yardım', route: '/help', icon: 'help_outline' },
     { label: 'Blog', route: '/blog', icon: 'article' }
   ];
 
-  menuItems = [
-    { label: 'Otel', route: '/hotels', icon: 'hotel' },
-    { label: 'Tur', route: '/tours', icon: 'explore' },
-    { label: 'Gemi', route: '/cruises', icon: 'directions_boat' },
-    { label: 'Kıbrıs', route: '/cyprus', icon: 'beach_access' },
-    { label: 'Uçak Bileti', route: '/flights', icon: 'flight', highlight: false },
-    { label: 'Erken Rezervasyon', route: '/early-booking', icon: 'event', highlight: true },
-    { label: 'Kampanyalar', route: '/campaigns', icon: 'local_offer' }
-  ];
+  menuItems: { label: string; route: string; icon: string; highlight?: boolean }[] = [];
 
   constructor(
     private breakpointObserver: BreakpointObserver,

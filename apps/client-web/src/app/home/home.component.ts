@@ -1,8 +1,8 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastService } from '../core/toast.service';
-import { LocationSelection } from '../shared/location-selector/location-selector.component';
+import { LocationSelection, LocationSelectorComponent } from '../shared/location-selector/location-selector.component';
 
 @Component({
   selector: 'app-home',
@@ -11,6 +11,9 @@ import { LocationSelection } from '../shared/location-selector/location-selector
   styleUrl: './home.component.scss'
 })
 export class HomeComponent implements OnInit {
+  @ViewChild('fromSelector') fromSelector!: LocationSelectorComponent;
+  @ViewChild('toSelector') toSelector!: LocationSelectorComponent;
+
   selectedService: string = 'flight';
   tripType: string = 'round-trip';
 
@@ -19,6 +22,10 @@ export class HomeComponent implements OnInit {
   toAirportControl = new FormControl<string>('');
   departureDateControl = new FormControl<Date | null>(null);
   returnDateControl = new FormControl<Date | null>(null);
+
+  // Görünen metin (swap için)
+  fromDisplay = '';
+  toDisplay = '';
 
   // Location metadata (countryCode, isCity vb.)
   fromLocation: LocationSelection | null = null;
@@ -50,10 +57,12 @@ export class HomeComponent implements OnInit {
 
   onFromLocationSelected(selection: LocationSelection): void {
     this.fromLocation = selection.code ? selection : null;
+    this.fromDisplay = selection.displayText || '';
   }
 
   onToLocationSelected(selection: LocationSelection): void {
     this.toLocation = selection.code ? selection : null;
+    this.toDisplay = selection.displayText || '';
   }
 
   swapAirports() {
@@ -64,6 +73,10 @@ export class HomeComponent implements OnInit {
     const tempLocation = this.fromLocation;
     this.fromLocation = this.toLocation;
     this.toLocation = tempLocation;
+
+    const tempDisplay = this.fromDisplay;
+    this.fromDisplay = this.toDisplay;
+    this.toDisplay = tempDisplay;
   }
 
   /** Dönüş tarihi seçicide gidiş tarihinden önce seçim engellensin */

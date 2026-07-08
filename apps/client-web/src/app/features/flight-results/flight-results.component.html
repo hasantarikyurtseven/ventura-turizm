@@ -40,7 +40,7 @@
             <h4>Fiyat Aralığı</h4>
             <div class="price-range">
               <div class="price-slider-wrapper">
-                <label>Fiyat Aralığı: {{ filterBy.priceRange.min }} ₺ - {{ filterBy.priceRange.max }} ₺</label>
+                <label>Fiyat Aralığı: {{ formatPrice(filterBy.priceRange.min) }} ₺ - {{ formatPrice(filterBy.priceRange.max) }} ₺</label>
                 <mat-slider
                   [min]="priceSliderMin"
                   [max]="priceSliderMax"
@@ -332,7 +332,7 @@
           </div>
         </div>
         <div class="flight-price">
-          <span class="price-amount">{{ flight.price }} {{ flight.currency }}</span>
+          <span class="price-amount">{{ formatPrice(flight.price) }} {{ flight.currency }}</span>
           <span class="price-label">Kişi başı</span>
         </div>
       </div>
@@ -412,7 +412,7 @@
                 <div class="brand-title-section">
                   <h3 class="brand-name">{{ getBrandDisplayName(brand) }}</h3>
                   <div class="brand-price">
-                    <span class="price-amount">{{ brand.totalFare }} {{ brand.currency }}</span>
+                    <span class="price-amount">{{ formatPrice(brand.totalFare) }} {{ brand.currency }}</span>
                   </div>
                 </div>
               </div>

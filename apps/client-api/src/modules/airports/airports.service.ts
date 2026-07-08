@@ -87,8 +87,6 @@ export class AirportsService {
 
   /**
    * Ülkeler listesini (distinct) döner.
-   * Mongo'daki alan adları CSV'den geldiği gibi PascalCase:
-   * CountryCode, CountryName
    */
   async getCountries(): Promise<
     { countryCode: string; countryName: string }[]
@@ -97,8 +95,8 @@ export class AirportsService {
       {
         $group: {
           _id: {
-            countryCode: '$CountryCode',
-            countryName: '$CountryName',
+            countryCode: '$countryCode',
+            countryName: '$countryName',
           },
         },
       },
@@ -120,7 +118,7 @@ export class AirportsService {
 
   /**
    * Belirli bir ülke için havalimanı/şehir listesi döner.
-   * Q parametresi ile CityName / AirportName / AirportCode üzerinde arama yapılır.
+   * Q parametresi ile cityName / airportName / airportCode üzerinde arama yapılır.
    */
   async searchAirports(params: {
     countryCode?: string;
@@ -143,7 +141,7 @@ export class AirportsService {
     if (countryCode) {
       pipeline.push({
         $match: {
-          CountryCode: countryCode.toUpperCase(),
+          countryCode: countryCode.toUpperCase(),
         },
       });
     }
@@ -153,36 +151,28 @@ export class AirportsService {
       pipeline.push({
         $match: {
           $or: [
-            { CityName: { $regex: q, $options: 'i' } },
-            { AirportName: { $regex: q, $options: 'i' } },
-            { AirportCode: { $regex: `^${q}`, $options: 'i' } },
+            { cityName:    { $regex: q, $options: 'i' } },
+            { airportName: { $regex: q, $options: 'i' } },
+            { airportCode: { $regex: `^${q}`, $options: 'i' } },
+            { searchName:  { $regex: q, $options: 'i' } },
           ],
         },
       });
     }
 
-    pipeline.push({
-      $sort: {
-        CityName: 1,
-        AirportName: 1,
-      },
-    });
-
-    pipeline.push({
-      $limit: limit,
-    });
+    pipeline.push({ $sort: { cityName: 1, airportName: 1 } });
+    pipeline.push({ $limit: limit });
 
     const rows = await (this.airportModel as any).aggregate(pipeline).exec();
 
-    // Mongo'daki PascalCase alanları, API için camelCase'e map et
     return rows.map((row: any) => ({
-      cityCode: row.CityCode,
-      cityName: row.CityName,
-      airportCode: row.AirportCode,
-      airportName: row.AirportName,
-      countryCode: row.CountryCode,
-      countryName: row.CountryName,
-      timeZoneId: row.TimeZoneId,
+      cityCode:    row.cityCode,
+      cityName:    row.cityName,
+      airportCode: row.airportCode,
+      airportName: row.airportName,
+      countryCode: row.countryCode,
+      countryName: row.countryName,
+      timeZoneId:  row.timeZoneId,
     }));
   }
 

@@ -2062,8 +2062,8 @@ let CountriesService = class CountriesService {
         if (search && search.trim()) {
             const s = search.trim();
             match.$or = [
-                { CountryCode: new RegExp(s, 'i') },
-                { CountryName: new RegExp(s, 'i') },
+                { countryCode: new RegExp(s, 'i') },
+                { countryName: new RegExp(s, 'i') },
             ];
         }
         const [data, totalResult] = await Promise.all([
@@ -2072,11 +2072,11 @@ let CountriesService = class CountriesService {
                 { $match: match },
                 {
                     $group: {
-                        _id: '$CountryCode',
-                        countryCode: { $first: '$CountryCode' },
-                        countryName: { $first: '$CountryName' },
+                        _id: '$countryCode',
+                        countryCode: { $first: '$countryCode' },
+                        countryName: { $first: '$countryName' },
                         airportCount: { $sum: 1 },
-                        cities: { $addToSet: '$CityCode' },
+                        cities: { $addToSet: '$cityCode' },
                     },
                 },
                 {
@@ -2096,7 +2096,7 @@ let CountriesService = class CountriesService {
             this.airportModel
                 .aggregate([
                 { $match: match },
-                { $group: { _id: '$CountryCode' } },
+                { $group: { _id: '$countryCode' } },
                 { $count: 'total' },
             ])
                 .exec(),
@@ -2112,14 +2112,14 @@ let CountriesService = class CountriesService {
             return [];
         const list = await this.airportModel
             .aggregate([
-            { $match: { CountryCode: code } },
+            { $match: { countryCode: code } },
             {
                 $project: {
                     _id: 0,
-                    airportCode: '$AirportCode',
-                    airportName: '$AirportName',
-                    cityCode: '$CityCode',
-                    cityName: '$CityName',
+                    airportCode: '$airportCode',
+                    airportName: '$airportName',
+                    cityCode: '$cityCode',
+                    cityName: '$cityName',
                 },
             },
             { $sort: { cityName: 1, airportName: 1 } },
@@ -2130,7 +2130,7 @@ let CountriesService = class CountriesService {
     async count() {
         const r = await this.airportModel
             .aggregate([
-            { $group: { _id: '$CountryCode' } },
+            { $group: { _id: '$countryCode' } },
             { $count: 'total' },
         ])
             .exec();

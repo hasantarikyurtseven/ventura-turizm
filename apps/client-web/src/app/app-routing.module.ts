@@ -4,7 +4,6 @@ import { HomeComponent } from './home/home.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { LoginComponent } from './auth/login/login.component';
 import { FlightResultsComponent } from './features/flight-results/flight-results.component';
-import { AirsearchTestComponent } from './features/airsearch-test/airsearch-test.component';
 import { VerifyEmailComponent } from './auth/verify-email/verify-email.component';
 import { BookingComponent } from './features/booking/booking.component';
 import { PaymentComponent } from './features/payment/payment.component';
@@ -33,8 +32,6 @@ const routes: Routes = [
   { path: 'rezervasyonlarim', component: MyReservationsComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'profil', component: ProfileComponent, canActivate: [AuthGuard] },
-  { path: 'airsearch-test', component: AirsearchTestComponent },
-  { path: 'biletbank/airsearch-test', component: AirsearchTestComponent },
   // Eski /auth/login URL'lerini /login'e yönlendir
   { path: 'auth/login', redirectTo: '/login' },
   { path: 'auth/register', redirectTo: '/register' },

@@ -509,6 +509,17 @@ export class FlightResultsComponent implements OnInit {
     return `${d} ${months[mo]} ${y}, ${weekday}`;
   }
 
+  /** Fiyatı Türkçe formatında gösterir: 5.289,76 */
+  formatPrice(value: number | string | undefined): string {
+    if (value === undefined || value === null || value === '') return '—';
+    const num = typeof value === 'string' ? parseFloat(value) : value;
+    if (isNaN(num)) return String(value);
+    return new Intl.NumberFormat('tr-TR', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(num);
+  }
+
   /** Teknik hata mesajlarını kullanıcı dostu metne çevirir */
   private toUserFriendlySearchError(raw: string): string {
     const r = raw.toLowerCase();

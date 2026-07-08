@@ -1164,8 +1164,8 @@ let AirportsService = AirportsService_1 = class AirportsService {
             {
                 $group: {
                     _id: {
-                        countryCode: '$CountryCode',
-                        countryName: '$CountryName',
+                        countryCode: '$countryCode',
+                        countryName: '$countryName',
                     },
                 },
             },
@@ -1189,7 +1189,7 @@ let AirportsService = AirportsService_1 = class AirportsService {
         if (countryCode) {
             pipeline.push({
                 $match: {
-                    CountryCode: countryCode.toUpperCase(),
+                    countryCode: countryCode.toUpperCase(),
                 },
             });
         }
@@ -1198,31 +1198,25 @@ let AirportsService = AirportsService_1 = class AirportsService {
             pipeline.push({
                 $match: {
                     $or: [
-                        { CityName: { $regex: q, $options: 'i' } },
-                        { AirportName: { $regex: q, $options: 'i' } },
-                        { AirportCode: { $regex: `^${q}`, $options: 'i' } },
+                        { cityName: { $regex: q, $options: 'i' } },
+                        { airportName: { $regex: q, $options: 'i' } },
+                        { airportCode: { $regex: `^${q}`, $options: 'i' } },
+                        { searchName: { $regex: q, $options: 'i' } },
                     ],
                 },
             });
         }
-        pipeline.push({
-            $sort: {
-                CityName: 1,
-                AirportName: 1,
-            },
-        });
-        pipeline.push({
-            $limit: limit,
-        });
+        pipeline.push({ $sort: { cityName: 1, airportName: 1 } });
+        pipeline.push({ $limit: limit });
         const rows = await this.airportModel.aggregate(pipeline).exec();
         return rows.map((row) => ({
-            cityCode: row.CityCode,
-            cityName: row.CityName,
-            airportCode: row.AirportCode,
-            airportName: row.AirportName,
-            countryCode: row.CountryCode,
-            countryName: row.CountryName,
-            timeZoneId: row.TimeZoneId,
+            cityCode: row.cityCode,
+            cityName: row.cityName,
+            airportCode: row.airportCode,
+            airportName: row.airportName,
+            countryCode: row.countryCode,
+            countryName: row.countryName,
+            timeZoneId: row.timeZoneId,
         }));
     }
     buildSearchName(args) {

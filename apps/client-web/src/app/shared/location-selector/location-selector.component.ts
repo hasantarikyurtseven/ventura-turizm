@@ -6,10 +6,12 @@ import {
   HostListener,
   Inject,
   Input,
+  OnChanges,
   OnDestroy,
   OnInit,
   Output,
   PLATFORM_ID,
+  SimpleChanges,
   ViewChild,
 } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
@@ -89,9 +91,10 @@ export interface RecentLocationItem {
   styleUrls: ['./location-selector.component.scss'],
   standalone: false,
 })
-export class LocationSelectorComponent implements OnInit, OnDestroy {
+export class LocationSelectorComponent implements OnInit, OnChanges, OnDestroy {
   @Input() label: string = '';
   @Input() control!: FormControl<string | null>;
+  @Input() presetDisplay: string = '';
   @Output() locationSelected = new EventEmitter<LocationSelection>();
 
   panelOpen = false;
@@ -141,6 +144,12 @@ export class LocationSelectorComponent implements OnInit, OnDestroy {
   private countriesLoaded = false;
 
   ngOnInit(): void {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['presetDisplay']) {
+      this.displayText = changes['presetDisplay'].currentValue ?? '';
+    }
+  }
 
   /** Mobil ekran kontrolü (SSR güvenli) */
   private get isMobile(): boolean {
