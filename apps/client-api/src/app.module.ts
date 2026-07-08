@@ -13,6 +13,8 @@ import { ContractsModule } from './modules/contracts/contracts.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
 import { SavedPassengersModule } from './modules/saved-passengers/saved-passengers.module';
+import { BlogModule } from './modules/blog/blog.module';
+import { HelpModule } from './modules/help/help.module';
 
 @Module({
   imports: [
@@ -55,6 +57,8 @@ import { SavedPassengersModule } from './modules/saved-passengers/saved-passenge
     AuthModule,
     ReservationsModule,
     SavedPassengersModule,
+    BlogModule,
+    HelpModule,
   ],
   controllers: [AppController],
   providers: [AppService],

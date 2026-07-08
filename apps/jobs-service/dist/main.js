@@ -79,6 +79,7 @@ const app_controller_1 = __webpack_require__(/*! ./app.controller */ "./src/app.
 const app_service_1 = __webpack_require__(/*! ./app.service */ "./src/app.service.ts");
 const email_verification_module_1 = __webpack_require__(/*! ./modules/email-verification/email-verification.module */ "./src/modules/email-verification/email-verification.module.ts");
 const reservation_confirmation_module_1 = __webpack_require__(/*! ./modules/reservation-confirmation/reservation-confirmation.module */ "./src/modules/reservation-confirmation/reservation-confirmation.module.ts");
+const contact_form_module_1 = __webpack_require__(/*! ./modules/contact-form/contact-form.module */ "./src/modules/contact-form/contact-form.module.ts");
 let AppModule = AppModule_1 = class AppModule {
     connection;
     logger = new common_1.Logger(AppModule_1.name);
@@ -120,6 +121,7 @@ exports.AppModule = AppModule = AppModule_1 = __decorate([
             }),
             email_verification_module_1.EmailVerificationModule,
             reservation_confirmation_module_1.ReservationConfirmationModule,
+            contact_form_module_1.ContactFormModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
@@ -156,6 +158,86 @@ exports.AppService = AppService;
 exports.AppService = AppService = __decorate([
     (0, common_1.Injectable)()
 ], AppService);
+
+
+/***/ },
+
+/***/ "./src/modules/contact-form/contact-form.module.ts"
+/*!*********************************************************!*\
+  !*** ./src/modules/contact-form/contact-form.module.ts ***!
+  \*********************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ContactFormModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const bullmq_1 = __webpack_require__(/*! @nestjs/bullmq */ "@nestjs/bullmq");
+const email_module_1 = __webpack_require__(/*! ../email/email.module */ "./src/modules/email/email.module.ts");
+const contact_form_processor_1 = __webpack_require__(/*! ./contact-form.processor */ "./src/modules/contact-form/contact-form.processor.ts");
+let ContactFormModule = class ContactFormModule {
+};
+exports.ContactFormModule = ContactFormModule;
+exports.ContactFormModule = ContactFormModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            bullmq_1.BullModule.registerQueue({ name: 'contact-form' }),
+            email_module_1.EmailModule,
+        ],
+        providers: [contact_form_processor_1.ContactFormProcessor],
+    })
+], ContactFormModule);
+
+
+/***/ },
+
+/***/ "./src/modules/contact-form/contact-form.processor.ts"
+/*!************************************************************!*\
+  !*** ./src/modules/contact-form/contact-form.processor.ts ***!
+  \************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var ContactFormProcessor_1;
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ContactFormProcessor = void 0;
+const bullmq_1 = __webpack_require__(/*! @nestjs/bullmq */ "@nestjs/bullmq");
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const email_service_1 = __webpack_require__(/*! ../email/email.service */ "./src/modules/email/email.service.ts");
+let ContactFormProcessor = ContactFormProcessor_1 = class ContactFormProcessor extends bullmq_1.WorkerHost {
+    emailService;
+    logger = new common_1.Logger(ContactFormProcessor_1.name);
+    constructor(emailService) {
+        super();
+        this.emailService = emailService;
+    }
+    async process(job) {
+        this.logger.log(`İletişim formu maili işleniyor: ${job.data.email}`);
+        await this.emailService.sendContactFormEmails(job.data);
+        this.logger.log(`İletişim formu maili tamamlandı: ${job.data.email}`);
+    }
+};
+exports.ContactFormProcessor = ContactFormProcessor;
+exports.ContactFormProcessor = ContactFormProcessor = ContactFormProcessor_1 = __decorate([
+    (0, bullmq_1.Processor)('contact-form'),
+    __metadata("design:paramtypes", [typeof (_a = typeof email_service_1.EmailService !== "undefined" && email_service_1.EmailService) === "function" ? _a : Object])
+], ContactFormProcessor);
 
 
 /***/ },
@@ -298,6 +380,7 @@ const config_1 = __webpack_require__(/*! @nestjs/config */ "@nestjs/config");
 const nodemailer = __webpack_require__(/*! nodemailer */ "nodemailer");
 const email_verification_template_1 = __webpack_require__(/*! ./templates/email-verification.template */ "./src/modules/email/templates/email-verification.template.ts");
 const reservation_confirmation_template_1 = __webpack_require__(/*! ./templates/reservation-confirmation.template */ "./src/modules/email/templates/reservation-confirmation.template.ts");
+const contact_form_template_1 = __webpack_require__(/*! ./templates/contact-form.template */ "./src/modules/email/templates/contact-form.template.ts");
 let EmailService = EmailService_1 = class EmailService {
     configService;
     logger = new common_1.Logger(EmailService_1.name);
@@ -345,8 +428,7 @@ let EmailService = EmailService_1 = class EmailService {
         const html = (0, reservation_confirmation_template_1.renderReservationConfirmationTemplate)(params);
         try {
             const info = await this.transporter.sendMail({
-                from,
-                to,
+                from, to,
                 subject: `Ventura Turizm – Rezervasyon Onayı: ${params.bookingCode}`,
                 html,
             });
@@ -354,6 +436,30 @@ let EmailService = EmailService_1 = class EmailService {
         }
         catch (error) {
             this.logger.error(`Rezervasyon onay maili gönderilemedi: ${to}`, error?.stack || error);
+            throw error;
+        }
+    }
+    async sendContactFormEmails(params) {
+        const from = this.configService.get('SMTP_FROM', 'noreply@venturaturizm.com');
+        const adminEmail = this.configService.get('CONTACT_ADMIN_EMAIL', from);
+        const adminHtml = (0, contact_form_template_1.renderContactFormAdminTemplate)(params);
+        const userHtml = (0, contact_form_template_1.renderContactFormUserTemplate)(params);
+        try {
+            await this.transporter.sendMail({
+                from, to: adminEmail,
+                subject: `Yeni İletişim Mesajı: ${params.subject}`,
+                html: adminHtml,
+                replyTo: params.email,
+            });
+            await this.transporter.sendMail({
+                from, to: params.email,
+                subject: 'Ventura Turizm – Mesajınız Alındı',
+                html: userHtml,
+            });
+            this.logger.log(`İletişim formu mailleri gönderildi: ${params.email}`);
+        }
+        catch (error) {
+            this.logger.error(`İletişim formu maili gönderilemedi`, error?.stack || error);
             throw error;
         }
     }
@@ -478,6 +584,58 @@ function renderBaseLayout(params) {
 </body>
 </html>
   `.trim();
+}
+
+
+/***/ },
+
+/***/ "./src/modules/email/templates/contact-form.template.ts"
+/*!**************************************************************!*\
+  !*** ./src/modules/email/templates/contact-form.template.ts ***!
+  \**************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.renderContactFormAdminTemplate = renderContactFormAdminTemplate;
+exports.renderContactFormUserTemplate = renderContactFormUserTemplate;
+const base_layout_1 = __webpack_require__(/*! ./base.layout */ "./src/modules/email/templates/base.layout.ts");
+function renderContactFormAdminTemplate(p) {
+    const body = `
+    <h2 style="color:#183641;font-size:22px;font-weight:700;margin:0 0 8px;">Yeni İletişim Mesajı</h2>
+    <p style="color:#475569;font-size:14px;margin:0 0 24px;">Web sitesi iletişim formundan yeni bir mesaj alındı.</p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="background:#f8fafc;border-radius:10px;padding:20px;margin-bottom:24px;">
+      <tr><td style="padding:6px 0;font-size:14px;color:#183641;"><strong>Ad Soyad:</strong> ${p.name}</td></tr>
+      <tr><td style="padding:6px 0;font-size:14px;color:#183641;"><strong>E-posta:</strong> ${p.email}</td></tr>
+      ${p.phone ? `<tr><td style="padding:6px 0;font-size:14px;color:#183641;"><strong>Telefon:</strong> ${p.phone}</td></tr>` : ''}
+      <tr><td style="padding:6px 0;font-size:14px;color:#183641;"><strong>Konu:</strong> ${p.subject}</td></tr>
+    </table>
+    <h3 style="color:#183641;font-size:15px;font-weight:600;margin:0 0 10px;">Mesaj:</h3>
+    <div style="background:#fff;border:1px solid #e2e8f0;border-radius:8px;padding:16px;font-size:14px;color:#475569;line-height:1.7;">
+      ${p.message.replace(/\n/g, '<br>')}
+    </div>
+  `;
+    return (0, base_layout_1.renderBaseLayout)({ body, footerExtra: 'Bu mesaj Ventura Turizm web sitesi iletişim formundan iletilmiştir.' });
+}
+function renderContactFormUserTemplate(p) {
+    const body = `
+    <h2 style="color:#183641;font-size:22px;font-weight:700;margin:0 0 8px;">Mesajınız Alındı!</h2>
+    <p style="color:#475569;font-size:15px;margin:0 0 20px;">Merhaba <strong>${p.name}</strong>,</p>
+    <p style="color:#475569;font-size:14px;line-height:1.7;margin:0 0 20px;">
+      İletişim formunu doldurduğunuz için teşekkür ederiz. Mesajınız başarıyla tarafımıza iletildi.
+      En kısa sürede size geri dönüş yapacağız.
+    </p>
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+           style="background:#f8fafc;border-radius:10px;padding:20px;margin-bottom:24px;">
+      <tr><td style="padding:4px 0;font-size:13px;color:#64748b;"><strong>Konu:</strong> ${p.subject}</td></tr>
+    </table>
+    <p style="color:#64748b;font-size:13px;line-height:1.6;margin:0;">
+      Sorularınız için <a href="mailto:info@venturaturizm.com" style="color:#4088b3;">info@venturaturizm.com</a>
+      adresinden bize ulaşabilirsiniz.
+    </p>
+  `;
+    return (0, base_layout_1.renderBaseLayout)({ body, footerExtra: 'Bu e-posta otomatik olarak gönderilmiştir.' });
 }
 
 

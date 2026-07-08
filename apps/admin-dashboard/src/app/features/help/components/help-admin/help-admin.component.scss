@@ -1,0 +1,49 @@
+.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.tab-nav { display:flex; gap:4px; margin-bottom:20px; border-bottom:2px solid #e2e8f0; }
+.tab-nav button { border-radius:0; opacity:0.6; }
+.tab-nav button.active { opacity:1; border-bottom:2px solid #4088b3; margin-bottom:-2px; }
+.badge { background:#ef4444; color:#fff; border-radius:10px; padding:1px 7px; font-size:11px; margin-left:6px; }
+.section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.faq-form-card { margin-bottom:16px; }
+.form-row { display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
+.full-width { width:100%; margin-bottom:8px; }
+.form-actions { display:flex; justify-content:flex-end; gap:8px; margin-top:8px; }
+.faq-category { margin-bottom:24px; }
+.category-title { font-size:15px; font-weight:600; color:#183641; margin:0 0 10px; padding-left:4px; border-left:3px solid #4088b3; }
+.faq-card { margin-bottom:10px; }
+.faq-row { display:flex; gap:16px; justify-content:space-between; align-items:flex-start; padding:12px; }
+.faq-content { flex:1; }
+.faq-question { font-size:14px; font-weight:600; color:#183641; margin-bottom:6px; }
+.faq-answer { font-size:13px; color:#475569; line-height:1.6; }
+.faq-actions { display:flex; align-items:center; gap:4px; flex-shrink:0; }
+.status-badge { padding:2px 8px; border-radius:10px; font-size:11px; background:#f1f5f9; color:#64748b; }
+.status-badge.active { background:#dcfce7; color:#16a34a; }
+.loading { display:flex; justify-content:center; padding:40px; }
+.empty-state { text-align:center; padding:60px; color:#94a3b8; }
+// Message stats
+.stats-row { display:grid; grid-template-columns:repeat(4, 1fr); gap:12px; margin-bottom:16px; }
+.stat-card { text-align:center; padding:16px; }
+.stat-card .stat-num { font-size:28px; font-weight:700; color:#183641; }
+.stat-card .stat-label { font-size:12px; color:#64748b; }
+.stat-card.new .stat-num { color:#ef4444; }
+.stat-card.read .stat-num { color:#3b82f6; }
+.stat-card.replied .stat-num { color:#16a34a; }
+.filter-row { margin-bottom:16px; }
+.messages-layout { display:grid; grid-template-columns:320px 1fr; gap:16px; }
+.messages-list { overflow:auto; max-height:600px; padding:0; }
+.msg-item { padding:14px 16px; border-bottom:1px solid #f1f5f9; cursor:pointer; transition:background 0.15s; }
+.msg-item:hover, .msg-item.selected { background:#f0f9ff; }
+.msg-item.unread { background:#fff7ed; }
+.msg-from { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.msg-subject { font-size:13px; color:#475569; }
+.msg-date { font-size:11px; color:#94a3b8; margin-top:4px; }
+.msg-badge { padding:2px 8px; border-radius:10px; font-size:11px; }
+.status-new { background:#fee2e2; color:#dc2626; }
+.status-read { background:#dbeafe; color:#2563eb; }
+.status-replied { background:#dcfce7; color:#16a34a; }
+.detail-header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:16px; }
+.detail-meta { font-size:13px; color:#64748b; margin-top:4px; }
+.detail-body { background:#f8fafc; border-radius:8px; padding:16px; font-size:14px; color:#183641; line-height:1.7; white-space:pre-wrap; }
+.detail-date { font-size:11px; color:#94a3b8; margin-top:8px; text-align:right; }
+.message-detail.empty { display:flex; flex-direction:column; align-items:center; justify-content:center; color:#94a3b8; min-height:200px; }
+@media (max-width:900px) { .stats-row { grid-template-columns:repeat(2,1fr); } .messages-layout { grid-template-columns:1fr; } }

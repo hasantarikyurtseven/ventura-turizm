@@ -10,6 +10,9 @@ import { PaymentComponent } from './features/payment/payment.component';
 import { PaymentCallbackComponent } from './features/payment-callback/payment-callback.component';
 import { MyReservationsComponent } from './features/my-reservations/my-reservations.component';
 import { ProfileComponent } from './features/profile/profile.component';
+import { BlogComponent } from './features/blog/blog.component';
+import { BlogDetailComponent } from './features/blog-detail/blog-detail.component';
+import { HelpComponent } from './features/help/help.component';
 import { AuthGuard } from './core/auth.guard';
 
 const routes: Routes = [
@@ -32,6 +35,10 @@ const routes: Routes = [
   { path: 'rezervasyonlarim', component: MyReservationsComponent, canActivate: [AuthGuard] },
   { path: 'profile', component: ProfileComponent, canActivate: [AuthGuard] },
   { path: 'profil', component: ProfileComponent, canActivate: [AuthGuard] },
+  { path: 'blog', component: BlogComponent },
+  { path: 'blog/:slug', component: BlogDetailComponent },
+  { path: 'yardim', component: HelpComponent },
+  { path: 'help', component: HelpComponent },
   // Eski /auth/login URL'lerini /login'e yönlendir
   { path: 'auth/login', redirectTo: '/login' },
   { path: 'auth/register', redirectTo: '/register' },

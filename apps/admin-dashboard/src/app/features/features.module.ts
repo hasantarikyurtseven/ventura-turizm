@@ -38,6 +38,14 @@ const routes: Routes = [
     {
         path: 'reservations',
         loadChildren: () => import('./reservations/reservations.module').then(m => m.ReservationsModule)
+    },
+    {
+        path: 'blog',
+        loadChildren: () => import('./blog/blog.module').then(m => m.BlogModule)
+    },
+    {
+        path: 'help',
+        loadChildren: () => import('./help/help.module').then(m => m.HelpModule)
     }
 ];
 

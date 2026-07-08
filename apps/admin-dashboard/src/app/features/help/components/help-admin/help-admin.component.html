@@ -1,0 +1,135 @@
+<div class="page-header">
+  <h1>Yardım Yönetimi</h1>
+</div>
+
+<!-- Tab navigation -->
+<div class="tab-nav">
+  <button mat-button [class.active]="activeTab === 'faqs'" (click)="onTabChange('faqs')">
+    <mat-icon>help_outline</mat-icon> SSS Yönetimi
+  </button>
+  <button mat-button [class.active]="activeTab === 'messages'" (click)="onTabChange('messages')">
+    <mat-icon>mail_outline</mat-icon> İletişim Mesajları
+    <span class="badge" *ngIf="messageStats.new > 0">{{ messageStats.new }}</span>
+  </button>
+</div>
+
+<!-- FAQs Tab -->
+<div *ngIf="activeTab === 'faqs'">
+  <div class="section-header">
+    <h2>Sık Sorulan Sorular</h2>
+    <button mat-raised-button color="primary" (click)="openFaqForm()">
+      <mat-icon>add</mat-icon> Yeni Soru
+    </button>
+  </div>
+
+  <!-- FAQ Form -->
+  <mat-card *ngIf="showFaqForm" class="faq-form-card">
+    <mat-card-header><mat-card-title>{{ editingFaqId ? 'Soruyu Düzenle' : 'Yeni Soru Ekle' }}</mat-card-title></mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="faqForm">
+        <div class="form-row">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Kategori</mat-label>
+            <input matInput formControlName="category" placeholder="Genel, Bilet, Ödeme...">
+          </mat-form-field>
+          <mat-form-field appearance="outline" style="width:100px">
+            <mat-label>Sıra</mat-label>
+            <input matInput type="number" formControlName="order">
+          </mat-form-field>
+          <mat-slide-toggle formControlName="active" style="margin-top:8px">Aktif</mat-slide-toggle>
+        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Soru *</mat-label>
+          <input matInput formControlName="question">
+          <mat-error *ngIf="faqForm.get('question')?.errors?.['required']">Zorunlu</mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Cevap *</mat-label>
+          <textarea matInput formControlName="answer" rows="4"></textarea>
+          <mat-error *ngIf="faqForm.get('answer')?.errors?.['required']">Zorunlu</mat-error>
+        </mat-form-field>
+        <div class="form-actions">
+          <button mat-button (click)="showFaqForm = false">İptal</button>
+          <button mat-raised-button color="primary" (click)="saveFaq()">Kaydet</button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <!-- FAQ List by category -->
+  <div *ngIf="isLoadingFaqs" class="loading"><mat-spinner diameter="36"></mat-spinner></div>
+  <div *ngFor="let cat of faqCategories" class="faq-category">
+    <h3 class="category-title">{{ cat }}</h3>
+    <mat-card class="faq-card" *ngFor="let faq of faqsByCategory(cat)">
+      <div class="faq-row">
+        <div class="faq-content">
+          <div class="faq-question"><strong>S:</strong> {{ faq.question }}</div>
+          <div class="faq-answer">{{ faq.answer }}</div>
+        </div>
+        <div class="faq-actions">
+          <span class="status-badge" [class.active]="faq.active">{{ faq.active ? 'Aktif' : 'Pasif' }}</span>
+          <button mat-icon-button color="primary" (click)="openFaqForm(faq)"><mat-icon>edit</mat-icon></button>
+          <button mat-icon-button color="warn" (click)="deleteFaq(faq._id)"><mat-icon>delete</mat-icon></button>
+        </div>
+      </div>
+    </mat-card>
+  </div>
+  <div *ngIf="!isLoadingFaqs && faqs.length === 0 && !showFaqForm" class="empty-state">
+    <mat-icon>help_outline</mat-icon><p>Henüz soru eklenmemiş.</p>
+  </div>
+</div>
+
+<!-- Messages Tab -->
+<div *ngIf="activeTab === 'messages'">
+  <div class="stats-row">
+    <mat-card class="stat-card"><div class="stat-num">{{ messageStats.total }}</div><div class="stat-label">Toplam</div></mat-card>
+    <mat-card class="stat-card new"><div class="stat-num">{{ messageStats.new }}</div><div class="stat-label">Yeni</div></mat-card>
+    <mat-card class="stat-card read"><div class="stat-num">{{ messageStats.read }}</div><div class="stat-label">Okundu</div></mat-card>
+    <mat-card class="stat-card replied"><div class="stat-num">{{ messageStats.replied }}</div><div class="stat-label">Yanıtlandı</div></mat-card>
+  </div>
+
+  <div class="filter-row">
+    <mat-form-field appearance="outline">
+      <mat-label>Durum Filtresi</mat-label>
+      <mat-select [(ngModel)]="messageStatusFilter" (ngModelChange)="messagePage=1; loadMessages()">
+        <mat-option value="">Tümü</mat-option>
+        <mat-option value="new">Yeni</mat-option>
+        <mat-option value="read">Okundu</mat-option>
+        <mat-option value="replied">Yanıtlandı</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  <div class="messages-layout">
+    <mat-card class="messages-list">
+      <div *ngIf="isLoadingMsgs" class="loading"><mat-spinner diameter="36"></mat-spinner></div>
+      <div class="msg-item" *ngFor="let msg of messages" [class.selected]="selectedMessage?._id === msg._id" [class.unread]="msg.status === 'new'" (click)="openMessage(msg)">
+        <div class="msg-from"><strong>{{ msg.name }}</strong><span class="msg-badge" [class]="statusClass(msg.status)">{{ statusLabel(msg.status) }}</span></div>
+        <div class="msg-subject">{{ msg.subject }}</div>
+        <div class="msg-date">{{ msg.createdAt | date:'dd.MM.yyyy HH:mm' }}</div>
+      </div>
+      <div *ngIf="!isLoadingMsgs && messages.length === 0" class="empty-state"><mat-icon>mail_outline</mat-icon><p>Mesaj yok.</p></div>
+    </mat-card>
+
+    <mat-card class="message-detail" *ngIf="selectedMessage">
+      <div class="detail-header">
+        <div>
+          <h3>{{ selectedMessage.subject }}</h3>
+          <div class="detail-meta">
+            <strong>{{ selectedMessage.name }}</strong> &bull; {{ selectedMessage.email }}
+            <span *ngIf="selectedMessage.phone"> &bull; {{ selectedMessage.phone }}</span>
+          </div>
+        </div>
+        <div class="detail-actions">
+          <button mat-stroked-button (click)="markStatus(selectedMessage._id, 'replied')" *ngIf="selectedMessage.status !== 'replied'">Yanıtlandı olarak işaretle</button>
+        </div>
+      </div>
+      <div class="detail-body">{{ selectedMessage.message }}</div>
+      <div class="detail-date">{{ selectedMessage.createdAt | date:'dd.MM.yyyy HH:mm' }}</div>
+    </mat-card>
+    <mat-card class="message-detail empty" *ngIf="!selectedMessage && messages.length > 0">
+      <mat-icon>mail_outline</mat-icon>
+      <p>Bir mesaj seçin</p>
+    </mat-card>
+  </div>
+</div>

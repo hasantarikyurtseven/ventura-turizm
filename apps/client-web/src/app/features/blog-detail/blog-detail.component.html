@@ -1,0 +1,68 @@
+<div class="blog-detail-page">
+  <!-- Loading -->
+  <div class="loading-state" *ngIf="isLoading">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+
+  <!-- Not Found -->
+  <div class="not-found" *ngIf="!isLoading && notFound">
+    <mat-icon>search_off</mat-icon>
+    <h2>Yazı Bulunamadı</h2>
+    <p>Aradığınız blog yazısı mevcut değil ya da kaldırılmış olabilir.</p>
+    <button mat-raised-button color="primary" routerLink="/blog">Blog'a Dön</button>
+  </div>
+
+  <article *ngIf="!isLoading && post">
+    <!-- Kapak Görseli -->
+    <div class="cover-image" *ngIf="post!.coverImage" [style.background-image]="'url(' + post!.coverImage + ')'">
+      <div class="cover-overlay"></div>
+      <div class="cover-content">
+        <div class="breadcrumb">
+          <a routerLink="/">Ana Sayfa</a> › <a routerLink="/blog">Blog</a> › <span>{{ post!.category }}</span>
+        </div>
+        <h1>{{ post!.title }}</h1>
+        <div class="article-meta">
+          <span *ngIf="post!.author"><mat-icon>person</mat-icon> {{ post!.author }}</span>
+          <span><mat-icon>calendar_today</mat-icon> {{ formatDate(post!.publishedAt) }}</span>
+          <span><mat-icon>visibility</mat-icon> {{ post!.viewCount || 0 }} görüntülenme</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- No cover: simple header -->
+    <div class="article-header-simple" *ngIf="!post!.coverImage">
+      <div class="article-header-inner">
+        <div class="breadcrumb">
+          <a routerLink="/">Ana Sayfa</a> › <a routerLink="/blog">Blog</a>
+          <span *ngIf="post!.category"> › {{ post!.category }}</span>
+        </div>
+        <h1>{{ post!.title }}</h1>
+        <div class="article-meta">
+          <span *ngIf="post!.author"><mat-icon>person</mat-icon> {{ post!.author }}</span>
+          <span><mat-icon>calendar_today</mat-icon> {{ formatDate(post!.publishedAt) }}</span>
+          <span><mat-icon>visibility</mat-icon> {{ post!.viewCount || 0 }} görüntülenme</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="article-container">
+      <div class="article-content">
+        <p class="article-excerpt" *ngIf="post!.excerpt">{{ post!.excerpt }}</p>
+
+        <div class="article-tags" *ngIf="post!.tags && post!.tags.length > 0">
+          <span class="tag" *ngFor="let tag of post!.tags">{{ tag }}</span>
+        </div>
+
+        <div class="article-body ql-content" [innerHTML]="post!.content"></div>
+
+        <div class="article-share">
+          <span>Bu yazıyı paylaş:</span>
+          <button mat-stroked-button (click)="router.navigate(['/blog'])">
+            <mat-icon>arrow_back</mat-icon> Blog'a Dön
+          </button>
+        </div>
+      </div>
+    </div>
+  </article>
+</div>

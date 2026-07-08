@@ -91,6 +91,8 @@ const contracts_module_1 = __webpack_require__(/*! ./modules/contracts/contracts
 const members_module_1 = __webpack_require__(/*! ./modules/members/members.module */ "./src/modules/members/members.module.ts");
 const reservations_module_1 = __webpack_require__(/*! ./modules/reservations/reservations.module */ "./src/modules/reservations/reservations.module.ts");
 const admin_notifications_module_1 = __webpack_require__(/*! ./modules/admin-notifications/admin-notifications.module */ "./src/modules/admin-notifications/admin-notifications.module.ts");
+const blog_module_1 = __webpack_require__(/*! ./modules/blog/blog.module */ "./src/modules/blog/blog.module.ts");
+const help_module_1 = __webpack_require__(/*! ./modules/help/help.module */ "./src/modules/help/help.module.ts");
 const audit_log_interceptor_1 = __webpack_require__(/*! ./modules/audit-logs/interceptors/audit-log.interceptor */ "./src/modules/audit-logs/interceptors/audit-log.interceptor.ts");
 const audit_log_exception_filter_1 = __webpack_require__(/*! ./modules/audit-logs/filters/audit-log-exception.filter */ "./src/modules/audit-logs/filters/audit-log-exception.filter.ts");
 let AppModule = AppModule_1 = class AppModule {
@@ -146,6 +148,8 @@ exports.AppModule = AppModule = AppModule_1 = __decorate([
             members_module_1.MembersModule,
             reservations_module_1.ReservationsModule,
             admin_notifications_module_1.AdminNotificationsModule,
+            blog_module_1.BlogModule,
+            help_module_1.HelpModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [
@@ -1643,6 +1647,335 @@ exports.JwtStrategy = JwtStrategy = __decorate([
 
 /***/ },
 
+/***/ "./src/modules/blog/blog.controller.ts"
+/*!*********************************************!*\
+  !*** ./src/modules/blog/blog.controller.ts ***!
+  \*********************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BlogController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const blog_service_1 = __webpack_require__(/*! ./blog.service */ "./src/modules/blog/blog.service.ts");
+const jwt_auth_guard_1 = __webpack_require__(/*! ../auth/guards/jwt-auth.guard */ "./src/modules/auth/guards/jwt-auth.guard.ts");
+let BlogController = class BlogController {
+    blogService;
+    constructor(blogService) {
+        this.blogService = blogService;
+    }
+    findAll(page = 1, limit = 20, search, status) {
+        return this.blogService.findAll(page, limit, search, status);
+    }
+    findOne(id) { return this.blogService.findOne(id); }
+    create(dto) { return this.blogService.create(dto); }
+    update(id, dto) { return this.blogService.update(id, dto); }
+    remove(id) { return this.blogService.remove(id); }
+};
+exports.BlogController = BlogController;
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('search')),
+    __param(3, (0, common_1.Query)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String, String]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "findOne", null);
+__decorate([
+    (0, common_1.Post)(),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "create", null);
+__decorate([
+    (0, common_1.Put)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "update", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "remove", null);
+exports.BlogController = BlogController = __decorate([
+    (0, common_1.Controller)('admin/blog'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof blog_service_1.BlogService !== "undefined" && blog_service_1.BlogService) === "function" ? _a : Object])
+], BlogController);
+
+
+/***/ },
+
+/***/ "./src/modules/blog/blog.module.ts"
+/*!*****************************************!*\
+  !*** ./src/modules/blog/blog.module.ts ***!
+  \*****************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BlogModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const blog_schema_1 = __webpack_require__(/*! ./schemas/blog.schema */ "./src/modules/blog/schemas/blog.schema.ts");
+const blog_service_1 = __webpack_require__(/*! ./blog.service */ "./src/modules/blog/blog.service.ts");
+const blog_controller_1 = __webpack_require__(/*! ./blog.controller */ "./src/modules/blog/blog.controller.ts");
+let BlogModule = class BlogModule {
+};
+exports.BlogModule = BlogModule;
+exports.BlogModule = BlogModule = __decorate([
+    (0, common_1.Module)({
+        imports: [mongoose_1.MongooseModule.forFeature([{ name: blog_schema_1.Blog.name, schema: blog_schema_1.BlogSchema }])],
+        controllers: [blog_controller_1.BlogController],
+        providers: [blog_service_1.BlogService],
+        exports: [blog_service_1.BlogService],
+    })
+], BlogModule);
+
+
+/***/ },
+
+/***/ "./src/modules/blog/blog.service.ts"
+/*!******************************************!*\
+  !*** ./src/modules/blog/blog.service.ts ***!
+  \******************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BlogService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+const blog_schema_1 = __webpack_require__(/*! ./schemas/blog.schema */ "./src/modules/blog/schemas/blog.schema.ts");
+function slugify(text) {
+    return text
+        .toLowerCase()
+        .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+        .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+        .replace(/[^a-z0-9]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+}
+let BlogService = class BlogService {
+    blogModel;
+    constructor(blogModel) {
+        this.blogModel = blogModel;
+    }
+    async findAll(page = 1, limit = 20, search, status) {
+        const p = Math.max(1, +page);
+        const l = Math.min(100, Math.max(1, +limit));
+        const filter = {};
+        if (status)
+            filter.status = status;
+        if (search?.trim()) {
+            const r = new RegExp(search.trim(), 'i');
+            filter.$or = [{ title: r }, { category: r }, { tags: r }];
+        }
+        const [data, total] = await Promise.all([
+            this.blogModel.find(filter).sort({ createdAt: -1 }).skip((p - 1) * l).limit(l).lean(),
+            this.blogModel.countDocuments(filter),
+        ]);
+        return { data, total, page: p, limit: l };
+    }
+    async findOne(id) {
+        const blog = await this.blogModel.findById(id).lean();
+        if (!blog)
+            throw new common_1.NotFoundException('Blog yazısı bulunamadı');
+        return blog;
+    }
+    async create(dto) {
+        const base = slugify(dto.title);
+        let slug = base;
+        let i = 1;
+        while (await this.blogModel.exists({ slug }))
+            slug = `${base}-${i++}`;
+        const blog = new this.blogModel({
+            ...dto,
+            slug,
+            publishedAt: dto.status === 'published' ? new Date() : null,
+        });
+        return blog.save();
+    }
+    async update(id, dto) {
+        const blog = await this.blogModel.findById(id);
+        if (!blog)
+            throw new common_1.NotFoundException('Blog yazısı bulunamadı');
+        if (dto.title && dto.title !== blog.title) {
+            const base = slugify(dto.title);
+            let slug = base;
+            let i = 1;
+            while (await this.blogModel.exists({ slug, _id: { $ne: id } }))
+                slug = `${base}-${i++}`;
+            dto.slug = slug;
+        }
+        if (dto.status === 'published' && !blog.publishedAt)
+            dto.publishedAt = new Date();
+        Object.assign(blog, dto);
+        return blog.save();
+    }
+    async remove(id) {
+        const blog = await this.blogModel.findByIdAndDelete(id);
+        if (!blog)
+            throw new common_1.NotFoundException('Blog yazısı bulunamadı');
+        return { success: true };
+    }
+};
+exports.BlogService = BlogService;
+exports.BlogService = BlogService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, mongoose_1.InjectModel)(blog_schema_1.Blog.name)),
+    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object])
+], BlogService);
+
+
+/***/ },
+
+/***/ "./src/modules/blog/schemas/blog.schema.ts"
+/*!*************************************************!*\
+  !*** ./src/modules/blog/schemas/blog.schema.ts ***!
+  \*************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BlogSchema = exports.Blog = void 0;
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+let Blog = class Blog extends mongoose_2.Document {
+    title;
+    slug;
+    excerpt;
+    content;
+    coverImage;
+    category;
+    tags;
+    status;
+    author;
+    publishedAt;
+    viewCount;
+    metaTitle;
+    metaDescription;
+};
+exports.Blog = Blog;
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, trim: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "title", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, unique: true, trim: true, lowercase: true }),
+    __metadata("design:type", String)
+], Blog.prototype, "slug", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], Blog.prototype, "excerpt", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], Blog.prototype, "content", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], Blog.prototype, "coverImage", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], Blog.prototype, "category", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [String], default: [] }),
+    __metadata("design:type", Array)
+], Blog.prototype, "tags", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: 'draft', enum: ['draft', 'published'] }),
+    __metadata("design:type", String)
+], Blog.prototype, "status", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], Blog.prototype, "author", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: Date, default: null }),
+    __metadata("design:type", Object)
+], Blog.prototype, "publishedAt", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: 0 }),
+    __metadata("design:type", Number)
+], Blog.prototype, "viewCount", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], Blog.prototype, "metaTitle", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], Blog.prototype, "metaDescription", void 0);
+exports.Blog = Blog = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true, collection: 'blogs' })
+], Blog);
+exports.BlogSchema = mongoose_1.SchemaFactory.createForClass(Blog);
+exports.BlogSchema.index({ slug: 1 }, { unique: true });
+exports.BlogSchema.index({ status: 1, publishedAt: -1 });
+
+
+/***/ },
+
 /***/ "./src/modules/contracts/contracts.controller.ts"
 /*!*******************************************************!*\
   !*** ./src/modules/contracts/contracts.controller.ts ***!
@@ -2516,6 +2849,364 @@ exports.DashboardService = DashboardService = __decorate([
     __param(1, (0, mongoose_1.InjectModel)(audit_log_schema_1.AuditLog.name)),
     __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _b : Object, typeof (_c = typeof reservations_service_1.ReservationsService !== "undefined" && reservations_service_1.ReservationsService) === "function" ? _c : Object, typeof (_d = typeof members_service_1.MembersService !== "undefined" && members_service_1.MembersService) === "function" ? _d : Object])
 ], DashboardService);
+
+
+/***/ },
+
+/***/ "./src/modules/help/help.controller.ts"
+/*!*********************************************!*\
+  !*** ./src/modules/help/help.controller.ts ***!
+  \*********************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HelpController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const help_service_1 = __webpack_require__(/*! ./help.service */ "./src/modules/help/help.service.ts");
+const jwt_auth_guard_1 = __webpack_require__(/*! ../auth/guards/jwt-auth.guard */ "./src/modules/auth/guards/jwt-auth.guard.ts");
+let HelpController = class HelpController {
+    helpService;
+    constructor(helpService) {
+        this.helpService = helpService;
+    }
+    findAllFaqs() { return this.helpService.findAllFaqs(); }
+    createFaq(dto) { return this.helpService.createFaq(dto); }
+    updateFaq(id, dto) { return this.helpService.updateFaq(id, dto); }
+    removeFaq(id) { return this.helpService.removeFaq(id); }
+    findAllMessages(page = 1, limit = 20, status) {
+        return this.helpService.findAllMessages(page, limit, status);
+    }
+    getMessageStats() { return this.helpService.getMessageStats(); }
+    updateMessageStatus(id, body) {
+        return this.helpService.updateMessageStatus(id, body.status, body.adminNote);
+    }
+};
+exports.HelpController = HelpController;
+__decorate([
+    (0, common_1.Get)('faqs'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "findAllFaqs", null);
+__decorate([
+    (0, common_1.Post)('faqs'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "createFaq", null);
+__decorate([
+    (0, common_1.Put)('faqs/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "updateFaq", null);
+__decorate([
+    (0, common_1.Delete)('faqs/:id'),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "removeFaq", null);
+__decorate([
+    (0, common_1.Get)('messages'),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('status')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String]),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "findAllMessages", null);
+__decorate([
+    (0, common_1.Get)('messages/stats'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "getMessageStats", null);
+__decorate([
+    (0, common_1.Put)('messages/:id/status'),
+    __param(0, (0, common_1.Param)('id')),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "updateMessageStatus", null);
+exports.HelpController = HelpController = __decorate([
+    (0, common_1.Controller)('admin/help'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
+    __metadata("design:paramtypes", [typeof (_a = typeof help_service_1.HelpService !== "undefined" && help_service_1.HelpService) === "function" ? _a : Object])
+], HelpController);
+
+
+/***/ },
+
+/***/ "./src/modules/help/help.module.ts"
+/*!*****************************************!*\
+  !*** ./src/modules/help/help.module.ts ***!
+  \*****************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HelpModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const faq_schema_1 = __webpack_require__(/*! ./schemas/faq.schema */ "./src/modules/help/schemas/faq.schema.ts");
+const contact_message_schema_1 = __webpack_require__(/*! ./schemas/contact-message.schema */ "./src/modules/help/schemas/contact-message.schema.ts");
+const help_service_1 = __webpack_require__(/*! ./help.service */ "./src/modules/help/help.service.ts");
+const help_controller_1 = __webpack_require__(/*! ./help.controller */ "./src/modules/help/help.controller.ts");
+let HelpModule = class HelpModule {
+};
+exports.HelpModule = HelpModule;
+exports.HelpModule = HelpModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            mongoose_1.MongooseModule.forFeature([
+                { name: faq_schema_1.Faq.name, schema: faq_schema_1.FaqSchema },
+                { name: contact_message_schema_1.ContactMessage.name, schema: contact_message_schema_1.ContactMessageSchema },
+            ]),
+        ],
+        controllers: [help_controller_1.HelpController],
+        providers: [help_service_1.HelpService],
+        exports: [help_service_1.HelpService],
+    })
+], HelpModule);
+
+
+/***/ },
+
+/***/ "./src/modules/help/help.service.ts"
+/*!******************************************!*\
+  !*** ./src/modules/help/help.service.ts ***!
+  \******************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HelpService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+const faq_schema_1 = __webpack_require__(/*! ./schemas/faq.schema */ "./src/modules/help/schemas/faq.schema.ts");
+const contact_message_schema_1 = __webpack_require__(/*! ./schemas/contact-message.schema */ "./src/modules/help/schemas/contact-message.schema.ts");
+let HelpService = class HelpService {
+    faqModel;
+    msgModel;
+    constructor(faqModel, msgModel) {
+        this.faqModel = faqModel;
+        this.msgModel = msgModel;
+    }
+    async findAllFaqs() {
+        return this.faqModel.find().sort({ category: 1, order: 1 }).lean();
+    }
+    async createFaq(dto) {
+        return new this.faqModel(dto).save();
+    }
+    async updateFaq(id, dto) {
+        const faq = await this.faqModel.findByIdAndUpdate(id, dto, { new: true });
+        if (!faq)
+            throw new common_1.NotFoundException('FAQ bulunamadı');
+        return faq;
+    }
+    async removeFaq(id) {
+        await this.faqModel.findByIdAndDelete(id);
+        return { success: true };
+    }
+    async findAllMessages(page = 1, limit = 20, status) {
+        const p = Math.max(1, +page);
+        const l = Math.min(100, +limit || 20);
+        const filter = {};
+        if (status)
+            filter.status = status;
+        const [data, total] = await Promise.all([
+            this.msgModel.find(filter).sort({ createdAt: -1 }).skip((p - 1) * l).limit(l).lean(),
+            this.msgModel.countDocuments(filter),
+        ]);
+        return { data, total, page: p, limit: l };
+    }
+    async updateMessageStatus(id, status, adminNote) {
+        const msg = await this.msgModel.findByIdAndUpdate(id, { status, ...(adminNote !== undefined ? { adminNote } : {}) }, { new: true });
+        if (!msg)
+            throw new common_1.NotFoundException('Mesaj bulunamadı');
+        return msg;
+    }
+    async getMessageStats() {
+        const [total, newCount, read, replied] = await Promise.all([
+            this.msgModel.countDocuments(),
+            this.msgModel.countDocuments({ status: 'new' }),
+            this.msgModel.countDocuments({ status: 'read' }),
+            this.msgModel.countDocuments({ status: 'replied' }),
+        ]);
+        return { total, new: newCount, read, replied };
+    }
+    async saveContactMessage(dto) {
+        return new this.msgModel(dto).save();
+    }
+};
+exports.HelpService = HelpService;
+exports.HelpService = HelpService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, mongoose_1.InjectModel)(faq_schema_1.Faq.name)),
+    __param(1, (0, mongoose_1.InjectModel)(contact_message_schema_1.ContactMessage.name)),
+    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _b : Object])
+], HelpService);
+
+
+/***/ },
+
+/***/ "./src/modules/help/schemas/contact-message.schema.ts"
+/*!************************************************************!*\
+  !*** ./src/modules/help/schemas/contact-message.schema.ts ***!
+  \************************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ContactMessageSchema = exports.ContactMessage = void 0;
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+let ContactMessage = class ContactMessage extends mongoose_2.Document {
+    name;
+    email;
+    phone;
+    subject;
+    message;
+    status;
+    adminNote;
+};
+exports.ContactMessage = ContactMessage;
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "name", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "email", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "phone", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "subject", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "message", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: 'new', enum: ['new', 'read', 'replied'] }),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "status", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: '' }),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "adminNote", void 0);
+exports.ContactMessage = ContactMessage = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true, collection: 'contact_messages' })
+], ContactMessage);
+exports.ContactMessageSchema = mongoose_1.SchemaFactory.createForClass(ContactMessage);
+
+
+/***/ },
+
+/***/ "./src/modules/help/schemas/faq.schema.ts"
+/*!************************************************!*\
+  !*** ./src/modules/help/schemas/faq.schema.ts ***!
+  \************************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.FaqSchema = exports.Faq = void 0;
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+let Faq = class Faq extends mongoose_2.Document {
+    question;
+    answer;
+    category;
+    order;
+    active;
+};
+exports.Faq = Faq;
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Faq.prototype, "question", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true }),
+    __metadata("design:type", String)
+], Faq.prototype, "answer", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: 'Genel' }),
+    __metadata("design:type", String)
+], Faq.prototype, "category", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: 0 }),
+    __metadata("design:type", Number)
+], Faq.prototype, "order", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ default: true }),
+    __metadata("design:type", Boolean)
+], Faq.prototype, "active", void 0);
+exports.Faq = Faq = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true, collection: 'faqs' })
+], Faq);
+exports.FaqSchema = mongoose_1.SchemaFactory.createForClass(Faq);
 
 
 /***/ },

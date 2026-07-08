@@ -1,0 +1,12 @@
+.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.loading { display:flex; justify-content:center; padding:60px; }
+.editor-layout { display:grid; grid-template-columns:1fr 320px; gap:20px; align-items:start; }
+.main-card { }
+.full-width { width:100%; margin-bottom:12px; }
+.content-label { font-size:14px; color:#475569; margin-bottom:8px; font-weight:500; }
+.content-editor { min-height:300px; margin-bottom:8px; }
+.field-error { color:#ef4444; font-size:12px; margin-top:-4px; margin-bottom:12px; }
+.sidebar { display:flex; flex-direction:column; }
+.save-actions { margin-top:16px; display:flex; justify-content:flex-end; }
+.save-actions button { min-width:120px; }
+@media (max-width:900px) { .editor-layout { grid-template-columns:1fr; } }

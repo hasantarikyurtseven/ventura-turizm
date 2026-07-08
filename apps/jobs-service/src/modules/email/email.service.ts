@@ -6,6 +6,11 @@ import {
   renderReservationConfirmationTemplate,
   ReservationConfirmationTemplateParams,
 } from './templates/reservation-confirmation.template';
+import {
+  renderContactFormAdminTemplate,
+  renderContactFormUserTemplate,
+  ContactFormTemplateParams,
+} from './templates/contact-form.template';
 
 @Injectable()
 export class EmailService implements OnModuleInit {
@@ -75,14 +80,39 @@ export class EmailService implements OnModuleInit {
 
     try {
       const info = await this.transporter.sendMail({
-        from,
-        to,
+        from, to,
         subject: `Ventura Turizm – Rezervasyon Onayı: ${params.bookingCode}`,
         html,
       });
       this.logger.log(`Rezervasyon onay maili gönderildi: ${to} (messageId: ${info.messageId})`);
     } catch (error) {
       this.logger.error(`Rezervasyon onay maili gönderilemedi: ${to}`, error?.stack || error);
+      throw error;
+    }
+  }
+
+  async sendContactFormEmails(params: ContactFormTemplateParams): Promise<void> {
+    const from = this.configService.get<string>('SMTP_FROM', 'noreply@venturaturizm.com');
+    const adminEmail = this.configService.get<string>('CONTACT_ADMIN_EMAIL', from);
+
+    const adminHtml = renderContactFormAdminTemplate(params);
+    const userHtml  = renderContactFormUserTemplate(params);
+
+    try {
+      await this.transporter.sendMail({
+        from, to: adminEmail,
+        subject: `Yeni İletişim Mesajı: ${params.subject}`,
+        html: adminHtml,
+        replyTo: params.email,
+      });
+      await this.transporter.sendMail({
+        from, to: params.email,
+        subject: 'Ventura Turizm – Mesajınız Alındı',
+        html: userHtml,
+      });
+      this.logger.log(`İletişim formu mailleri gönderildi: ${params.email}`);
+    } catch (error) {
+      this.logger.error(`İletişim formu maili gönderilemedi`, error?.stack || error);
       throw error;
     }
   }

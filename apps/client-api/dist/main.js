@@ -98,6 +98,8 @@ const contracts_module_1 = __webpack_require__(/*! ./modules/contracts/contracts
 const auth_module_1 = __webpack_require__(/*! ./modules/auth/auth.module */ "./src/modules/auth/auth.module.ts");
 const reservations_module_1 = __webpack_require__(/*! ./modules/reservations/reservations.module */ "./src/modules/reservations/reservations.module.ts");
 const saved_passengers_module_1 = __webpack_require__(/*! ./modules/saved-passengers/saved-passengers.module */ "./src/modules/saved-passengers/saved-passengers.module.ts");
+const blog_module_1 = __webpack_require__(/*! ./modules/blog/blog.module */ "./src/modules/blog/blog.module.ts");
+const help_module_1 = __webpack_require__(/*! ./modules/help/help.module */ "./src/modules/help/help.module.ts");
 let AppModule = AppModule_1 = class AppModule {
     connection;
     logger = new common_1.Logger(AppModule_1.name);
@@ -156,6 +158,8 @@ exports.AppModule = AppModule = AppModule_1 = __decorate([
             auth_module_1.AuthModule,
             reservations_module_1.ReservationsModule,
             saved_passengers_module_1.SavedPassengersModule,
+            blog_module_1.BlogModule,
+            help_module_1.HelpModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],
@@ -7054,6 +7058,275 @@ exports.BookingAuthGuard = BookingAuthGuard = BookingAuthGuard_1 = __decorate([
 
 /***/ },
 
+/***/ "./src/modules/blog/blog.controller.ts"
+/*!*********************************************!*\
+  !*** ./src/modules/blog/blog.controller.ts ***!
+  \*********************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BlogController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const blog_service_1 = __webpack_require__(/*! ./blog.service */ "./src/modules/blog/blog.service.ts");
+let BlogController = class BlogController {
+    blogService;
+    constructor(blogService) {
+        this.blogService = blogService;
+    }
+    findAll(page = 1, limit = 10, category) {
+        return this.blogService.findAll(page, limit, category);
+    }
+    getCategories() { return this.blogService.getCategories(); }
+    findBySlug(slug) { return this.blogService.findBySlug(slug); }
+};
+exports.BlogController = BlogController;
+__decorate([
+    (0, common_1.Get)(),
+    __param(0, (0, common_1.Query)('page')),
+    __param(1, (0, common_1.Query)('limit')),
+    __param(2, (0, common_1.Query)('category')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object, String]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "findAll", null);
+__decorate([
+    (0, common_1.Get)('categories'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "getCategories", null);
+__decorate([
+    (0, common_1.Get)(':slug'),
+    __param(0, (0, common_1.Param)('slug')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", void 0)
+], BlogController.prototype, "findBySlug", null);
+exports.BlogController = BlogController = __decorate([
+    (0, common_1.Controller)('blog'),
+    __metadata("design:paramtypes", [typeof (_a = typeof blog_service_1.BlogService !== "undefined" && blog_service_1.BlogService) === "function" ? _a : Object])
+], BlogController);
+
+
+/***/ },
+
+/***/ "./src/modules/blog/blog.module.ts"
+/*!*****************************************!*\
+  !*** ./src/modules/blog/blog.module.ts ***!
+  \*****************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BlogModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const blog_schema_1 = __webpack_require__(/*! ./blog.schema */ "./src/modules/blog/blog.schema.ts");
+const blog_service_1 = __webpack_require__(/*! ./blog.service */ "./src/modules/blog/blog.service.ts");
+const blog_controller_1 = __webpack_require__(/*! ./blog.controller */ "./src/modules/blog/blog.controller.ts");
+let BlogModule = class BlogModule {
+};
+exports.BlogModule = BlogModule;
+exports.BlogModule = BlogModule = __decorate([
+    (0, common_1.Module)({
+        imports: [mongoose_1.MongooseModule.forFeature([{ name: blog_schema_1.Blog.name, schema: blog_schema_1.BlogSchema }])],
+        controllers: [blog_controller_1.BlogController],
+        providers: [blog_service_1.BlogService],
+    })
+], BlogModule);
+
+
+/***/ },
+
+/***/ "./src/modules/blog/blog.schema.ts"
+/*!*****************************************!*\
+  !*** ./src/modules/blog/blog.schema.ts ***!
+  \*****************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BlogSchema = exports.Blog = void 0;
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+let Blog = class Blog extends mongoose_2.Document {
+    title;
+    slug;
+    excerpt;
+    content;
+    coverImage;
+    category;
+    tags;
+    status;
+    author;
+    publishedAt;
+    viewCount;
+    metaTitle;
+    metaDescription;
+    createdAt;
+    updatedAt;
+};
+exports.Blog = Blog;
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "title", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "slug", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "excerpt", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "content", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "coverImage", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "category", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ type: [String] }),
+    __metadata("design:type", Array)
+], Blog.prototype, "tags", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "status", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "author", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", typeof (_a = typeof Date !== "undefined" && Date) === "function" ? _a : Object)
+], Blog.prototype, "publishedAt", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Number)
+], Blog.prototype, "viewCount", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "metaTitle", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Blog.prototype, "metaDescription", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", typeof (_b = typeof Date !== "undefined" && Date) === "function" ? _b : Object)
+], Blog.prototype, "createdAt", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", typeof (_c = typeof Date !== "undefined" && Date) === "function" ? _c : Object)
+], Blog.prototype, "updatedAt", void 0);
+exports.Blog = Blog = __decorate([
+    (0, mongoose_1.Schema)({ collection: 'blogs', strict: false })
+], Blog);
+exports.BlogSchema = mongoose_1.SchemaFactory.createForClass(Blog);
+
+
+/***/ },
+
+/***/ "./src/modules/blog/blog.service.ts"
+/*!******************************************!*\
+  !*** ./src/modules/blog/blog.service.ts ***!
+  \******************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.BlogService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+const blog_schema_1 = __webpack_require__(/*! ./blog.schema */ "./src/modules/blog/blog.schema.ts");
+let BlogService = class BlogService {
+    blogModel;
+    constructor(blogModel) {
+        this.blogModel = blogModel;
+    }
+    async findAll(page = 1, limit = 10, category) {
+        const p = Math.max(1, +page);
+        const l = Math.min(50, Math.max(1, +limit));
+        const filter = { status: 'published' };
+        if (category)
+            filter.category = category;
+        const [data, total] = await Promise.all([
+            this.blogModel.find(filter, { content: 0 })
+                .sort({ publishedAt: -1 }).skip((p - 1) * l).limit(l).lean(),
+            this.blogModel.countDocuments(filter),
+        ]);
+        return { data, total, page: p, limit: l };
+    }
+    async findBySlug(slug) {
+        const blog = await this.blogModel.findOneAndUpdate({ slug, status: 'published' }, { $inc: { viewCount: 1 } }, { new: true }).lean();
+        return blog;
+    }
+    async getCategories() {
+        return this.blogModel.distinct('category', { status: 'published' });
+    }
+};
+exports.BlogService = BlogService;
+exports.BlogService = BlogService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, mongoose_1.InjectModel)(blog_schema_1.Blog.name)),
+    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object])
+], BlogService);
+
+
+/***/ },
+
 /***/ "./src/modules/contracts/contracts.controller.ts"
 /*!*******************************************************!*\
   !*** ./src/modules/contracts/contracts.controller.ts ***!
@@ -7282,6 +7555,257 @@ exports.ContractsService = ContractsService = __decorate([
     __param(0, (0, mongoose_1.InjectModel)(contracts_schema_1.Contract.name)),
     __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object])
 ], ContractsService);
+
+
+/***/ },
+
+/***/ "./src/modules/help/help.controller.ts"
+/*!*********************************************!*\
+  !*** ./src/modules/help/help.controller.ts ***!
+  \*********************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HelpController = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const help_service_1 = __webpack_require__(/*! ./help.service */ "./src/modules/help/help.service.ts");
+let HelpController = class HelpController {
+    helpService;
+    constructor(helpService) {
+        this.helpService = helpService;
+    }
+    getFaqs() { return this.helpService.getFaqs(); }
+    submitContact(dto) {
+        return this.helpService.submitContact(dto);
+    }
+};
+exports.HelpController = HelpController;
+__decorate([
+    (0, common_1.Get)('faqs'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "getFaqs", null);
+__decorate([
+    (0, common_1.Post)('contact'),
+    __param(0, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", void 0)
+], HelpController.prototype, "submitContact", null);
+exports.HelpController = HelpController = __decorate([
+    (0, common_1.Controller)('help'),
+    __metadata("design:paramtypes", [typeof (_a = typeof help_service_1.HelpService !== "undefined" && help_service_1.HelpService) === "function" ? _a : Object])
+], HelpController);
+
+
+/***/ },
+
+/***/ "./src/modules/help/help.module.ts"
+/*!*****************************************!*\
+  !*** ./src/modules/help/help.module.ts ***!
+  \*****************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HelpModule = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const bullmq_1 = __webpack_require__(/*! @nestjs/bullmq */ "@nestjs/bullmq");
+const help_schema_1 = __webpack_require__(/*! ./help.schema */ "./src/modules/help/help.schema.ts");
+const help_service_1 = __webpack_require__(/*! ./help.service */ "./src/modules/help/help.service.ts");
+const help_controller_1 = __webpack_require__(/*! ./help.controller */ "./src/modules/help/help.controller.ts");
+let HelpModule = class HelpModule {
+};
+exports.HelpModule = HelpModule;
+exports.HelpModule = HelpModule = __decorate([
+    (0, common_1.Module)({
+        imports: [
+            mongoose_1.MongooseModule.forFeature([
+                { name: help_schema_1.Faq.name, schema: help_schema_1.FaqSchema },
+                { name: help_schema_1.ContactMessage.name, schema: help_schema_1.ContactMessageSchema },
+            ]),
+            bullmq_1.BullModule.registerQueue({ name: 'contact-form' }),
+        ],
+        controllers: [help_controller_1.HelpController],
+        providers: [help_service_1.HelpService],
+    })
+], HelpModule);
+
+
+/***/ },
+
+/***/ "./src/modules/help/help.schema.ts"
+/*!*****************************************!*\
+  !*** ./src/modules/help/help.schema.ts ***!
+  \*****************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ContactMessageSchema = exports.ContactMessage = exports.FaqSchema = exports.Faq = void 0;
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+let Faq = class Faq extends mongoose_2.Document {
+    question;
+    answer;
+    category;
+    order;
+    active;
+};
+exports.Faq = Faq;
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Faq.prototype, "question", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Faq.prototype, "answer", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], Faq.prototype, "category", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Number)
+], Faq.prototype, "order", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", Boolean)
+], Faq.prototype, "active", void 0);
+exports.Faq = Faq = __decorate([
+    (0, mongoose_1.Schema)({ collection: 'faqs', strict: false })
+], Faq);
+exports.FaqSchema = mongoose_1.SchemaFactory.createForClass(Faq);
+let ContactMessage = class ContactMessage extends mongoose_2.Document {
+    name;
+    email;
+    phone;
+    subject;
+    message;
+    status;
+};
+exports.ContactMessage = ContactMessage;
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "name", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "email", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "phone", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "subject", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "message", void 0);
+__decorate([
+    (0, mongoose_1.Prop)(),
+    __metadata("design:type", String)
+], ContactMessage.prototype, "status", void 0);
+exports.ContactMessage = ContactMessage = __decorate([
+    (0, mongoose_1.Schema)({ collection: 'contact_messages', strict: false })
+], ContactMessage);
+exports.ContactMessageSchema = mongoose_1.SchemaFactory.createForClass(ContactMessage);
+
+
+/***/ },
+
+/***/ "./src/modules/help/help.service.ts"
+/*!******************************************!*\
+  !*** ./src/modules/help/help.service.ts ***!
+  \******************************************/
+(__unused_webpack_module, exports, __webpack_require__) {
+
+
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+var __param = (this && this.__param) || function (paramIndex, decorator) {
+    return function (target, key) { decorator(target, key, paramIndex); }
+};
+var _a, _b, _c;
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.HelpService = void 0;
+const common_1 = __webpack_require__(/*! @nestjs/common */ "@nestjs/common");
+const mongoose_1 = __webpack_require__(/*! @nestjs/mongoose */ "@nestjs/mongoose");
+const mongoose_2 = __webpack_require__(/*! mongoose */ "mongoose");
+const bullmq_1 = __webpack_require__(/*! @nestjs/bullmq */ "@nestjs/bullmq");
+const bullmq_2 = __webpack_require__(/*! bullmq */ "bullmq");
+const help_schema_1 = __webpack_require__(/*! ./help.schema */ "./src/modules/help/help.schema.ts");
+let HelpService = class HelpService {
+    faqModel;
+    msgModel;
+    contactQueue;
+    constructor(faqModel, msgModel, contactQueue) {
+        this.faqModel = faqModel;
+        this.msgModel = msgModel;
+        this.contactQueue = contactQueue;
+    }
+    async getFaqs() {
+        return this.faqModel.find({ active: true }).sort({ category: 1, order: 1 }).lean();
+    }
+    async submitContact(dto) {
+        await new this.msgModel({ ...dto, status: 'new' }).save();
+        await this.contactQueue.add('send-contact-email', dto, {
+            attempts: 3,
+            backoff: { type: 'exponential', delay: 5000 },
+        });
+        return { success: true };
+    }
+};
+exports.HelpService = HelpService;
+exports.HelpService = HelpService = __decorate([
+    (0, common_1.Injectable)(),
+    __param(0, (0, mongoose_1.InjectModel)(help_schema_1.Faq.name)),
+    __param(1, (0, mongoose_1.InjectModel)(help_schema_1.ContactMessage.name)),
+    __param(2, (0, bullmq_1.InjectQueue)('contact-form')),
+    __metadata("design:paramtypes", [typeof (_a = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _a : Object, typeof (_b = typeof mongoose_2.Model !== "undefined" && mongoose_2.Model) === "function" ? _b : Object, typeof (_c = typeof bullmq_2.Queue !== "undefined" && bullmq_2.Queue) === "function" ? _c : Object])
+], HelpService);
 
 
 /***/ },

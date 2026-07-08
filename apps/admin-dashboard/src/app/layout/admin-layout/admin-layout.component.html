@@ -33,6 +33,20 @@
 
                 <span class="menu-separator">|</span>
 
+                <button mat-button routerLink="/blog" routerLinkActive="active" class="control-panel-button">
+                    <mat-icon>article</mat-icon>
+                    <span>Blog</span>
+                </button>
+
+                <span class="menu-separator">|</span>
+
+                <button mat-button routerLink="/help" routerLinkActive="active" class="control-panel-button">
+                    <mat-icon>help_outline</mat-icon>
+                    <span>Yardım</span>
+                </button>
+
+                <span class="menu-separator">|</span>
+
                 <button mat-button [matMenuTriggerFor]="settingsMenu" [class.active]="isSettingsPageActive()" class="settings-button">
                     <mat-icon>settings</mat-icon>
                     <span>Ayarlar</span>

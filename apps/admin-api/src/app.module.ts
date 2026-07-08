@@ -30,6 +30,8 @@ import { ContractsModule } from './modules/contracts/contracts.module';
 import { MembersModule } from './modules/members/members.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
 import { AdminNotificationsModule } from './modules/admin-notifications/admin-notifications.module';
+import { BlogModule } from './modules/blog/blog.module';
+import { HelpModule } from './modules/help/help.module';
 
 // Interceptors
 import { AuditLogInterceptor } from './modules/audit-logs/interceptors/audit-log.interceptor';
@@ -70,6 +72,8 @@ import { AuditLogExceptionFilter } from './modules/audit-logs/filters/audit-log-
     MembersModule,
     ReservationsModule,
     AdminNotificationsModule,
+    BlogModule,
+    HelpModule,
   ],
   controllers: [AppController],
   providers: [

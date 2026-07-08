@@ -1,0 +1,91 @@
+<div class="page-header">
+  <h1>{{ isEdit ? 'Blog Yazısı Düzenle' : 'Yeni Blog Yazısı' }}</h1>
+  <button mat-button (click)="router.navigate(['/blog'])">
+    <mat-icon>arrow_back</mat-icon> Geri
+  </button>
+</div>
+
+<div *ngIf="isLoading" class="loading"><mat-spinner diameter="40"></mat-spinner></div>
+
+<form [formGroup]="form" (ngSubmit)="save()" *ngIf="!isLoading">
+  <div class="editor-layout">
+    <!-- Ana içerik -->
+    <mat-card class="main-card">
+      <mat-card-content>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Başlık *</mat-label>
+          <input matInput formControlName="title" placeholder="Blog yazısının başlığı">
+          <mat-error *ngIf="f['title'].errors?.['required']">Başlık zorunludur</mat-error>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Özet</mat-label>
+          <textarea matInput formControlName="excerpt" rows="3" placeholder="Kısa özet (liste sayfasında görünür)"></textarea>
+        </mat-form-field>
+
+        <div class="content-label">İçerik *</div>
+        <quill-editor formControlName="content" [modules]="quillModules" class="content-editor"></quill-editor>
+        <div class="field-error" *ngIf="f['content'].errors?.['required'] && f['content'].touched">İçerik zorunludur</div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Sağ panel -->
+    <div class="sidebar">
+      <mat-card>
+        <mat-card-header><mat-card-title>Yayın Ayarları</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Durum</mat-label>
+            <mat-select formControlName="status">
+              <mat-option value="draft">Taslak</mat-option>
+              <mat-option value="published">Yayınla</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Yazar</mat-label>
+            <input matInput formControlName="author">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Kategori</mat-label>
+            <input matInput formControlName="category">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Etiketler (virgülle ayırın)</mat-label>
+            <input matInput formControlName="tags" placeholder="seyahat, uçuş, tatil">
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Kapak Görseli URL</mat-label>
+            <input matInput formControlName="coverImage">
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card style="margin-top:16px">
+        <mat-card-header><mat-card-title>SEO</mat-card-title></mat-card-header>
+        <mat-card-content>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Meta Başlık</mat-label>
+            <input matInput formControlName="metaTitle">
+            <mat-hint>Boş bırakılırsa başlık kullanılır</mat-hint>
+          </mat-form-field>
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Meta Açıklama</mat-label>
+            <textarea matInput formControlName="metaDescription" rows="3"></textarea>
+            <mat-hint>Boş bırakılırsa özet kullanılır</mat-hint>
+          </mat-form-field>
+        </mat-card-content>
+      </mat-card>
+
+      <div class="save-actions">
+        <button mat-raised-button color="primary" type="submit" [disabled]="isSaving">
+          <mat-spinner *ngIf="isSaving" diameter="20"></mat-spinner>
+          <span *ngIf="!isSaving">{{ isEdit ? 'Güncelle' : 'Kaydet' }}</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</form>

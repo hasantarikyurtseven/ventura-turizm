@@ -1,0 +1,69 @@
+<div class="blog-page">
+  <!-- Hero -->
+  <div class="blog-hero">
+    <div class="blog-hero-inner">
+      <h1>Blog</h1>
+      <p>Seyahat rehberleri, destinasyon önerileri ve havacılık dünyasından haberler</p>
+    </div>
+  </div>
+
+  <div class="blog-container">
+    <!-- Kategori Filtresi -->
+    <div class="category-filter" *ngIf="categories.length > 0">
+      <button class="cat-btn" [class.active]="selectedCategory === ''" (click)="selectCategory('')">Tümü</button>
+      <button class="cat-btn" *ngFor="let cat of categories" [class.active]="selectedCategory === cat" (click)="selectCategory(cat)">{{ cat }}</button>
+    </div>
+
+    <!-- Loading -->
+    <div class="loading-state" *ngIf="isLoading">
+      <mat-spinner diameter="48"></mat-spinner>
+    </div>
+
+    <!-- Post Grid -->
+    <div class="posts-grid" *ngIf="!isLoading && posts.length > 0">
+      <article class="post-card" *ngFor="let post of posts">
+        <a [routerLink]="['/blog', post.slug]" class="post-image-link">
+          <div class="post-image" [style.background-image]="post.coverImage ? 'url(' + post.coverImage + ')' : 'none'">
+            <div class="post-image-placeholder" *ngIf="!post.coverImage">
+              <mat-icon>article</mat-icon>
+            </div>
+          </div>
+        </a>
+        <div class="post-body">
+          <div class="post-meta">
+            <span class="post-category" *ngIf="post.category">{{ post.category }}</span>
+            <span class="post-date">{{ formatDate(post.publishedAt) }}</span>
+          </div>
+          <h2 class="post-title">
+            <a [routerLink]="['/blog', post.slug]">{{ post.title }}</a>
+          </h2>
+          <p class="post-excerpt" *ngIf="post.excerpt">{{ post.excerpt }}</p>
+          <div class="post-footer">
+            <span class="post-author" *ngIf="post.author">
+              <mat-icon>person</mat-icon> {{ post.author }}
+            </span>
+            <a [routerLink]="['/blog', post.slug]" class="read-more">Devamını Oku →</a>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Empty State -->
+    <div class="empty-state" *ngIf="!isLoading && posts.length === 0">
+      <mat-icon>article</mat-icon>
+      <h3>Henüz blog yazısı yok</h3>
+      <p>Yakında yeni içerikler eklenecek.</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" *ngIf="total > limit && !isLoading">
+      <button mat-stroked-button [disabled]="page === 1" (click)="prevPage()">
+        <mat-icon>chevron_left</mat-icon> Önceki
+      </button>
+      <span class="page-info">{{ page }} / {{ totalPages }}</span>
+      <button mat-stroked-button [disabled]="page >= totalPages" (click)="nextPage()">
+        Sonraki <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+</div>

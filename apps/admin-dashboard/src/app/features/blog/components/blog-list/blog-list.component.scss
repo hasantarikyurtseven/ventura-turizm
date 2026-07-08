@@ -1,0 +1,11 @@
+.page-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; }
+.filter-card { margin-bottom:16px; }
+.filter-row { display:flex; gap:16px; flex-wrap:wrap; padding:16px 16px 0; }
+.filter-row mat-form-field { min-width:200px; }
+.loading-overlay { display:flex; justify-content:center; padding:40px; }
+.blog-table { width:100%; }
+.slug { font-size:12px; color:#64748b; }
+.status-badge { padding:3px 10px; border-radius:12px; font-size:12px; font-weight:600; background:#f1f5f9; color:#64748b; }
+.status-badge.published { background:#dcfce7; color:#16a34a; }
+.empty-state { text-align:center; padding:60px 20px; color:#94a3b8; mat-icon { font-size:48px; width:48px; height:48px; } }
+.pagination { display:flex; align-items:center; justify-content:center; gap:12px; padding:12px; }

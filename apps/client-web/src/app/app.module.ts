@@ -26,6 +26,9 @@ import { PaymentComponent } from './features/payment/payment.component';
 import { PaymentCallbackComponent } from './features/payment-callback/payment-callback.component';
 import { MyReservationsComponent } from './features/my-reservations/my-reservations.component';
 import { ProfileComponent } from './features/profile/profile.component';
+import { BlogComponent } from './features/blog/blog.component';
+import { BlogDetailComponent } from './features/blog-detail/blog-detail.component';
+import { HelpComponent } from './features/help/help.component';
 import { API_BASE_URL_PROVIDER } from './core/api-url.token';
 import { AuthInterceptor } from './core/auth.interceptor';
 
@@ -49,6 +52,9 @@ registerLocaleData(localeTr);
     PaymentCallbackComponent,
     MyReservationsComponent,
     ProfileComponent,
+    BlogComponent,
+    BlogDetailComponent,
+    HelpComponent,
   ],
   imports: [
     BrowserModule,

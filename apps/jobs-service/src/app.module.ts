@@ -7,6 +7,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { EmailVerificationModule } from './modules/email-verification/email-verification.module';
 import { ReservationConfirmationModule } from './modules/reservation-confirmation/reservation-confirmation.module';
+import { ContactFormModule } from './modules/contact-form/contact-form.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { ReservationConfirmationModule } from './modules/reservation-confirmatio
     }),
     EmailVerificationModule,
     ReservationConfirmationModule,
+    ContactFormModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,0 +1,162 @@
+<div class="help-page">
+  <!-- Hero -->
+  <div class="help-hero">
+    <div class="help-hero-inner">
+      <mat-icon class="hero-icon">support_agent</mat-icon>
+      <h1>Yardım Merkezi</h1>
+      <p>Size nasıl yardımcı olabiliriz?</p>
+    </div>
+  </div>
+
+  <div class="help-container">
+    <!-- Hızlı Linkler -->
+    <div class="quick-links">
+      <a class="quick-link" (click)="scrollTo('faq')">
+        <mat-icon>help_outline</mat-icon>
+        <span>Sık Sorulan Sorular</span>
+      </a>
+      <a class="quick-link" (click)="scrollTo('contact')">
+        <mat-icon>mail_outline</mat-icon>
+        <span>Bize Yazın</span>
+      </a>
+      <a class="quick-link" href="tel:+902121234567">
+        <mat-icon>phone</mat-icon>
+        <span>Telefon Desteği</span>
+      </a>
+      <a class="quick-link" href="mailto:info@venturaturizm.com">
+        <mat-icon>email</mat-icon>
+        <span>E-posta</span>
+      </a>
+    </div>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="faq-section">
+      <div class="section-header">
+        <h2>Sık Sorulan Sorular</h2>
+        <p>En çok merak edilen konularda yanıtlarımız</p>
+      </div>
+
+      <div *ngIf="isLoadingFaqs" class="loading-state"><mat-spinner diameter="40"></mat-spinner></div>
+
+      <div *ngFor="let cat of categories" class="faq-category-group">
+        <h3 class="faq-category-title">{{ cat }}</h3>
+        <mat-accordion class="faq-accordion">
+          <mat-expansion-panel *ngFor="let faq of faqsByCategory(cat)" class="faq-panel">
+            <mat-expansion-panel-header>
+              <mat-panel-title>{{ faq.question }}</mat-panel-title>
+            </mat-expansion-panel-header>
+            <p class="faq-answer-text">{{ faq.answer }}</p>
+          </mat-expansion-panel>
+        </mat-accordion>
+      </div>
+
+      <!-- Kategorisiz FAQ -->
+      <mat-accordion *ngIf="categories.length === 0 && faqs.length > 0" class="faq-accordion">
+        <mat-expansion-panel *ngFor="let faq of faqs" class="faq-panel">
+          <mat-expansion-panel-header>
+            <mat-panel-title>{{ faq.question }}</mat-panel-title>
+          </mat-expansion-panel-header>
+          <p class="faq-answer-text">{{ faq.answer }}</p>
+        </mat-expansion-panel>
+      </mat-accordion>
+
+      <div *ngIf="!isLoadingFaqs && faqs.length === 0" class="no-faqs">
+        <p>Yakında SSS içerikleri eklenecek.</p>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact-section">
+      <div class="section-header">
+        <h2>Bize Ulaşın</h2>
+        <p>Sorularınız veya önerileriniz için formu doldurun, en kısa sürede yanıt verelim.</p>
+      </div>
+
+      <div class="contact-layout">
+        <!-- Form -->
+        <mat-card class="contact-form-card">
+          <mat-card-content>
+            <form [formGroup]="contactForm" (ngSubmit)="submitContact()">
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>Ad Soyad *</mat-label>
+                  <input matInput formControlName="name">
+                  <mat-error *ngIf="f['name'].errors?.['required']">Ad Soyad zorunludur</mat-error>
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>E-posta *</mat-label>
+                  <input matInput type="email" formControlName="email">
+                  <mat-error *ngIf="f['email'].errors?.['required']">E-posta zorunludur</mat-error>
+                  <mat-error *ngIf="f['email'].errors?.['email']">Geçerli bir e-posta girin</mat-error>
+                </mat-form-field>
+              </div>
+              <div class="form-row">
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>Telefon (İsteğe bağlı)</mat-label>
+                  <input matInput formControlName="phone" type="tel">
+                </mat-form-field>
+                <mat-form-field appearance="outline" class="flex-1">
+                  <mat-label>Konu *</mat-label>
+                  <mat-select formControlName="subject">
+                    <mat-option value="Genel Bilgi">Genel Bilgi</mat-option>
+                    <mat-option value="Rezervasyon">Rezervasyon</mat-option>
+                    <mat-option value="İptal & İade">İptal & İade</mat-option>
+                    <mat-option value="Teknik Sorun">Teknik Sorun</mat-option>
+                    <mat-option value="Ödeme">Ödeme</mat-option>
+                    <mat-option value="Diğer">Diğer</mat-option>
+                  </mat-select>
+                  <mat-error *ngIf="f['subject'].errors?.['required']">Konu seçiniz</mat-error>
+                </mat-form-field>
+              </div>
+              <mat-form-field appearance="outline" class="full-width">
+                <mat-label>Mesajınız *</mat-label>
+                <textarea matInput formControlName="message" rows="5" placeholder="Mesajınızı detaylı yazın..."></textarea>
+                <mat-error *ngIf="f['message'].errors?.['required']">Mesaj zorunludur</mat-error>
+                <mat-error *ngIf="f['message'].errors?.['minlength']">En az 20 karakter giriniz</mat-error>
+              </mat-form-field>
+              <button mat-raised-button class="submit-btn" type="submit" [disabled]="isSending">
+                <mat-spinner *ngIf="isSending" diameter="20"></mat-spinner>
+                <mat-icon *ngIf="!isSending">send</mat-icon>
+                <span>{{ isSending ? 'Gönderiliyor...' : 'Mesajı Gönder' }}</span>
+              </button>
+            </form>
+          </mat-card-content>
+        </mat-card>
+
+        <!-- Info -->
+        <div class="contact-info">
+          <div class="info-card">
+            <mat-icon>location_on</mat-icon>
+            <div>
+              <h4>Adres</h4>
+              <p>Atatürk Mah. Cumhuriyet Cad. No:1<br>İstanbul, Türkiye</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <mat-icon>phone</mat-icon>
+            <div>
+              <h4>Telefon</h4>
+              <p><a href="tel:+902121234567">+90 212 123 45 67</a></p>
+              <p class="info-note">Hafta içi 09:00 – 18:00</p>
+            </div>
+          </div>
+          <div class="info-card">
+            <mat-icon>email</mat-icon>
+            <div>
+              <h4>E-posta</h4>
+              <p><a href="mailto:info@venturaturizm.com">info&#64;venturaturizm.com</a></p>
+            </div>
+          </div>
+          <div class="info-card">
+            <mat-icon>schedule</mat-icon>
+            <div>
+              <h4>Çalışma Saatleri</h4>
+              <p>Pazartesi – Cuma: 09:00 – 18:00</p>
+              <p>Cumartesi: 10:00 – 14:00</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
