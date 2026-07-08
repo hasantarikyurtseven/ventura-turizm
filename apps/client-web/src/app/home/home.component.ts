@@ -3,6 +3,7 @@ import { FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ToastService } from '../core/toast.service';
 import { LocationSelection, LocationSelectorComponent } from '../shared/location-selector/location-selector.component';
+import { BlogService, BlogPost } from '../core/blog.service';
 
 @Component({
   selector: 'app-home',
@@ -40,9 +41,12 @@ export class HomeComponent implements OnInit {
   // Bugünün tarihi (geçmiş tarih seçimini engellemek için)
   today = new Date();
 
+  latestPosts: BlogPost[] = [];
+
   constructor(
     private readonly router: Router,
     private readonly toast: ToastService,
+    private readonly blogService: BlogService,
   ) {}
 
   @HostListener('document:click', ['$event'])
@@ -53,7 +57,18 @@ export class HomeComponent implements OnInit {
     }
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.blogService.getPosts(1, 3).subscribe(r => this.latestPosts = r.data);
+  }
+
+  scrollToSearch() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  formatBlogDate(d: string) {
+    if (!d) return '';
+    return new Date(d).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', year: 'numeric' });
+  }
 
   onFromLocationSelected(selection: LocationSelection): void {
     this.fromLocation = selection.code ? selection : null;

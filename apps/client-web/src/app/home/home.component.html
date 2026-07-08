@@ -151,85 +151,67 @@
   </div>
 </section>
 
-<!-- Main Services -->
-<section class="section main-services-section">
+<!-- Nasıl Çalışır -->
+<section class="section how-it-works-section">
   <div class="container">
     <div class="section-header">
-      <h2>Hizmetlerimiz</h2>
-      <p class="section-subtitle">Seyahat ihtiyaçlarınız için tüm çözümler tek platformda</p>
+      <h2>Nasıl Çalışır?</h2>
+      <p class="section-subtitle">3 adımda biletinizi alın, yolculuğunuza başlayın</p>
     </div>
-    <div class="main-services-grid">
-      <mat-card *ngFor="let service of mainServices" class="main-service-card" [routerLink]="service.route">
-        <div class="service-icon-wrapper" [style.background]="service.color">
-          <mat-icon>{{ service.icon }}</mat-icon>
-        </div>
-        <mat-card-content>
-          <h3>{{ service.title }}</h3>
-          <p>{{ service.description }}</p>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-button color="primary">Keşfet <mat-icon>arrow_forward</mat-icon></button>
-        </mat-card-actions>
-      </mat-card>
+    <div class="steps-grid">
+      <div class="step-item">
+        <div class="step-number">1</div>
+        <div class="step-icon"><mat-icon>search</mat-icon></div>
+        <h3>Ara</h3>
+        <p>Nereden nereye gideceğinizi, tarihinizi ve yolcu sayınızı girin. Tüm uygun seçenekleri anında listeleyin.</p>
+      </div>
+      <div class="step-connector"><mat-icon>arrow_forward</mat-icon></div>
+      <div class="step-item">
+        <div class="step-number">2</div>
+        <div class="step-icon"><mat-icon>compare_arrows</mat-icon></div>
+        <h3>Karşılaştır &amp; Seç</h3>
+        <p>Fiyat, saat ve bagaj seçeneklerini karşılaştırın. Seyahat tarzınıza en uygun uçuşu seçin.</p>
+      </div>
+      <div class="step-connector"><mat-icon>arrow_forward</mat-icon></div>
+      <div class="step-item">
+        <div class="step-number">3</div>
+        <div class="step-icon"><mat-icon>confirmation_number</mat-icon></div>
+        <h3>Rezervasyon Yap</h3>
+        <p>Yolcu bilgilerini girin, güvenli ödeme yapın. Biletiniz e-posta ile anında iletilir.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Featured Offers -->
-<section class="section offers-section">
+<!-- Neden Ventura -->
+<section class="section why-section">
   <div class="container">
-    <div class="section-header">
-      <h2>Özel Fırsatlar</h2>
-      <p class="section-subtitle">Size özel hazırlanmış kampanya ve fırsatlar</p>
-    </div>
-    <div class="offers-grid">
-      <mat-card *ngFor="let offer of featuredOffers" class="offer-card">
-        <div class="offer-badge">{{ offer.badge }}</div>
-        <div class="offer-icon-wrapper">
-          <mat-icon>{{ offer.icon }}</mat-icon>
-        </div>
-        <mat-card-content>
-          <h3>{{ offer.title }}</h3>
-          <p>{{ offer.description }}</p>
-          <div class="offer-price">{{ offer.price }}</div>
-        </mat-card-content>
-        <mat-card-actions>
-          <button mat-raised-button color="primary">Detaylar</button>
-        </mat-card-actions>
-      </mat-card>
-    </div>
-  </div>
-</section>
-
-<!-- Why Choose Us -->
-<section class="section why-choose-section">
-  <div class="container">
-    <div class="section-header">
-      <h2>Neden Bizi Seçmelisiniz?</h2>
-      <p class="section-subtitle">Seyahat deneyiminizi en iyi şekilde yaşamanız için</p>
-    </div>
-    <div class="why-choose-grid">
-      <mat-card *ngFor="let item of whyChooseUs" class="why-choose-card">
-        <mat-card-content>
-          <div class="why-choose-icon">
-            <mat-icon>{{ item.icon }}</mat-icon>
+    <div class="why-layout">
+      <div class="why-text">
+        <div class="why-label">Neden Ventura Turizm?</div>
+        <h2>Seyahatinizin Her Adımında Yanınızdayız</h2>
+        <p>Yurt içi ve yurt dışı uçuş seçeneklerini tek platformda karşılaştırın. En uygun fiyatları bulun, güvenli ödeme yapın.</p>
+        <a routerLink="/yardim" mat-stroked-button class="why-cta-btn">Daha Fazla Bilgi</a>
+      </div>
+      <div class="why-features">
+        <div class="why-feature" *ngFor="let item of whyChooseUs">
+          <div class="why-feature-icon"><mat-icon>{{ item.icon }}</mat-icon></div>
+          <div class="why-feature-text">
+            <h4>{{ item.title }}</h4>
+            <p>{{ item.description }}</p>
           </div>
-          <h3>{{ item.title }}</h3>
-          <p>{{ item.description }}</p>
-        </mat-card-content>
-      </mat-card>
+        </div>
+      </div>
     </div>
   </div>
 </section>
 
-<!-- Stats -->
-<section class="section stats-section">
+<!-- İstatistikler -->
+<section class="stats-section">
   <div class="container">
     <div class="stats-grid">
       <div *ngFor="let stat of stats" class="stat-item">
-        <div class="stat-icon">
-          <mat-icon>{{ stat.icon }}</mat-icon>
-        </div>
+        <mat-icon class="stat-icon">{{ stat.icon }}</mat-icon>
         <div class="stat-number">{{ stat.number }}</div>
         <div class="stat-label">{{ stat.label }}</div>
       </div>
@@ -237,29 +219,51 @@
   </div>
 </section>
 
-<!-- Testimonials -->
-<section class="section testimonials-section">
+<!-- Son Blog Yazıları -->
+<section class="section blog-preview-section" *ngIf="latestPosts.length > 0">
   <div class="container">
-    <div class="section-header">
-      <h2>Müşteri Yorumları</h2>
-      <p class="section-subtitle">Bizi tercih edenler ne diyor?</p>
+    <div class="section-header-row">
+      <div>
+        <h2>Seyahat Rehberi</h2>
+        <p class="section-subtitle">İpuçları, destinasyon önerileri ve havacılık dünyası</p>
+      </div>
+      <a routerLink="/blog" mat-stroked-button class="all-posts-btn">
+        Tüm Yazılar <mat-icon>arrow_forward</mat-icon>
+      </a>
     </div>
-    <div class="testimonials-grid">
-      <mat-card *ngFor="let testimonial of testimonials" class="testimonial-card">
-        <mat-card-content>
-          <div class="testimonial-header">
-            <div class="testimonial-rating">
-              <mat-icon *ngFor="let i of [1,2,3,4,5]">star</mat-icon>
-            </div>
-            <mat-chip class="service-chip">{{ testimonial.service }}</mat-chip>
-          </div>
-          <p class="testimonial-text">"{{ testimonial.text }}"</p>
-          <div class="testimonial-author">
-            <strong>{{ testimonial.name }}</strong>
-            <span>{{ testimonial.location }}</span>
-          </div>
-        </mat-card-content>
-      </mat-card>
+    <div class="blog-preview-grid">
+      <a class="blog-preview-card" *ngFor="let post of latestPosts" [routerLink]="['/blog', post.slug]">
+        <div class="blog-preview-img" [style.background-image]="post.coverImage ? 'url(' + post.coverImage + ')' : 'none'">
+          <div class="blog-preview-img-placeholder" *ngIf="!post.coverImage"><mat-icon>article</mat-icon></div>
+          <span class="blog-cat" *ngIf="post.category">{{ post.category }}</span>
+        </div>
+        <div class="blog-preview-body">
+          <p class="blog-date">{{ formatBlogDate(post.publishedAt) }}</p>
+          <h3>{{ post.title }}</h3>
+          <p class="blog-excerpt" *ngIf="post.excerpt">{{ post.excerpt }}</p>
+          <span class="blog-read-more">Devamını Oku →</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA Banner -->
+<section class="cta-section">
+  <div class="container">
+    <div class="cta-box">
+      <div class="cta-text">
+        <h2>Seyahatinizi Planlamaya Hazır mısınız?</h2>
+        <p>En uygun uçuş fiyatları için hemen arama yapın veya sorularınız için destek ekibimizle iletişime geçin.</p>
+      </div>
+      <div class="cta-actions">
+        <button mat-raised-button class="cta-btn-primary" (click)="scrollToSearch()">
+          <mat-icon>flight_takeoff</mat-icon> Uçuş Ara
+        </button>
+        <a routerLink="/yardim" mat-stroked-button class="cta-btn-secondary">
+          <mat-icon>support_agent</mat-icon> Destek Al
+        </a>
+      </div>
     </div>
   </div>
 </section>
