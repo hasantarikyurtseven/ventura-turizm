@@ -1,0 +1,244 @@
+.site-footer {
+  background: #0f2129;
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 14px;
+}
+
+// ─── Container ────────────────────────────────────────────────────────────────
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+// ─── Ana bölüm ────────────────────────────────────────────────────────────────
+
+.footer-main {
+  padding: 64px 0 48px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+
+  .footer-container {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1.5fr;
+    gap: 56px;
+    align-items: start;
+  }
+}
+
+// ─── Marka kolonu ────────────────────────────────────────────────────────────
+
+.footer-logo {
+  height: 36px;
+  display: block;
+  margin-bottom: 16px;
+  filter: brightness(0) invert(1);
+  opacity: 0.92;
+}
+
+.footer-logo-text {
+  display: none;
+  font-size: 20px;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: 1.5px;
+  margin-bottom: 16px;
+}
+
+.footer-brand-desc {
+  color: rgba(255, 255, 255, 0.55);
+  line-height: 1.7;
+  margin: 0 0 24px;
+  max-width: 280px;
+}
+
+.footer-social {
+  display: flex;
+  gap: 10px;
+}
+
+.social-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  transition: all 0.2s;
+
+  &:hover {
+    background: #4088b3;
+    border-color: #4088b3;
+    color: #fff;
+    transform: translateY(-2px);
+  }
+}
+
+// ─── Kolon başlığı ───────────────────────────────────────────────────────────
+
+.footer-col-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #fff;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+// ─── Linkler ─────────────────────────────────────────────────────────────────
+
+.footer-links {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  li a {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    transition: color 0.15s;
+
+    mat-icon {
+      font-size: 15px;
+      width: 15px;
+      height: 15px;
+      opacity: 0.7;
+    }
+
+    &:hover { color: #fff; }
+
+    &.soon {
+      cursor: default;
+      opacity: 0.55;
+      &:hover { color: rgba(255, 255, 255, 0.6); }
+    }
+  }
+}
+
+.soon-badge {
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(64, 136, 179, 0.35);
+  color: #93c5fd;
+  padding: 1px 7px;
+  border-radius: 8px;
+  margin-left: 2px;
+  letter-spacing: 0.03em;
+}
+
+// ─── İletişim ────────────────────────────────────────────────────────────────
+
+.footer-contact {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+
+    mat-icon {
+      font-size: 17px;
+      width: 17px;
+      height: 17px;
+      color: #4088b3;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    span, a {
+      color: rgba(255, 255, 255, 0.6);
+      line-height: 1.55;
+      text-decoration: none;
+    }
+
+    a:hover { color: #fff; }
+  }
+}
+
+// ─── Alt çizgi ────────────────────────────────────────────────────────────────
+
+.footer-bottom {
+  padding: 18px 0;
+}
+
+.footer-bottom-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  span {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 13px;
+  }
+}
+
+.footer-legal-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  a {
+    color: rgba(255, 255, 255, 0.35);
+    text-decoration: none;
+    font-size: 13px;
+    transition: color 0.15s;
+    &:hover { color: rgba(255, 255, 255, 0.7); }
+  }
+
+  .sep { color: rgba(255, 255, 255, 0.2); }
+}
+
+// ─── Responsive ──────────────────────────────────────────────────────────────
+
+@media (max-width: 768px) {
+  .footer-main .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 36px 40px;
+  }
+
+  .footer-brand {
+    grid-column: 1 / -1;
+    .footer-brand-desc { max-width: 100%; }
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-main {
+    padding: 48px 0 36px;
+
+    .footer-container {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+  }
+
+  .footer-bottom-inner {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 10px;
+  }
+
+  .footer-legal-links {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}

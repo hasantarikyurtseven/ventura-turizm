@@ -12,6 +12,7 @@ import { AppComponent } from './app.component';
 import { MaterialModule } from './material.module';
 import { HomeComponent } from './home/home.component';
 import { NavbarComponent } from './layout/navbar/navbar.component';
+import { FooterComponent } from './layout/footer/footer.component';
 import { RegisterComponent } from './auth/register/register.component';
 import { LoginComponent } from './auth/login/login.component';
 import { LoginModalComponent } from './auth/login/login-modal.component';
@@ -39,6 +40,7 @@ registerLocaleData(localeTr);
     AppComponent,
     HomeComponent,
     NavbarComponent,
+    FooterComponent,
     RegisterComponent,
     LoginComponent,
     LoginModalComponent,
