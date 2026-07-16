@@ -72,6 +72,10 @@ export interface FlightCard {
   brandOptions?: FlightBrandOption[];
 
   optionFlag?: string; // OUT / IN
+  /** RecommendationBox kaynaklı bacaklarda rota eşleştirme anahtarı */
+  legDedupeKey?: string;
+  /** Allocate için RecommendationBox + SubOptions akışı gerektirir */
+  isRecommendationLeg?: boolean;
   bookingProvider?: string;
   bookingProviderId?: number;
   validatingCarrier?: string;
@@ -85,6 +89,16 @@ export interface FlightCard {
   isNdc?: boolean;
   isEticket?: boolean;
   isFlexSC?: boolean;
+}
+
+/** Gidiş-dönüş RecommendationBox eşleşmeleri (Allocate SubOptions için) */
+export interface RecommendationLink {
+  productId: string;
+  outboundSubOptionId: string;
+  returnSubOptionId: string;
+  outboundDedupeKey: string;
+  returnDedupeKey: string;
+  totalFare: number;
 }
 
 function ensureArray<T>(v: T | T[] | undefined | null): T[] {
@@ -148,13 +162,170 @@ function currencySymbol(code: string): string {
   }
 }
 
+/** A_Flight için benzersiz anahtar (gidiş/dönüş tekilleştirme — rota bazlı) */
+function getAFlightDedupeKey(af: any): string {
+  const segs = ensureArray(af?.Segments?.A_FlightSegment);
+  if (!segs.length) return String(af?.FlightId || '').trim();
+  return segs
+    .map((seg) =>
+      [
+        seg.FlightNumber,
+        seg.DepartureDate,
+        seg.DepartureAirport,
+        seg.ArrivalAirport,
+      ]
+        .map((v) => String(v || '').trim())
+        .join(':'),
+    )
+    .join('|');
+}
+
+/** A_Flight için id (allocate için FlightId tercih edilir) */
+function getAFlightId(af: any, box: any): string {
+  return String(af?.FlightId || box?.ProductId || '').trim();
+}
+
+/** RecommendationBox içindeki A_FlightSegment → T_Segment benzeri yapı */
+function mapAFlightSegmentToTSegment(seg: any): any {
+  return {
+    Id: seg?.Id,
+    OriginCode: seg?.DepartureAirport,
+    DestinationCode: seg?.ArrivalAirport,
+    DepartureDay: seg?.DepartureDate,
+    ArrivalDay: seg?.ArrivalDate,
+    DepartureTime: seg?.DepartureTime,
+    ArrivalTime: seg?.ArrivalTime,
+    FlightNumber: seg?.FlightNumber,
+    MarketingAirline: seg?.MarketingAirline,
+    OperatingAirline: seg?.OperatingAirline,
+    Duration: seg?.Duration,
+    CabinClass: seg?.Cabin,
+    Cabin: seg?.Cabin,
+    BookingClass: seg?.BookingClass,
+    FareBasis: seg?.FareBasis,
+    FareType: seg?.FareType,
+    Equipment: seg?.EquipmentType,
+    HasTechnicalStop: seg?.isTechnicalStop,
+  };
+}
+
+/** RecommendationBox A_Flight → T_FlightOption benzeri pseudo obje */
+function aFlightToPseudoOption(af: any, box: any, optionFlag: 'OUT' | 'IN'): any {
+  const segments = ensureArray(af?.Segments?.A_FlightSegment).map(mapAFlightSegmentToTSegment);
+  const dedupeKey = getAFlightDedupeKey(af);
+  const subOptionId = getAFlightId(af, box);
+
+  return {
+    // UI seçimi için benzersiz id — allocate'de ProductId olarak KULLANILMAZ
+    ProductId: `${optionFlag}:${dedupeKey}`,
+    Currency: box?.Currency,
+    TotalFare: Number(box?.TotalFare ?? box?.NetFare ?? 0) || 0,
+    NetFare: Number(box?.NetFare ?? 0) || 0,
+    Segments: { T_Segment: segments },
+    BrandedFares: box?.BrandedFares,
+    FreeBaggageAllowances: box?.BrandedFares?.T_BrandedFare_v2?.FreeBaggageAllowances ?? box?.FreeBaggageAllowances,
+    BrandedItems: box?.BrandedFares?.T_BrandedFare_v2?.BrandedItems ?? box?.BrandedItems,
+    OptionFlag: optionFlag,
+    ValidatingCarrier: box?.ValidatingCarrier,
+    BookingProvider: box?.BookingProvider,
+    BookingProviderId: box?.BookingProviderId,
+    IsRefundable: box?.IsRefundable,
+    IsReservable: box?.IsReservable,
+    IsEticket: box?.IsEticket,
+    FlightRuleAttribute: box?.FlightRuleAttribute,
+    _legDedupeKey: dedupeKey,
+    _isRecommendationLeg: true,
+    _subOptionId: subOptionId,
+    _recommendationProductId: String(box?.ProductId || '').trim(),
+  };
+}
+
+/** RecommendationBox gidiş-dönüş kombinasyonlarını toplar */
+function collectRecommendationLinks(result: any): RecommendationLink[] {
+  const recBoxes = ensureArray(result?.Recommendations?.T_RecommendationBox);
+  const links: RecommendationLink[] = [];
+
+  for (const box of recBoxes) {
+    const productId = String(box?.ProductId || '').trim();
+    if (!productId) continue;
+
+    const totalFare = Number(box?.TotalFare ?? box?.NetFare ?? 0) || 0;
+    const depFlights = ensureArray(box?.DepartureFlights?.A_Flight);
+    const retFlights = ensureArray(box?.ReturnFlights?.A_Flight);
+
+    for (const dep of depFlights) {
+      for (const ret of retFlights) {
+        const outboundDedupeKey = getAFlightDedupeKey(dep);
+        const returnDedupeKey = getAFlightDedupeKey(ret);
+        const outboundSubOptionId = getAFlightId(dep, box);
+        const returnSubOptionId = getAFlightId(ret, box);
+        if (!outboundDedupeKey || !returnDedupeKey || !outboundSubOptionId || !returnSubOptionId) continue;
+
+        links.push({
+          productId,
+          outboundSubOptionId,
+          returnSubOptionId,
+          outboundDedupeKey,
+          returnDedupeKey,
+          totalFare,
+        });
+      }
+    }
+  }
+
+  return links;
+}
+
+/**
+ * RT aramalarda FlightOptions boş geldiğinde Recommendations.T_RecommendationBox
+ * içinden gidiş (OUT) ve dönüş (IN) uçuşlarını çıkarır.
+ */
+function collectFlightsFromRecommendations(result: any): any[] {
+  const recBoxes = ensureArray(result?.Recommendations?.T_RecommendationBox);
+  if (!recBoxes.length) return [];
+
+  const legMap = new Map<string, any>();
+
+  const upsertLeg = (af: any, box: any, optionFlag: 'OUT' | 'IN') => {
+    const dedupeKey = getAFlightDedupeKey(af);
+    if (!dedupeKey) return;
+    const key = `${optionFlag}:${dedupeKey}`;
+    const boxFare = Number(box?.TotalFare ?? box?.NetFare ?? 0) || 0;
+    const pseudo = aFlightToPseudoOption(af, box, optionFlag);
+    const existing = legMap.get(key);
+    if (!existing || boxFare < (Number(existing._boxFare) || Infinity)) {
+      legMap.set(key, { ...pseudo, _boxFare: boxFare });
+    }
+  };
+
+  for (const box of recBoxes) {
+    const depFlights = ensureArray(box?.DepartureFlights?.A_Flight);
+    const retFlights = ensureArray(box?.ReturnFlights?.A_Flight);
+
+    depFlights.forEach((af) => upsertLeg(af, box, 'OUT'));
+    retFlights.forEach((af) => upsertLeg(af, box, 'IN'));
+  }
+
+  return Array.from(legMap.values()).map(({ _boxFare, ...opt }) => opt);
+}
+
+/** FlightOptions boş mu? (nil veya T_FlightOption yok) */
+function hasFlightOptions(result: any): boolean {
+  const fo = result?.FlightOptions;
+  if (!fo) return false;
+  if (fo?.T_FlightOption) return true;
+  if (Array.isArray(fo) && fo.length > 0) return true;
+  return false;
+}
+
 export function mapAirSearchXmlToFlights(rawXml: string): {
   hasError?: boolean;
   searchId?: string;
   shoppingFileId?: string;
   flights: FlightCard[];
+  recommendationLinks?: RecommendationLink[];
 } {
-  const emptyResult = { hasError: true, searchId: undefined, shoppingFileId: undefined, flights: [] };
+  const emptyResult = { hasError: true, searchId: undefined, shoppingFileId: undefined, flights: [], recommendationLinks: [] as RecommendationLink[] };
 
   if (!rawXml || typeof rawXml !== 'string' || rawXml.trim().length === 0) {
     return emptyResult;
@@ -238,6 +409,13 @@ export function mapAirSearchXmlToFlights(rawXml: string): {
   // Olası yapı 4: ProductItem array
   else if (result?.ProductItem) {
     options = ensureArray(result.ProductItem);
+  }
+
+  // Olası yapı 5: RT aramalarda FlightOptions boş, uçuşlar Recommendations içinde
+  let recommendationLinks: RecommendationLink[] = [];
+  if (options.length === 0 && !hasFlightOptions(result)) {
+    options = collectFlightsFromRecommendations(result);
+    recommendationLinks = collectRecommendationLinks(result);
   }
 
   const flights: FlightCard[] = options
@@ -504,6 +682,8 @@ export function mapAirSearchXmlToFlights(rawXml: string): {
         brandOptions,
 
         optionFlag: opt?.OptionFlag ? String(opt.OptionFlag) : undefined,
+        legDedupeKey: opt?._legDedupeKey ? String(opt._legDedupeKey) : undefined,
+        isRecommendationLeg: opt?._isRecommendationLeg === true,
         bookingProvider: opt?.BookingProvider ? String(opt.BookingProvider) : undefined,
         bookingProviderId: opt?.BookingProviderId ? Number(opt.BookingProviderId) : undefined,
         validatingCarrier: opt?.ValidatingCarrier ? String(opt.ValidatingCarrier) : undefined,
@@ -521,6 +701,6 @@ export function mapAirSearchXmlToFlights(rawXml: string): {
     })
     .filter(Boolean) as FlightCard[];
 
-  return { hasError, searchId, shoppingFileId, flights };
+  return { hasError, searchId, shoppingFileId, flights, recommendationLinks };
 }
 

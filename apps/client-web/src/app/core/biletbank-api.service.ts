@@ -60,6 +60,17 @@ export interface AirSearchFlightDto {
     currency: string;
   }[];
   optionFlag?: string;
+  legDedupeKey?: string;
+  isRecommendationLeg?: boolean;
+}
+
+export interface RecommendationLinkDto {
+  productId: string;
+  outboundSubOptionId: string;
+  returnSubOptionId: string;
+  outboundDedupeKey: string;
+  returnDedupeKey: string;
+  totalFare: number;
 }
 
 export interface AirSearchResponseDto {
@@ -71,6 +82,7 @@ export interface AirSearchResponseDto {
   sessionId?: string; // Allocate için gerekli
   sessionToken?: string; // Allocate için gerekli
   flights?: AirSearchFlightDto[];
+  recommendationLinks?: RecommendationLinkDto[];
 }
 
 export interface AllocateRequestDto {
@@ -78,6 +90,7 @@ export interface AllocateRequestDto {
   selectedItems?: {
     productId: string;
     brandedFareItemId?: string;
+    subOptions?: string[];
   }[];
   brandedFareItemId?: string;
   sessionId: string;

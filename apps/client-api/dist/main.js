@@ -2759,8 +2759,141 @@ function currencySymbol(code) {
             return code || '';
     }
 }
+function getAFlightDedupeKey(af) {
+    const segs = ensureArray(af?.Segments?.A_FlightSegment);
+    if (!segs.length)
+        return String(af?.FlightId || '').trim();
+    return segs
+        .map((seg) => [
+        seg.FlightNumber,
+        seg.DepartureDate,
+        seg.DepartureAirport,
+        seg.ArrivalAirport,
+    ]
+        .map((v) => String(v || '').trim())
+        .join(':'))
+        .join('|');
+}
+function getAFlightId(af, box) {
+    return String(af?.FlightId || box?.ProductId || '').trim();
+}
+function mapAFlightSegmentToTSegment(seg) {
+    return {
+        Id: seg?.Id,
+        OriginCode: seg?.DepartureAirport,
+        DestinationCode: seg?.ArrivalAirport,
+        DepartureDay: seg?.DepartureDate,
+        ArrivalDay: seg?.ArrivalDate,
+        DepartureTime: seg?.DepartureTime,
+        ArrivalTime: seg?.ArrivalTime,
+        FlightNumber: seg?.FlightNumber,
+        MarketingAirline: seg?.MarketingAirline,
+        OperatingAirline: seg?.OperatingAirline,
+        Duration: seg?.Duration,
+        CabinClass: seg?.Cabin,
+        Cabin: seg?.Cabin,
+        BookingClass: seg?.BookingClass,
+        FareBasis: seg?.FareBasis,
+        FareType: seg?.FareType,
+        Equipment: seg?.EquipmentType,
+        HasTechnicalStop: seg?.isTechnicalStop,
+    };
+}
+function aFlightToPseudoOption(af, box, optionFlag) {
+    const segments = ensureArray(af?.Segments?.A_FlightSegment).map(mapAFlightSegmentToTSegment);
+    const dedupeKey = getAFlightDedupeKey(af);
+    const subOptionId = getAFlightId(af, box);
+    return {
+        ProductId: `${optionFlag}:${dedupeKey}`,
+        Currency: box?.Currency,
+        TotalFare: Number(box?.TotalFare ?? box?.NetFare ?? 0) || 0,
+        NetFare: Number(box?.NetFare ?? 0) || 0,
+        Segments: { T_Segment: segments },
+        BrandedFares: box?.BrandedFares,
+        FreeBaggageAllowances: box?.BrandedFares?.T_BrandedFare_v2?.FreeBaggageAllowances ?? box?.FreeBaggageAllowances,
+        BrandedItems: box?.BrandedFares?.T_BrandedFare_v2?.BrandedItems ?? box?.BrandedItems,
+        OptionFlag: optionFlag,
+        ValidatingCarrier: box?.ValidatingCarrier,
+        BookingProvider: box?.BookingProvider,
+        BookingProviderId: box?.BookingProviderId,
+        IsRefundable: box?.IsRefundable,
+        IsReservable: box?.IsReservable,
+        IsEticket: box?.IsEticket,
+        FlightRuleAttribute: box?.FlightRuleAttribute,
+        _legDedupeKey: dedupeKey,
+        _isRecommendationLeg: true,
+        _subOptionId: subOptionId,
+        _recommendationProductId: String(box?.ProductId || '').trim(),
+    };
+}
+function collectRecommendationLinks(result) {
+    const recBoxes = ensureArray(result?.Recommendations?.T_RecommendationBox);
+    const links = [];
+    for (const box of recBoxes) {
+        const productId = String(box?.ProductId || '').trim();
+        if (!productId)
+            continue;
+        const totalFare = Number(box?.TotalFare ?? box?.NetFare ?? 0) || 0;
+        const depFlights = ensureArray(box?.DepartureFlights?.A_Flight);
+        const retFlights = ensureArray(box?.ReturnFlights?.A_Flight);
+        for (const dep of depFlights) {
+            for (const ret of retFlights) {
+                const outboundDedupeKey = getAFlightDedupeKey(dep);
+                const returnDedupeKey = getAFlightDedupeKey(ret);
+                const outboundSubOptionId = getAFlightId(dep, box);
+                const returnSubOptionId = getAFlightId(ret, box);
+                if (!outboundDedupeKey || !returnDedupeKey || !outboundSubOptionId || !returnSubOptionId)
+                    continue;
+                links.push({
+                    productId,
+                    outboundSubOptionId,
+                    returnSubOptionId,
+                    outboundDedupeKey,
+                    returnDedupeKey,
+                    totalFare,
+                });
+            }
+        }
+    }
+    return links;
+}
+function collectFlightsFromRecommendations(result) {
+    const recBoxes = ensureArray(result?.Recommendations?.T_RecommendationBox);
+    if (!recBoxes.length)
+        return [];
+    const legMap = new Map();
+    const upsertLeg = (af, box, optionFlag) => {
+        const dedupeKey = getAFlightDedupeKey(af);
+        if (!dedupeKey)
+            return;
+        const key = `${optionFlag}:${dedupeKey}`;
+        const boxFare = Number(box?.TotalFare ?? box?.NetFare ?? 0) || 0;
+        const pseudo = aFlightToPseudoOption(af, box, optionFlag);
+        const existing = legMap.get(key);
+        if (!existing || boxFare < (Number(existing._boxFare) || Infinity)) {
+            legMap.set(key, { ...pseudo, _boxFare: boxFare });
+        }
+    };
+    for (const box of recBoxes) {
+        const depFlights = ensureArray(box?.DepartureFlights?.A_Flight);
+        const retFlights = ensureArray(box?.ReturnFlights?.A_Flight);
+        depFlights.forEach((af) => upsertLeg(af, box, 'OUT'));
+        retFlights.forEach((af) => upsertLeg(af, box, 'IN'));
+    }
+    return Array.from(legMap.values()).map(({ _boxFare, ...opt }) => opt);
+}
+function hasFlightOptions(result) {
+    const fo = result?.FlightOptions;
+    if (!fo)
+        return false;
+    if (fo?.T_FlightOption)
+        return true;
+    if (Array.isArray(fo) && fo.length > 0)
+        return true;
+    return false;
+}
 function mapAirSearchXmlToFlights(rawXml) {
-    const emptyResult = { hasError: true, searchId: undefined, shoppingFileId: undefined, flights: [] };
+    const emptyResult = { hasError: true, searchId: undefined, shoppingFileId: undefined, flights: [], recommendationLinks: [] };
     if (!rawXml || typeof rawXml !== 'string' || rawXml.trim().length === 0) {
         return emptyResult;
     }
@@ -2828,6 +2961,11 @@ function mapAirSearchXmlToFlights(rawXml) {
     }
     else if (result?.ProductItem) {
         options = ensureArray(result.ProductItem);
+    }
+    let recommendationLinks = [];
+    if (options.length === 0 && !hasFlightOptions(result)) {
+        options = collectFlightsFromRecommendations(result);
+        recommendationLinks = collectRecommendationLinks(result);
     }
     const flights = options
         .map((opt) => {
@@ -3050,6 +3188,8 @@ function mapAirSearchXmlToFlights(rawXml) {
             }),
             brandOptions,
             optionFlag: opt?.OptionFlag ? String(opt.OptionFlag) : undefined,
+            legDedupeKey: opt?._legDedupeKey ? String(opt._legDedupeKey) : undefined,
+            isRecommendationLeg: opt?._isRecommendationLeg === true,
             bookingProvider: opt?.BookingProvider ? String(opt.BookingProvider) : undefined,
             bookingProviderId: opt?.BookingProviderId ? Number(opt.BookingProviderId) : undefined,
             validatingCarrier: opt?.ValidatingCarrier ? String(opt.ValidatingCarrier) : undefined,
@@ -3066,7 +3206,7 @@ function mapAirSearchXmlToFlights(rawXml) {
         };
     })
         .filter(Boolean);
-    return { hasError, searchId, shoppingFileId, flights };
+    return { hasError, searchId, shoppingFileId, flights, recommendationLinks };
 }
 
 
@@ -3339,6 +3479,7 @@ let BiletbankAirSearchService = BiletbankAirSearchService_1 = class BiletbankAir
                 sessionId: loginResult.sessionId,
                 sessionToken: loginResult.sessionToken,
                 flights: mapped.flights,
+                recommendationLinks: mapped.recommendationLinks ?? [],
             };
             this.lastResponse = response;
             return response;
@@ -3644,13 +3785,19 @@ let BiletbankAllocateService = BiletbankAllocateService_1 = class BiletbankAlloc
         const selectedItemsXml = selectedItems
             .map((item) => {
             const brandedFareItemId = item.brandedFareItemId?.trim();
+            const subOptions = (item.subOptions || []).filter((id) => id?.trim());
+            const subOptionsXml = subOptions.length
+                ? `
+              <io:SubOptions>${subOptions.map((id) => `<arr:guid xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">${escapeXml(id.trim())}</arr:guid>`).join('')}
+              </io:SubOptions>`
+                : '';
             return `
             <io:IO_AllocationItem>
               ${brandedFareItemId ? `<io:BrandedFareItemId>${escapeXml(brandedFareItemId)}</io:BrandedFareItemId>` : ''}
               <io:ProductId>${escapeXml(item.productId.trim())}</io:ProductId>
               <io:SelectedServiceFee>
                 <io:Amount>${amountFormatted}</io:Amount>
-              </io:SelectedServiceFee>
+              </io:SelectedServiceFee>${subOptionsXml}
             </io:IO_AllocationItem>`;
         })
             .join('');
@@ -6319,6 +6466,7 @@ const class_transformer_1 = __webpack_require__(/*! class-transformer */ "class-
 class AllocateRequestItemDto {
     productId;
     brandedFareItemId;
+    subOptions;
 }
 exports.AllocateRequestItemDto = AllocateRequestItemDto;
 __decorate([
@@ -6331,6 +6479,12 @@ __decorate([
     (0, class_validator_1.IsString)(),
     __metadata("design:type", String)
 ], AllocateRequestItemDto.prototype, "brandedFareItemId", void 0);
+__decorate([
+    (0, class_validator_1.IsOptional)(),
+    (0, class_validator_1.IsArray)(),
+    (0, class_validator_1.IsString)({ each: true }),
+    __metadata("design:type", Array)
+], AllocateRequestItemDto.prototype, "subOptions", void 0);
 class AllocateRequestDto {
     productId;
     selectedItems;

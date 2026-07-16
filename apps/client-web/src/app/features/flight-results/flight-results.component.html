@@ -23,6 +23,56 @@
       </button>
     </div>
 
+    <!-- RT Adım Göstergesi -->
+    <div class="rt-steps-bar"
+         *ngIf="searchTripType === 'RT' && hasSearchResult && !isLoading && (filteredOutboundFlights.length > 0 || filteredReturnFlights.length > 0)">
+      <div class="rt-step" [class.active]="rtStep === 1" [class.done]="rtStep === 2">
+        <div class="step-circle">
+          <mat-icon *ngIf="rtStep === 2">check</mat-icon>
+          <span *ngIf="rtStep === 1">1</span>
+        </div>
+        <div class="step-info">
+          <span class="step-label">Gidiş Uçuşu</span>
+          <span class="step-route">{{ searchOriginCode }} → {{ searchDestinationCode }}</span>
+          <span class="step-date" *ngIf="searchDepartureDate">{{ formatSearchDate(searchDepartureDate) }}</span>
+        </div>
+      </div>
+      <div class="step-connector"><div class="connector-line"></div></div>
+      <div class="rt-step" [class.active]="rtStep === 2">
+        <div class="step-circle">
+          <span>2</span>
+        </div>
+        <div class="step-info">
+          <span class="step-label">Dönüş Uçuşu</span>
+          <span class="step-route">{{ searchDestinationCode }} → {{ searchOriginCode }}</span>
+          <span class="step-date" *ngIf="searchReturnDate">{{ formatSearchDate(searchReturnDate) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: Seçili gidiş uçuşu özeti -->
+    <div class="selected-outbound-bar" *ngIf="rtStep === 2 && selectedOutboundFlight">
+      <div class="selected-outbound-info">
+        <div class="selected-outbound-icon">
+          <mat-icon>flight_takeoff</mat-icon>
+        </div>
+        <div class="selected-outbound-details">
+          <span class="selected-label">Seçili Gidiş Uçuşu</span>
+          <span class="selected-flight-summary">
+            <strong>{{ getAirlineForFlight(selectedOutboundFlight).name }}</strong>
+            · {{ selectedOutboundFlight.departure.time }} {{ selectedOutboundFlight.departure.airportCode }}
+            → {{ selectedOutboundFlight.arrival.time }} {{ selectedOutboundFlight.arrival.airportCode }}
+            · {{ selectedOutboundFlight.duration }}
+            · <span class="selected-price">{{ formatPrice(selectedOutboundFlight.price) }} {{ selectedOutboundFlight.currency }}</span>
+          </span>
+        </div>
+      </div>
+      <button mat-stroked-button class="change-outbound-btn" (click)="goBackToStep1()">
+        <mat-icon>arrow_back</mat-icon>
+        Gidiş Uçuşunu Değiştir
+      </button>
+    </div>
+
     <div class="results-layout">
       <!-- Filters Sidebar -->
       <aside class="filters-sidebar" [class.active]="showFilters">
@@ -246,18 +296,18 @@
               </div>
             </section>
 
-            <!-- Gidiş biletleri (RT) -->
-            <section class="flight-section outbound" *ngIf="searchTripType === 'RT' && filteredOutboundFlights.length > 0">
+            <!-- Gidiş biletleri (RT - yalnızca Step 1'de görünür) -->
+            <section class="flight-section outbound" *ngIf="searchTripType === 'RT' && filteredOutboundFlights.length > 0 && rtStep === 1">
               <div class="section-header">
                 <mat-icon class="section-icon">flight_takeoff</mat-icon>
                 <div class="section-title-block">
-                  <h2 class="section-title">Gidiş biletleri</h2>
+                  <h2 class="section-title">Gidiş uçuşunu seç</h2>
                   <p class="section-route" *ngIf="searchOriginCode && searchDestinationCode">
                     {{ searchOriginCode }} → {{ searchDestinationCode }}
                     <span class="section-date" *ngIf="searchDepartureDate">{{ formatSearchDate(searchDepartureDate) }}</span>
                   </p>
                 </div>
-                <span class="section-badge">{{ filteredOutboundFlights.length }} uçuş</span>
+                <span class="section-badge">{{ filteredOutboundFlights.length }} seçenek</span>
               </div>
               <div class="section-cards">
                 <ng-container *ngFor="let flight of filteredOutboundFlights">
@@ -266,21 +316,21 @@
               </div>
             </section>
 
-            <!-- Dönüş biletleri (sadece gidiş-dönüş aramada) -->
-            <section class="flight-section return" *ngIf="searchTripType === 'RT' && searchOriginCode && searchDestinationCode && filteredReturnFlights.length > 0">
+            <!-- Dönüş biletleri (RT - yalnızca Step 2'de görünür) -->
+            <section class="flight-section return" *ngIf="searchTripType === 'RT' && searchOriginCode && searchDestinationCode && visibleReturnFlights.length > 0 && rtStep === 2">
               <div class="section-header">
                 <mat-icon class="section-icon">flight_land</mat-icon>
                 <div class="section-title-block">
-                  <h2 class="section-title">Dönüş biletleri</h2>
+                  <h2 class="section-title">Dönüş uçuşunu seç</h2>
                   <p class="section-route">
                     {{ searchDestinationCode }} → {{ searchOriginCode }}
                     <span class="section-date" *ngIf="searchReturnDate">{{ formatSearchDate(searchReturnDate) }}</span>
                   </p>
                 </div>
-                <span class="section-badge">{{ filteredReturnFlights.length }} uçuş</span>
+                <span class="section-badge">{{ visibleReturnFlights.length }} seçenek</span>
               </div>
               <div class="section-cards">
-                <ng-container *ngFor="let flight of filteredReturnFlights">
+                <ng-container *ngFor="let flight of visibleReturnFlights">
                   <ng-container *ngTemplateOutlet="flightCardTpl; context: { $implicit: flight }"></ng-container>
                 </ng-container>
               </div>
@@ -456,8 +506,28 @@
         <button mat-button class="details-btn" (click)="toggleFlightDetails(flight.id, $event)">
           {{ isDetailsExpanded(flight.id) ? 'Detayları Gizle' : 'Detaylar' }}
         </button>
+
+        <!-- RT Step 1: Gidiş uçuşu için "Devam Et" butonu -->
+        <ng-container *ngIf="isOutboundInStep1(flight)">
+          <button
+            *ngIf="canSelectForStep2(flight)"
+            mat-raised-button
+            color="primary"
+            class="select-btn step2-btn"
+            [disabled]="isLoading"
+            (click)="proceedToStep2(flight, $event)">
+            <mat-icon>arrow_forward</mat-icon>
+            <span>Devam Et</span>
+          </button>
+          <div *ngIf="!canSelectForStep2(flight) && (flight.brandOptions && flight.brandOptions.length > 0)" class="select-hint">
+            <mat-icon>info</mat-icon>
+            <span>Devam etmek için bir paket seçin</span>
+          </div>
+        </ng-container>
+
+        <!-- Normal booking butonu (OW, roundTrip, RT Step 2 dönüş) -->
         <button 
-          *ngIf="canProceedToBooking(flight)"
+          *ngIf="!isOutboundInStep1(flight) && canProceedToBooking(flight)"
           mat-raised-button 
           color="primary" 
           class="select-btn"
@@ -468,7 +538,7 @@
           <span *ngIf="!isLoading">Seç</span>
           <span *ngIf="isLoading">İşleniyor...</span>
         </button>
-        <div *ngIf="isLoggedIn && !canProceedToBooking(flight)" class="select-hint">
+        <div *ngIf="!isOutboundInStep1(flight) && !canProceedToBooking(flight)" class="select-hint">
           <mat-icon>info</mat-icon>
           <span>{{ getBookingHint(flight) }}</span>
         </div>

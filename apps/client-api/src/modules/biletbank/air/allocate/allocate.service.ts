@@ -95,13 +95,19 @@ export class BiletbankAllocateService {
     const selectedItemsXml = selectedItems
       .map((item) => {
         const brandedFareItemId = item.brandedFareItemId?.trim();
+        const subOptions = (item.subOptions || []).filter((id) => id?.trim());
+        const subOptionsXml = subOptions.length
+          ? `
+              <io:SubOptions>${subOptions.map((id) => `<arr:guid xmlns:arr="http://schemas.microsoft.com/2003/10/Serialization/Arrays">${escapeXml(id.trim())}</arr:guid>`).join('')}
+              </io:SubOptions>`
+          : '';
         return `
             <io:IO_AllocationItem>
               ${brandedFareItemId ? `<io:BrandedFareItemId>${escapeXml(brandedFareItemId)}</io:BrandedFareItemId>` : ''}
               <io:ProductId>${escapeXml(item.productId.trim())}</io:ProductId>
               <io:SelectedServiceFee>
                 <io:Amount>${amountFormatted}</io:Amount>
-              </io:SelectedServiceFee>
+              </io:SelectedServiceFee>${subOptionsXml}
             </io:IO_AllocationItem>`;
       })
       .join('');

@@ -242,6 +242,7 @@ export class BiletbankAirSearchService {
       sessionId: loginResult.sessionId,
       sessionToken: loginResult.sessionToken,
       flights: mapped.flights,
+      recommendationLinks: mapped.recommendationLinks ?? [],
     };
     
     // Debug: Response'u sakla

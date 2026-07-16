@@ -1,7 +1,7 @@
 import { Component, Inject, OnInit, PLATFORM_ID, ChangeDetectorRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BiletbankApiService, AirSearchFlightDto } from '../../core/biletbank-api.service';
+import { BiletbankApiService, AirSearchFlightDto, RecommendationLinkDto } from '../../core/biletbank-api.service';
 import { AuthService } from '../../core/auth.service';
 import { ToastService } from '../../core/toast.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -64,6 +64,8 @@ export interface Flight {
     currency: string;
   }[];
   optionFlag?: string;
+  legDedupeKey?: string;
+  isRecommendationLeg?: boolean;
 }
 
 type FlightBrandOption = NonNullable<Flight['brandOptions']>[number];
@@ -262,6 +264,14 @@ export class FlightResultsComponent implements OnInit {
   selectedOutboundFlightId?: string;
   selectedReturnFlightId?: string;
 
+  /** Gidiş-dönüş aşamalı seçim: 1 = gidiş seçimi, 2 = dönüş seçimi */
+  rtStep: 1 | 2 = 1;
+  /** Seçili gidiş uçuşu (Step 2'de gösterim ve booking için) */
+  selectedOutboundFlight: Flight | null = null;
+
+  /** RecommendationBox gidiş-dönüş eşleşmeleri (Allocate SubOptions için) */
+  recommendationLinks: RecommendationLinkDto[] = [];
+
   /** Detaylar paneli açık olan uçuş (tek seferde bir kart) */
   expandedDetailsFlightId: string | null = null;
 
@@ -354,6 +364,14 @@ export class FlightResultsComponent implements OnInit {
         this.isLoading = true;
         this.hasSearchResult = false;
         this.filteredFlights = [];
+        // Aşamalı seçimi sıfırla
+        this.rtStep = 1;
+        this.selectedOutboundFlight = null;
+        this.selectedOutboundFlightId = undefined;
+        this.selectedReturnFlightId = undefined;
+        this.selectedFlight = null;
+        this.selectedBrandByFlight = new Map();
+        this.recommendationLinks = [];
 
         // Üyeliksiz (misafir) akış da dahil olmak üzere her zaman SearchAndBook kullan.
         // SearchOnly session bilgisi (sessionId/sessionToken/shoppingFileId) döndürmediğinden
@@ -455,10 +473,12 @@ export class FlightResultsComponent implements OnInit {
 
         if (!dtoFlights.length) {
           this.filteredFlights = [];
+          this.recommendationLinks = [];
           this.updateOutboundReturnLists();
           this.toast.warning('Arama kriterlerinize uygun uçuş bulunamadı.');
         } else {
           this.flights = dtoFlights.map(f => this.mapDtoToFlight(f));
+          this.recommendationLinks = res.recommendationLinks ?? [];
           this.recalcPriceBounds();
           this.filteredFlights = [...this.flights];
           this.sortFlights();
@@ -697,6 +717,8 @@ export class FlightResultsComponent implements OnInit {
       segments: (src as any).segments,
       brandOptions: src.brandOptions,
       optionFlag: src.optionFlag,
+      legDedupeKey: src.legDedupeKey,
+      isRecommendationLeg: src.isRecommendationLeg,
     };
   }
 
@@ -901,12 +923,97 @@ export class FlightResultsComponent implements OnInit {
     return this.expandedBrandOptions.has(flightId);
   }
 
+  /** Step 2'de gösterilecek dönüş uçuşları (seçili gidişe uyumlu) */
+  get visibleReturnFlights(): Flight[] {
+    if (!this.recommendationLinks.length || !this.selectedOutboundFlight?.legDedupeKey) {
+      return this.filteredReturnFlights;
+    }
+
+    const validReturnKeys = new Set(
+      this.recommendationLinks
+        .filter((link) => link.outboundDedupeKey === this.selectedOutboundFlight!.legDedupeKey)
+        .map((link) => link.returnDedupeKey),
+    );
+
+    return this.filteredReturnFlights.filter(
+      (flight) => flight.legDedupeKey && validReturnKeys.has(flight.legDedupeKey),
+    );
+  }
+
+  /** RecommendationBox allocate için gidiş+dönüş eşleşmesi bul */
+  private findRecommendationLink(outbound: Flight, inbound: Flight): RecommendationLinkDto | null {
+    if (!outbound.legDedupeKey || !inbound.legDedupeKey) return null;
+
+    const matches = this.recommendationLinks.filter(
+      (link) =>
+        link.outboundDedupeKey === outbound.legDedupeKey &&
+        link.returnDedupeKey === inbound.legDedupeKey,
+    );
+
+    if (!matches.length) return null;
+    return matches.reduce((min, link) => (link.totalFare < min.totalFare ? link : min), matches[0]);
+  }
+
   isCompactOutboundFlight(flight: Flight): boolean {
     if (!this.selectedOutboundFlightId || flight.id === this.selectedOutboundFlightId) {
       return false;
     }
     return this.getCurrentFlightDirection(flight) === 'outbound';
   }
+
+  /** RT Step 1'de gidiş uçuşu mu? (Ayrı outbound kart için "Devam Et" butonu gösterilir) */
+  isOutboundInStep1(flight: Flight): boolean {
+    if (this.searchTripType !== 'RT' || this.rtStep !== 1) return false;
+    const hasSession = !!(this.currentSessionId && this.currentSessionToken && this.currentShoppingFileId);
+    if (!hasSession) return false;
+    return this.getCurrentFlightDirection(flight) === 'outbound';
+  }
+
+  /** Step 2'ye geçmek için yeterli koşul var mı? (session + paket seçimi) */
+  canSelectForStep2(flight: Flight): boolean {
+    if (!this.currentSessionId || !this.currentSessionToken || !this.currentShoppingFileId) return false;
+    if (flight.brandOptions && flight.brandOptions.length > 0) {
+      return !!this.selectedBrandByFlight.get(flight.id);
+    }
+    return true;
+  }
+
+  /** Gidiş uçuşunu seçip Step 2'ye geç */
+  proceedToStep2(flight: Flight, event?: MouseEvent): void {
+    if (event) event.stopPropagation();
+
+    if (flight.brandOptions && flight.brandOptions.length > 0 && !this.selectedBrandByFlight.get(flight.id)) {
+      this.toast.warning('Lütfen bir paket seçin.');
+      return;
+    }
+
+    this.selectedOutboundFlight = flight;
+    this.selectedOutboundFlightId = flight.id;
+    this.selectedReturnFlight_internal = null;
+    this.selectedReturnFlightId = undefined;
+    this.selectedFlight = null;
+    this.rtStep = 2;
+
+    if (this.isBrowser) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /** Step 1'e geri dön — gidiş seçimini değiştir */
+  goBackToStep1(): void {
+    this.rtStep = 1;
+    this.selectedOutboundFlight = null;
+    this.selectedOutboundFlightId = undefined;
+    this.selectedReturnFlight_internal = null;
+    this.selectedReturnFlightId = undefined;
+    this.selectedFlight = null;
+    if (this.isBrowser) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /** (internal) Seçili dönüş uçuşu */
+  selectedReturnFlight_internal: Flight | null = null;
 
   getServiceGroupIcon(serviceGroup?: string): string {
     switch (serviceGroup) {
@@ -1448,25 +1555,53 @@ export class FlightResultsComponent implements OnInit {
     }
 
     const selectedBrandId = this.selectedBrandByFlight.get(flight.id);
+    const bookingLegs = this.buildBookingLegs(flight);
+
+    // RecommendationBox RT: tek ProductId + SubOptions [gidiş FlightId, dönüş FlightId]
+    const outbound = this.selectedOutboundFlight;
+    const isRecommendationRt =
+      this.recommendationLinks.length > 0 &&
+      outbound?.isRecommendationLeg &&
+      flight.isRecommendationLeg &&
+      this.getCurrentFlightDirection(flight) === 'return';
+
+    let selectedItems: { productId: string; brandedFareItemId?: string; subOptions?: string[] }[];
+    let primaryProductId: string;
+
+    if (isRecommendationRt && outbound) {
+      const link = this.findRecommendationLink(outbound, flight);
+      if (!link) {
+        this.toast.warning('Seçilen gidiş ve dönüş uçuşu birlikte rezerve edilemiyor. Lütfen başka bir dönüş uçuşu seçin.');
+        return;
+      }
+
+      selectedItems = [{
+        productId: link.productId,
+        brandedFareItemId: selectedBrandId,
+        subOptions: [link.outboundSubOptionId, link.returnSubOptionId],
+      }];
+      primaryProductId = link.productId;
+    } else {
+      selectedItems = bookingLegs.map((leg) => ({
+        productId: leg.productId,
+        brandedFareItemId: leg.brandedFareItemId,
+      }));
+      primaryProductId = flight.id;
+    }
+
+    const productIds = Array.from(new Set(selectedItems.map((item) => item.productId)));
+    const missingPackageLeg = bookingLegs.find((leg) => leg.allBrandOptions.length > 0 && !leg.brandedFareItemId);
+    if (!isRecommendationRt && missingPackageLeg) {
+      this.toast.warning(`${missingPackageLeg.title} için lütfen bir paket seçin.`);
+      return;
+    }
     if (flight.brandOptions && flight.brandOptions.length > 0 && !selectedBrandId) {
       this.toast.warning('Lütfen bir paket seçin.');
       return;
     }
 
-    const bookingLegs = this.buildBookingLegs(flight);
-    const selectedItems = bookingLegs.map((leg) => ({
-      productId: leg.productId,
-      brandedFareItemId: leg.brandedFareItemId,
-    }));
-    const productIds = Array.from(new Set(selectedItems.map((item) => item.productId)));
-    const missingPackageLeg = bookingLegs.find((leg) => leg.allBrandOptions.length > 0 && !leg.brandedFareItemId);
-    if (missingPackageLeg) {
-      this.toast.warning(`${missingPackageLeg.title} için lütfen bir paket seçin.`);
-      return;
-    }
-
     // Seçili paket bilgisini al
-    const selectedBrand = selectedBrandId 
+    const selectedBrand = selectedBrandId
       ? flight.brandOptions?.find(b => b.id === selectedBrandId)
       : null;
     
@@ -1474,13 +1609,13 @@ export class FlightResultsComponent implements OnInit {
     this.isLoading = true;
     try {
       const allocateResult = await firstValueFrom(this.api.allocate({
-        productId: flight.id,
+        productId: primaryProductId,
         selectedItems,
         brandedFareItemId: selectedBrandId,
         sessionId: this.currentSessionId!,
         sessionToken: this.currentSessionToken!,
         shoppingFileId: this.currentShoppingFileId!,
-        selectedServiceFeeAmount: 0, // Komisyon hesaplaması gerekmiyorsa 0
+        selectedServiceFeeAmount: 0,
       }));
 
       if (allocateResult?.success) {
@@ -1490,7 +1625,7 @@ export class FlightResultsComponent implements OnInit {
           const bookingData = {
             allocateId: allocateResult.allocateId,
             allocateProductId: allocateResult.productId, // Allocate yanıtındaki ProductItemId
-            productId: flight.id,
+            productId: primaryProductId,
             productIds,
             sessionId: this.currentSessionId,
             sessionToken: this.currentSessionToken,
@@ -1566,22 +1701,21 @@ export class FlightResultsComponent implements OnInit {
     const hasSession = !!(this.currentSessionId && this.currentSessionToken && this.currentShoppingFileId);
     if (!hasSession) return false;
 
-    // Eğer uçuş verilmişse, paket seçimi kontrolü yap
-    if (flight) {
-      if (this.getBookingBlockMessage(flight)) {
-        return false;
-      }
+    if (!flight) return hasSession;
 
-      // Eğer paket seçenekleri varsa, bir paket seçilmiş olmalı
-      if (flight.brandOptions && flight.brandOptions.length > 0) {
-        const selectedBrandId = this.selectedBrandByFlight.get(flight.id);
-        return !!selectedBrandId;
-      }
-      // Paket seçenekleri yoksa direkt devam edebilir
-      return true;
+    // RT Step 1'deki gidiş uçuşları "Devam Et" butonu ile ilerlenir, burada gösterilmez
+    if (this.searchTripType === 'RT' && this.rtStep === 1) {
+      const dir = this.getCurrentFlightDirection(flight);
+      if (dir === 'outbound') return false;
     }
 
-    return hasSession;
+    if (this.getBookingBlockMessage(flight)) return false;
+
+    // Paket seçimi zorunluysa kontrol et
+    if (flight.brandOptions && flight.brandOptions.length > 0) {
+      return !!this.selectedBrandByFlight.get(flight.id);
+    }
+    return true;
   }
 
   getBookingHint(flight: Flight): string {
@@ -1597,6 +1731,7 @@ export class FlightResultsComponent implements OnInit {
       this.selectedOutboundFlightId = flight.id;
     } else if (direction === 'return') {
       this.selectedReturnFlightId = flight.id;
+      this.selectedReturnFlight_internal = flight;
     }
   }
 
@@ -1610,20 +1745,22 @@ export class FlightResultsComponent implements OnInit {
 
   private getBookingBlockMessage(flight: Flight): string | null {
     const direction = this.getCurrentFlightDirection(flight);
-    if (!direction || direction === 'roundTrip') {
+    if (!direction || direction === 'roundTrip') return null;
+
+    // Gidiş uçuşu: Step 1'de "Devam Et" butonu var, direkt booking yok
+    if (direction === 'outbound') {
+      if (this.searchTripType === 'RT' && this.rtStep === 1) return 'Önce gidiş uçuşunu seçip devam edin.';
       return null;
     }
 
-    if (direction === 'outbound') {
-      return 'Gidiş-dönüş aramada booking aşamasına geçmek için dönüş uçuşunu da seçin.';
-    }
-
-    if (!this.selectedOutboundFlightId) {
-      return 'Booking aşamasına geçmek için önce gidiş uçuşunu seçin.';
-    }
-
-    if (this.selectedReturnFlightId !== flight.id) {
-      return 'Booking aşamasına geçmek için dönüş uçuşunu seçin.';
+    // Dönüş uçuşu: gidiş seçilmiş olmalı
+    if (direction === 'return') {
+      if (!this.selectedOutboundFlightId) {
+        return 'Önce gidiş uçuşunu seçin.';
+      }
+      if (this.selectedReturnFlightId !== flight.id) {
+        return 'Dönüş uçuşunu seçin.';
+      }
     }
 
     return null;

@@ -18,6 +18,12 @@ export class AllocateRequestItemDto {
   @IsOptional()
   @IsString()
   brandedFareItemId?: string;
+
+  /** RecommendationBox allocate: gidiş + dönüş FlightId listesi */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  subOptions?: string[];
 }
 
 /**
